@@ -1,46 +1,156 @@
-# Getting Started with Create React App
+# Employee Step-Up App 🏃‍♂️💎
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A gamified fitness tracking mobile web application that encourages employees to stay active through challenges, rewards, and social competition.
 
-## Available Scripts
+## 🌟 Features
 
-In the project directory, you can run:
+- **Home Dashboard**: View active missions, daily step count, and recent achievements
+- **Profile System**: Comprehensive user profiles with achievements and activity history
+- **Challenges**: Daily, weekly, and monthly missions to complete
+- **Rankings**: Leaderboards showing how you compare to other users
+- **Rewards Marketplace**: Redeem gems for real-world rewards
+- **Health Integration**: Ready for Apple Health and Google Fit integration
+- **GameLayer API**: Complete integration with GameLayer platform
 
-### `npm start`
+## 🚀 Tech Stack
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+- **React 18** with TypeScript
+- **Styled Components** for modern CSS-in-JS styling
+- **Framer Motion** for smooth animations
+- **React Router** for client-side routing
+- **Axios** for API calls
+- **Lucide React** for beautiful icons
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## 📱 Mobile-First Design
 
-### `npm test`
+The app is optimized for mobile devices with:
+- Responsive design that works on all screen sizes
+- Touch-friendly interactions
+- Bottom navigation for easy thumb access
+- Safe area support for modern smartphones
+- PWA-ready configuration
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## 🛠 Development
 
-### `npm run build`
+### Prerequisites
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- Node.js 16+ 
+- npm or yarn
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Installation
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```bash
+# Clone the repository
+git clone https://github.com/judgesteven/employee-app.git
 
-### `npm run eject`
+# Navigate to project directory
+cd employee-app
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+# Install dependencies
+npm install
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+# Start development server
+npm start
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+### Environment Variables
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+Create a `.env` file in the root directory:
 
-## Learn More
+```env
+REACT_APP_GAMELAYER_API_KEY=your_api_key_here
+REACT_APP_GAMELAYER_API_URL=https://api.gamelayer.co
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## 🚀 Deployment
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### Automatic Deployment with Vercel
+
+This project is configured for automatic deployment to Vercel:
+
+1. **Connect to Vercel**: Import your GitHub repository to Vercel
+2. **Environment Variables**: Add your GameLayer API key as `GAMELAYER_API_KEY`
+3. **Auto Deploy**: Every push to `main` branch triggers automatic deployment
+
+### Manual Deployment
+
+```bash
+# Build for production
+npm run build
+
+# Deploy to your hosting platform
+```
+
+## 🎮 GameLayer Integration
+
+The app integrates with [GameLayer](https://www.gamelayer.co) for:
+- User management and authentication
+- Mission/challenge creation and tracking
+- Leaderboard management
+- Achievement system
+- Reward catalog management
+
+## 📊 Health Data Integration
+
+Currently includes mock health data services with structure for:
+- **Apple HealthKit** integration (iOS)
+- **Google Fit** integration (Android)
+- Real-time step counting
+- Activity data synchronization
+
+## 🎨 UI/UX Features
+
+- **Modern Design Language**: Clean, playful interface
+- **Smooth Animations**: Framer Motion powered transitions
+- **Glass-morphism Effects**: Modern visual styling
+- **Consistent Theming**: Centralized design system
+- **Accessibility**: Focus states and semantic HTML
+
+## 📂 Project Structure
+
+```
+src/
+├── components/          # Reusable UI components
+│   ├── Navigation/      # Bottom navigation
+│   └── Profile/         # Profile-related components
+├── pages/               # Main application pages
+│   ├── Home.tsx         # Landing page with active missions
+│   ├── ProfileDetails.tsx # Complete user profile
+│   ├── Challenges.tsx   # Available missions
+│   ├── Competition.tsx  # Rankings and leaderboards
+│   └── Rewards.tsx      # Rewards marketplace
+├── services/            # API and external integrations
+│   ├── gameLayerApi.ts  # GameLayer API client
+│   └── healthData.ts    # Health data service
+├── styles/              # Styling and theming
+│   ├── theme.ts         # Design system
+│   └── GlobalStyles.ts  # Global styles and components
+└── types/               # TypeScript type definitions
+```
+
+## 🔧 Available Scripts
+
+- `npm start` - Start development server
+- `npm run build` - Build for production
+- `npm test` - Run test suite
+- `npm run eject` - Eject from Create React App
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📱 Screenshots
+
+*Add screenshots of the app here*
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+---
+
+Built with ❤️ for employee wellness and engagement
