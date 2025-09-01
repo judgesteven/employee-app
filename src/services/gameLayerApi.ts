@@ -94,6 +94,51 @@ export const gameLayerApi = {
   async unlockAchievement(userId: string, achievementId: string): Promise<void> {
     await api.post(`/users/${userId}/achievements/${achievementId}/unlock`);
   },
+
+  // Events - for tracking activities like steps
+  async trackEvent(playerId: string, eventName: string, eventData: any): Promise<void> {
+    await api.post(`/players/${playerId}/events`, {
+      event: eventName,
+      data: eventData
+    }, {
+      params: {
+        account: ACCOUNT_ID
+      }
+    });
+  },
+
+  // Specific method for tracking steps
+  async trackStep(playerId: string = PLAYER_ID, timestamp?: Date): Promise<void> {
+    await this.trackEvent(playerId, 'step-tracker', {
+      timestamp: timestamp || new Date().toISOString(),
+      source: 'apple_health'
+    });
+  },
+
+  // Batch step tracking for efficiency
+  async trackSteps(playerId: string = PLAYER_ID, stepCount: number, timestamp?: Date): Promise<void> {
+    const stepEvents = Array.from({ length: stepCount }, (_, index) => ({
+      event: 'step-tracker',
+      data: {
+        timestamp: timestamp || new Date().toISOString(),
+        source: 'apple_health',
+        sequence: index + 1
+      }
+    }));
+
+    // Send in batches to avoid overwhelming the API
+    const batchSize = 100;
+    for (let i = 0; i < stepEvents.length; i += batchSize) {
+      const batch = stepEvents.slice(i, i + batchSize);
+      await api.post(`/players/${playerId}/events/batch`, {
+        events: batch
+      }, {
+        params: {
+          account: ACCOUNT_ID
+        }
+      });
+    }
+  },
 };
 
 export default gameLayerApi;
