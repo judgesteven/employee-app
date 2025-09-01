@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "name": "employee-step-up-app",
   "builds": [
     {
       "src": "package.json",
@@ -21,9 +20,5 @@
       "src": "/(.*)",
       "dest": "/index.html"
     }
-  ],
-  "env": {
-    "REACT_APP_GAMELAYER_API_KEY": "@gamelayer_api_key",
-    "REACT_APP_GAMELAYER_API_URL": "https://api.gamelayer.co"
-  }
+  ]
 }
