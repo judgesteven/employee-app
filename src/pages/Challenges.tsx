@@ -330,14 +330,9 @@ const TagBadge = styled.div<{ $tag: string }>`
 
 type FilterType = 'all' | 'daily' | 'weekly' | 'monthly';
 
-export const Challenges: React.FC = () => {
-  const [challenges, setChallenges] = useState<Challenge[]>([]);
-  const [activeFilter, setActiveFilter] = useState<FilterType>('all');
-  const [loading, setLoading] = useState(true);
-
-  // Mock challenges data - in production this would come from GameLayer API
-  // Only showing incomplete/available challenges here
-  const mockChallenges: Challenge[] = [
+// Mock challenges data - in production this would come from GameLayer API
+// Only showing incomplete/available challenges here
+const mockChallenges: Challenge[] = [
     {
       id: '1',
       title: 'Step Sprint',
@@ -417,6 +412,11 @@ export const Challenges: React.FC = () => {
       tags: ['weekend', 'intensive'],
     },
   ];
+
+export const Challenges: React.FC = () => {
+  const [challenges, setChallenges] = useState<Challenge[]>([]);
+  const [activeFilter, setActiveFilter] = useState<FilterType>('all');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchMissions = async () => {

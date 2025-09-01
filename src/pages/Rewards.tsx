@@ -294,6 +294,7 @@ export const Rewards: React.FC = () => {
       setRewards(mockRewards);
       setLoading(false);
     }, 1000);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // mockRewards is static data, no need to include in dependencies
 
   const filteredRewards = rewards.filter(reward => {

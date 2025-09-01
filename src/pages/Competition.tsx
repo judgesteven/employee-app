@@ -380,6 +380,7 @@ export const Competition: React.FC = () => {
       setLeaderboards(mockLeaderboardData);
       setLoading(false);
     }, 1000);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // mockLeaderboardData is static data, no need to include in dependencies
 
   const currentLeaderboard = leaderboards[activeTab];
