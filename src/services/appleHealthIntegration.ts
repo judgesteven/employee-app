@@ -50,7 +50,9 @@ class AppleHealthIntegrationService {
       // Simulate permission dialog
       return new Promise((resolve) => {
         setTimeout(() => {
-          const granted = confirm('Allow Employee Step-Up to access your Health data for step tracking?');
+          // In a real iOS app, this would use HealthKit's authorization request
+          // For web simulation, we'll automatically grant permissions for testing
+          const granted = true; // Simulate user granting permissions
           console.log('Health permissions:', granted ? 'granted' : 'denied');
           resolve(granted);
         }, 1000);
