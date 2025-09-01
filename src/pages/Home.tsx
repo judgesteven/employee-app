@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Clock, Target, ChevronRight } from 'lucide-react';
+import { Clock, Target, ChevronRight, Gem } from 'lucide-react';
 import { ProfileHeader } from '../components/Profile/ProfileHeader';
 import { QuickStats } from '../components/Profile/QuickStats';
 
@@ -100,11 +100,18 @@ const MissionInfo = styled.div`
   flex: 1;
 `;
 
+const MissionTitleContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${theme.spacing.sm};
+  margin-bottom: ${theme.spacing.xs};
+`;
+
 const MissionTitle = styled.h3`
   font-size: ${theme.typography.fontSize.lg};
   font-weight: ${theme.typography.fontWeight.semibold};
   color: ${theme.colors.text.primary};
-  margin-bottom: ${theme.spacing.xs};
+  margin: 0;
 `;
 
 const MissionDescription = styled.p`
@@ -122,6 +129,14 @@ const MissionIcon = styled.div`
   align-items: center;
   justify-content: center;
   font-size: ${theme.typography.fontSize.xl};
+  margin-left: ${theme.spacing.md};
+`;
+
+const MissionImage = styled.img`
+  width: 48px;
+  height: 48px;
+  border-radius: ${theme.borderRadius.lg};
+  object-fit: cover;
   margin-left: ${theme.spacing.md};
 `;
 
@@ -154,18 +169,27 @@ const ProgressText = styled.div`
 `;
 
 const ProgressCurrent = styled.span`
-  color: ${theme.colors.text.primary};
-  font-weight: ${theme.typography.fontWeight.medium};
+  color: ${theme.colors.text.secondary};
+  font-size: ${theme.typography.fontSize.sm};
 `;
 
 const ProgressTarget = styled.span`
   color: ${theme.colors.text.secondary};
+  font-size: ${theme.typography.fontSize.sm};
 `;
 
 const MissionFooter = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+`;
+
+const RewardInfo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${theme.spacing.xs};
+  color: ${theme.colors.accent};
+  font-weight: ${theme.typography.fontWeight.medium};
 `;
 
 const TimeLeft = styled.div`
@@ -177,11 +201,14 @@ const TimeLeft = styled.div`
 `;
 
 const MissionType = styled.div<{ type: string }>`
+  display: inline-block;
+  width: fit-content;
   padding: ${theme.spacing.xs} ${theme.spacing.sm};
   border-radius: ${theme.borderRadius.full};
   font-size: ${theme.typography.fontSize.xs};
-  font-weight: ${theme.typography.fontWeight.semibold};
-  text-transform: uppercase;
+  font-weight: ${theme.typography.fontWeight.medium};
+  text-transform: lowercase;
+  border: 1px solid;
   
   ${props => {
     switch (props.type) {
@@ -189,21 +216,127 @@ const MissionType = styled.div<{ type: string }>`
         return `
           background: ${theme.colors.accent}20;
           color: ${theme.colors.accent};
+          border-color: ${theme.colors.accent}40;
         `;
       case 'weekly':
         return `
           background: ${theme.colors.primary}20;
           color: ${theme.colors.primary};
+          border-color: ${theme.colors.primary}40;
         `;
       case 'monthly':
         return `
           background: ${theme.colors.secondary}20;
           color: ${theme.colors.secondary};
+          border-color: ${theme.colors.secondary}40;
         `;
       default:
         return `
           background: ${theme.colors.surface};
           color: ${theme.colors.text.secondary};
+          border-color: ${theme.colors.border};
+        `;
+    }
+  }}
+`;
+
+const TagsAndCategoryContainer = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: ${theme.spacing.xs};
+  margin-top: ${theme.spacing.sm};
+`;
+
+const TagBadge = styled.div<{ $tag: string }>`
+  display: inline-block;
+  padding: ${theme.spacing.xs} ${theme.spacing.sm};
+  border-radius: ${theme.borderRadius.full};
+  font-size: ${theme.typography.fontSize.xs};
+  font-weight: ${theme.typography.fontWeight.medium};
+  text-transform: lowercase;
+  border: 1px solid;
+  
+  ${props => {
+    const tag = props.$tag.toLowerCase();
+    switch (tag) {
+      case 'fitness':
+      case 'cardio':
+      case 'workout':
+        return `
+          background: ${theme.colors.success}20;
+          color: ${theme.colors.success};
+          border-color: ${theme.colors.success}40;
+        `;
+      case 'activity':
+      case 'movement':
+      case 'active':
+        return `
+          background: ${theme.colors.primary}20;
+          color: ${theme.colors.primary};
+          border-color: ${theme.colors.primary}40;
+        `;
+      case 'endurance':
+      case 'marathon':
+      case 'challenge':
+        return `
+          background: ${theme.colors.accent}20;
+          color: ${theme.colors.accent};
+          border-color: ${theme.colors.accent}40;
+        `;
+      case 'habit':
+      case 'streak':
+      case 'consistency':
+        return `
+          background: ${theme.colors.secondary}20;
+          color: ${theme.colors.secondary};
+          border-color: ${theme.colors.secondary}40;
+        `;
+      case 'evening':
+      case 'morning':
+      case 'time':
+        return `
+          background: #8B5CF6;
+          color: #8B5CF6;
+          border-color: #8B5CF640;
+        `;
+      case 'weekend':
+      case 'weekly':
+      case 'daily':
+        return `
+          background: #F59E0B20;
+          color: #F59E0B;
+          border-color: #F59E0B40;
+        `;
+      case 'relaxation':
+      case 'calm':
+      case 'wellness':
+        return `
+          background: #10B98120;
+          color: #10B981;
+          border-color: #10B98140;
+        `;
+      case 'intensive':
+      case 'power':
+      case 'strength':
+        return `
+          background: #EF444420;
+          color: #EF4444;
+          border-color: #EF444440;
+        `;
+      case 'long-term':
+      case 'goal':
+      case 'target':
+        return `
+          background: #6366F120;
+          color: #6366F1;
+          border-color: #6366F140;
+        `;
+      default:
+        return `
+          background: ${theme.colors.surface};
+          color: ${theme.colors.text.secondary};
+          border-color: ${theme.colors.border};
         `;
     }
   }}
@@ -282,6 +415,7 @@ export const Home: React.FC = () => {
       expiresAt: new Date(Date.now() + 8 * 60 * 60 * 1000),
       completed: false,
       icon: '🏃‍♂️',
+      tags: ['fitness', 'cardio'],
     },
     {
       id: '3',
@@ -294,6 +428,7 @@ export const Home: React.FC = () => {
       expiresAt: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
       completed: false,
       icon: '⚡',
+      tags: ['endurance', 'challenge'],
     },
     {
       id: '4',
@@ -306,6 +441,7 @@ export const Home: React.FC = () => {
       expiresAt: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
       completed: false,
       icon: '🏆',
+      tags: ['habit', 'streak'],
     },
   ];
 
@@ -328,19 +464,45 @@ export const Home: React.FC = () => {
           dailyStepCount: currentSteps,
         };
 
-        // Update mission progress based on current steps
-        const updatedMissions = mockInProgressMissions.map(mission => {
-          if (mission.type === 'daily' && mission.title.includes('steps')) {
-            return {
-              ...mission,
-              currentProgress: Math.min(currentSteps, mission.targetValue),
-            };
-          }
+        // Get missions from GameLayer API
+        let missions = await gameLayerApi.getMissions();
+        console.log('Home: Fetched missions from GameLayer API:', missions);
+        console.log('Home: Number of missions fetched:', missions?.length || 0);
+        
+        // If no missions from API, use mock data as fallback
+        if (!missions || missions.length === 0) {
+          console.log('Home: No missions from API, using mock data');
+          missions = mockInProgressMissions;
+        }
+        
+        // Log mission data (removed step override logic)
+        const updatedMissions = missions.map(mission => {
+          console.log('Home: Processing mission:', mission.title);
+          console.log('Home: Mission progress from API:', mission.currentProgress, '/', mission.targetValue);
+          console.log('Home: Mission tags:', mission.tags);
+          
+          // Use the progress data directly from GameLayer API
           return mission;
         });
 
+        console.log('Home: Updated missions:', updatedMissions.length);
+
+        // Only filter out truly invalid missions - be more permissive
+        const filteredMissions = updatedMissions.filter(mission => {
+          // Only remove missions that are clearly invalid or incomplete
+          // Don't filter based on 0/1 as this might be valid for some mission types
+          if (!mission.id || !mission.title) {
+            console.log('Home: Filtering out invalid mission:', mission);
+            return false;
+          }
+          return true;
+        });
+
+        console.log('Home: Filtered missions:', filteredMissions.length);
+        console.log('Home: Final missions to display:', filteredMissions.slice(0, 3));
+
         setUser(updatedUser);
-        setInProgressMissions(updatedMissions);
+        setInProgressMissions(filteredMissions.slice(0, 3)); // Show only first 3 missions on home
       } catch (err) {
         console.error('Error initializing home:', err);
         setError('Failed to load data. Please try again.');
@@ -350,8 +512,19 @@ export const Home: React.FC = () => {
           ...mockUser,
           dailyStepCount: currentSteps,
         };
+        
+        // Apply same filtering to mock data
+        const filteredMockMissions = mockInProgressMissions.filter(mission => {
+          // Only remove missions that are clearly invalid or incomplete
+          if (!mission.id || !mission.title) {
+            console.log('Home: Filtering out invalid fallback mission:', mission);
+            return false;
+          }
+          return true;
+        });
+        
         setUser(fallbackUser);
-        setInProgressMissions(mockInProgressMissions);
+        setInProgressMissions(filteredMockMissions.slice(0, 3)); // Fallback to mock data
       } finally {
         setLoading(false);
       }
@@ -375,14 +548,23 @@ export const Home: React.FC = () => {
     
     if (diff <= 0) return 'Expired';
     
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const days = Math.floor(hours / 24);
+    const totalMinutes = Math.floor(diff / (1000 * 60));
+    const totalHours = Math.floor(totalMinutes / 60);
+    const days = Math.floor(totalHours / 24);
+    const hours = totalHours % 24;
+    const minutes = totalMinutes % 60;
     
-    if (days > 0) return `${days}d ${hours % 24}h left`;
-    if (hours > 0) return `${hours}h left`;
-    
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    return `${minutes}m left`;
+    // Format as DD:HH:MM with conditional display
+    if (days > 0) {
+      // Show DD:HH:MM
+      return `${days.toString().padStart(2, '0')}:${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+    } else if (hours > 0) {
+      // Show HH:MM (no days)
+      return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+    } else {
+      // Show MM (no days or hours)
+      return `${minutes.toString().padStart(2, '0')}`;
+    }
   };
 
   const getProgressPercentage = (current: number, target: number): number => {
@@ -477,32 +659,53 @@ export const Home: React.FC = () => {
                 >
                   <MissionHeader>
                     <MissionInfo>
-                      <MissionTitle>{mission.title}</MissionTitle>
+                      <MissionTitleContainer>
+                        <MissionTitle>{mission.title}</MissionTitle>
+                      </MissionTitleContainer>
                       <MissionDescription>{mission.description}</MissionDescription>
+                      <TagsAndCategoryContainer>
+                        <MissionType type={mission.type}>
+                          {mission.type}
+                        </MissionType>
+                        {mission.tags && mission.tags.length > 0 && (
+                          <>
+                            {mission.tags.map((tag, index) => (
+                              <TagBadge key={index} $tag={tag}>
+                                {tag}
+                              </TagBadge>
+                            ))}
+                          </>
+                        )}
+                      </TagsAndCategoryContainer>
                     </MissionInfo>
-                    <MissionIcon>{mission.icon}</MissionIcon>
+                    {mission.imgUrl ? (
+                      <MissionImage src={mission.imgUrl} alt={mission.title} />
+                    ) : (
+                      <MissionIcon>{mission.icon}</MissionIcon>
+                    )}
                   </MissionHeader>
 
                   <ProgressSection>
-                    <ProgressBar>
-                      <ProgressFill
-                        $progress={getProgressPercentage(mission.currentProgress, mission.targetValue)}
-                      />
-                    </ProgressBar>
                     <ProgressText>
                       <ProgressCurrent>
                         {mission.currentProgress.toLocaleString()} / {mission.targetValue.toLocaleString()}
                       </ProgressCurrent>
                       <ProgressTarget>
-                        {Math.round(getProgressPercentage(mission.currentProgress, mission.targetValue))}%
+                        {Math.round(getProgressPercentage(mission.currentProgress, mission.targetValue))}% complete
                       </ProgressTarget>
                     </ProgressText>
+                    <ProgressBar>
+                      <ProgressFill
+                        $progress={getProgressPercentage(mission.currentProgress, mission.targetValue)}
+                      />
+                    </ProgressBar>
                   </ProgressSection>
 
                   <MissionFooter>
-                    <MissionType type={mission.type}>
-                      {mission.type}
-                    </MissionType>
+                    <RewardInfo>
+                      <Gem size={16} />
+                      <span>{mission.reward} gems</span>
+                    </RewardInfo>
                     <TimeLeft>
                       <Clock size={16} />
                       <span>{formatTimeLeft(mission.expiresAt)}</span>
@@ -546,3 +749,4 @@ export const Home: React.FC = () => {
     </HomeContainer>
   );
 };
+

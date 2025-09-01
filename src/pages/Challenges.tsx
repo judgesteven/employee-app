@@ -5,6 +5,7 @@ import { Clock, Gem } from 'lucide-react';
 import { Container, Button } from '../styles/GlobalStyles';
 import { theme } from '../styles/theme';
 import { Challenge } from '../types';
+import { gameLayerApi } from '../services/gameLayerApi';
 
 const ChallengesContainer = styled(Container)`
   padding-top: ${theme.spacing.lg};
@@ -83,11 +84,18 @@ const ChallengeInfo = styled.div`
   flex: 1;
 `;
 
+const ChallengeTitleContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${theme.spacing.sm};
+  margin-bottom: ${theme.spacing.xs};
+`;
+
 const ChallengeTitle = styled.h3`
   font-size: ${theme.typography.fontSize.lg};
   font-weight: ${theme.typography.fontWeight.semibold};
   color: ${theme.colors.text.primary};
-  margin-bottom: ${theme.spacing.xs};
+  margin: 0;
 `;
 
 const ChallengeDescription = styled.p`
@@ -105,6 +113,14 @@ const ChallengeIcon = styled.div`
   align-items: center;
   justify-content: center;
   font-size: ${theme.typography.fontSize.xl};
+  margin-left: ${theme.spacing.md};
+`;
+
+const ChallengeImage = styled.img`
+  width: 48px;
+  height: 48px;
+  border-radius: ${theme.borderRadius.lg};
+  object-fit: cover;
   margin-left: ${theme.spacing.md};
 `;
 
@@ -137,12 +153,13 @@ const ProgressText = styled.div`
 `;
 
 const ProgressCurrent = styled.span`
-  color: ${theme.colors.text.primary};
-  font-weight: ${theme.typography.fontWeight.medium};
+  color: ${theme.colors.text.secondary};
+  font-size: ${theme.typography.fontSize.sm};
 `;
 
 const ProgressTarget = styled.span`
   color: ${theme.colors.text.secondary};
+  font-size: ${theme.typography.fontSize.sm};
 `;
 
 const ChallengeFooter = styled.div`
@@ -165,6 +182,148 @@ const TimeLeft = styled.div`
   gap: ${theme.spacing.xs};
   color: ${theme.colors.text.secondary};
   font-size: ${theme.typography.fontSize.sm};
+`;
+
+const ChallengeType = styled.div<{ type: string }>`
+  display: inline-block;
+  width: fit-content;
+  padding: ${theme.spacing.xs} ${theme.spacing.sm};
+  border-radius: ${theme.borderRadius.full};
+  font-size: ${theme.typography.fontSize.xs};
+  font-weight: ${theme.typography.fontWeight.medium};
+  text-transform: lowercase;
+  border: 1px solid;
+  
+  ${props => {
+    switch (props.type) {
+      case 'daily':
+        return `
+          background: ${theme.colors.accent}20;
+          color: ${theme.colors.accent};
+          border-color: ${theme.colors.accent}40;
+        `;
+      case 'weekly':
+        return `
+          background: ${theme.colors.primary}20;
+          color: ${theme.colors.primary};
+          border-color: ${theme.colors.primary}40;
+        `;
+      case 'monthly':
+        return `
+          background: ${theme.colors.secondary}20;
+          color: ${theme.colors.secondary};
+          border-color: ${theme.colors.secondary}40;
+        `;
+      default:
+        return `
+          background: ${theme.colors.surface};
+          color: ${theme.colors.text.secondary};
+          border-color: ${theme.colors.border};
+        `;
+    }
+  }}
+`;
+
+const TagsAndCategoryContainer = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: ${theme.spacing.xs};
+  margin-top: ${theme.spacing.sm};
+`;
+
+const TagBadge = styled.div<{ $tag: string }>`
+  display: inline-block;
+  padding: ${theme.spacing.xs} ${theme.spacing.sm};
+  border-radius: ${theme.borderRadius.full};
+  font-size: ${theme.typography.fontSize.xs};
+  font-weight: ${theme.typography.fontWeight.medium};
+  text-transform: lowercase;
+  border: 1px solid;
+  
+  ${props => {
+    const tag = props.$tag.toLowerCase();
+    switch (tag) {
+      case 'fitness':
+      case 'cardio':
+      case 'workout':
+        return `
+          background: ${theme.colors.success}20;
+          color: ${theme.colors.success};
+          border-color: ${theme.colors.success}40;
+        `;
+      case 'activity':
+      case 'movement':
+      case 'active':
+        return `
+          background: ${theme.colors.primary}20;
+          color: ${theme.colors.primary};
+          border-color: ${theme.colors.primary}40;
+        `;
+      case 'endurance':
+      case 'marathon':
+      case 'challenge':
+        return `
+          background: ${theme.colors.accent}20;
+          color: ${theme.colors.accent};
+          border-color: ${theme.colors.accent}40;
+        `;
+      case 'habit':
+      case 'streak':
+      case 'consistency':
+        return `
+          background: ${theme.colors.secondary}20;
+          color: ${theme.colors.secondary};
+          border-color: ${theme.colors.secondary}40;
+        `;
+      case 'evening':
+      case 'morning':
+      case 'time':
+        return `
+          background: #8B5CF620;
+          color: #8B5CF6;
+          border-color: #8B5CF640;
+        `;
+      case 'weekend':
+      case 'weekly':
+      case 'daily':
+        return `
+          background: #F59E0B20;
+          color: #F59E0B;
+          border-color: #F59E0B40;
+        `;
+      case 'relaxation':
+      case 'calm':
+      case 'wellness':
+        return `
+          background: #10B98120;
+          color: #10B981;
+          border-color: #10B98140;
+        `;
+      case 'intensive':
+      case 'power':
+      case 'strength':
+        return `
+          background: #EF444420;
+          color: #EF4444;
+          border-color: #EF444440;
+        `;
+      case 'long-term':
+      case 'goal':
+      case 'target':
+        return `
+          background: #6366F120;
+          color: #6366F1;
+          border-color: #6366F140;
+        `;
+      default:
+        return `
+          background: ${theme.colors.surface};
+          color: ${theme.colors.text.secondary};
+          border-color: ${theme.colors.border};
+        `;
+    }
+  }}
 `;
 
 
@@ -190,6 +349,7 @@ export const Challenges: React.FC = () => {
       expiresAt: new Date(Date.now() + 8 * 60 * 60 * 1000), // 8 hours from now
       completed: false,
       icon: '🏃‍♂️',
+      tags: ['fitness', 'cardio'],
     },
     {
       id: '3',
@@ -202,6 +362,7 @@ export const Challenges: React.FC = () => {
       expiresAt: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3 days from now
       completed: false,
       icon: '⚡',
+      tags: ['endurance', 'challenge'],
     },
     {
       id: '4',
@@ -214,6 +375,7 @@ export const Challenges: React.FC = () => {
       expiresAt: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 days from now
       completed: false,
       icon: '🏆',
+      tags: ['habit', 'streak'],
     },
     {
       id: '5',
@@ -226,6 +388,7 @@ export const Challenges: React.FC = () => {
       expiresAt: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000), // 15 days from now
       completed: false,
       icon: '🎯',
+      tags: ['marathon', 'long-term'],
     },
     {
       id: '6',
@@ -238,6 +401,7 @@ export const Challenges: React.FC = () => {
       expiresAt: new Date(Date.now() + 5 * 60 * 60 * 1000), // 5 hours from now
       completed: false,
       icon: '🌙',
+      tags: ['evening', 'relaxation'],
     },
     {
       id: '7',
@@ -250,16 +414,28 @@ export const Challenges: React.FC = () => {
       expiresAt: new Date(Date.now() + 12 * 60 * 60 * 1000), // 12 hours from now
       completed: false,
       icon: '🎉',
+      tags: ['weekend', 'intensive'],
     },
   ];
 
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      setChallenges(mockChallenges);
-      setLoading(false);
-    }, 1000);
-  }, []); // mockChallenges is static data, no need to include in dependencies
+    const fetchMissions = async () => {
+      try {
+        setLoading(true);
+        const missions = await gameLayerApi.getMissions();
+        console.log('Fetched missions from GameLayer API:', missions);
+        setChallenges(missions);
+      } catch (error) {
+        console.error('Error fetching missions:', error);
+        // Fallback to mock data on error
+        setChallenges(mockChallenges);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMissions();
+  }, []);
 
   const filteredChallenges = challenges.filter(challenge => {
     if (activeFilter === 'all') return true;
@@ -272,14 +448,23 @@ export const Challenges: React.FC = () => {
     
     if (diff <= 0) return 'Expired';
     
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const days = Math.floor(hours / 24);
+    const totalMinutes = Math.floor(diff / (1000 * 60));
+    const totalHours = Math.floor(totalMinutes / 60);
+    const days = Math.floor(totalHours / 24);
+    const hours = totalHours % 24;
+    const minutes = totalMinutes % 60;
     
-    if (days > 0) return `${days}d ${hours % 24}h left`;
-    if (hours > 0) return `${hours}h left`;
-    
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    return `${minutes}m left`;
+    // Format as DD:HH:MM with conditional display
+    if (days > 0) {
+      // Show DD:HH:MM
+      return `${days.toString().padStart(2, '0')}:${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+    } else if (hours > 0) {
+      // Show HH:MM (no days)
+      return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+    } else {
+      // Show MM (no days or hours)
+      return `${minutes.toString().padStart(2, '0')}`;
+    }
   };
 
   const getProgressPercentage = (current: number, target: number): number => {
@@ -366,26 +551,46 @@ export const Challenges: React.FC = () => {
             >
               <ChallengeHeader>
                 <ChallengeInfo>
-                  <ChallengeTitle>{challenge.title}</ChallengeTitle>
+                  <ChallengeTitleContainer>
+                    <ChallengeTitle>{challenge.title}</ChallengeTitle>
+                  </ChallengeTitleContainer>
                   <ChallengeDescription>{challenge.description}</ChallengeDescription>
+                  <TagsAndCategoryContainer>
+                    <ChallengeType type={challenge.type}>
+                      {challenge.type}
+                    </ChallengeType>
+                    {challenge.tags && challenge.tags.length > 0 && (
+                      <>
+                        {challenge.tags.map((tag, index) => (
+                          <TagBadge key={index} $tag={tag}>
+                            {tag}
+                          </TagBadge>
+                        ))}
+                      </>
+                    )}
+                  </TagsAndCategoryContainer>
                 </ChallengeInfo>
-                <ChallengeIcon>{challenge.icon}</ChallengeIcon>
+                {challenge.imgUrl ? (
+                  <ChallengeImage src={challenge.imgUrl} alt={challenge.title} />
+                ) : (
+                  <ChallengeIcon>{challenge.icon}</ChallengeIcon>
+                )}
               </ChallengeHeader>
 
               <ProgressSection>
-                <ProgressBar>
-                  <ProgressFill
-                    $progress={getProgressPercentage(challenge.currentProgress, challenge.targetValue)}
-                  />
-                </ProgressBar>
                 <ProgressText>
                   <ProgressCurrent>
                     {challenge.currentProgress.toLocaleString()} / {challenge.targetValue.toLocaleString()}
                   </ProgressCurrent>
                   <ProgressTarget>
-                    {Math.round(getProgressPercentage(challenge.currentProgress, challenge.targetValue))}%
+                    {Math.round(getProgressPercentage(challenge.currentProgress, challenge.targetValue))}% complete
                   </ProgressTarget>
                 </ProgressText>
+                <ProgressBar>
+                  <ProgressFill
+                    $progress={getProgressPercentage(challenge.currentProgress, challenge.targetValue)}
+                  />
+                </ProgressBar>
               </ProgressSection>
 
               <ChallengeFooter>

@@ -34,6 +34,8 @@ export interface Challenge {
   expiresAt: Date;
   completed: boolean;
   icon: string;
+  imgUrl?: string; // Mission image URL from GameLayer API
+  tags?: string[]; // Tags from GameLayer API
 }
 
 // Leaderboard types
