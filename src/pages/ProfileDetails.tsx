@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Award, Trophy, Gift, TrendingUp, Calendar, Footprints, Gem, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Award, Trophy, Gift, TrendingUp, Calendar, Footprints, Gem, ChevronRight, Settings as SettingsIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Button } from '../styles/GlobalStyles';
 import { theme } from '../styles/theme';
@@ -17,8 +17,14 @@ const ProfileDetailsContainer = styled(Container)`
 const Header = styled.div`
   display: flex;
   align-items: center;
-  gap: ${theme.spacing.md};
+  justify-content: space-between;
   margin-bottom: ${theme.spacing.lg};
+`;
+
+const HeaderLeft = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${theme.spacing.md};
 `;
 
 const BackButton = styled(Button)`
@@ -33,6 +39,14 @@ const Title = styled.h1`
   font-size: ${theme.typography.fontSize['2xl']};
   font-weight: ${theme.typography.fontWeight.bold};
   color: ${theme.colors.text.primary};
+`;
+
+const SettingsButton = styled(Button)`
+  padding: ${theme.spacing.sm};
+  min-height: auto;
+  width: 44px;
+  height: 44px;
+  border-radius: ${theme.borderRadius.full};
 `;
 
 const ProfileSummary = styled.div`
@@ -592,10 +606,16 @@ export const ProfileDetails: React.FC = () => {
         animate="visible"
       >
         <Header>
-          <BackButton variant="secondary" onClick={() => navigate(-1)}>
-            <ArrowLeft size={20} />
-          </BackButton>
-          <Title>Profile Details</Title>
+          <HeaderLeft>
+            <BackButton variant="secondary" onClick={() => navigate(-1)}>
+              <ArrowLeft size={20} />
+            </BackButton>
+            <Title>Profile Details</Title>
+          </HeaderLeft>
+          
+          <SettingsButton variant="ghost" onClick={() => navigate('/settings')}>
+            <SettingsIcon size={20} />
+          </SettingsButton>
         </Header>
 
         <ProfileSummary>

@@ -75,6 +75,11 @@ const ButtonRow = styled.div`
   gap: ${theme.spacing.sm};
 `;
 
+const SingleButtonRow = styled.div`
+  display: flex;
+  width: 100%;
+`;
+
 const StepCounter = styled(motion.div)`
   text-align: center;
   padding: ${theme.spacing.lg};
@@ -105,7 +110,7 @@ export const StepTracker: React.FC<StepTrackerProps> = ({ onStepTracked }) => {
   const [stepsTracked, setStepsTracked] = useState(0);
   const [isAppleHealthAvailable, setIsAppleHealthAvailable] = useState(false);
   const [permissionsGranted, setPermissionsGranted] = useState(false);
-  const [isSyncing, setIsSyncing] = useState(false);
+
 
   useEffect(() => {
     // Check if Apple Health is available
@@ -143,14 +148,7 @@ export const StepTracker: React.FC<StepTrackerProps> = ({ onStepTracked }) => {
     setIsTracking(false);
   };
 
-  const handleSyncHistorical = async () => {
-    setIsSyncing(true);
-    try {
-      await appleHealthIntegration.syncHistoricalSteps(7); // Sync last 7 days
-    } finally {
-      setIsSyncing(false);
-    }
-  };
+
 
   const handleRequestPermissions = async () => {
     const granted = await appleHealthIntegration.requestHealthPermissions();
@@ -224,13 +222,13 @@ export const StepTracker: React.FC<StepTrackerProps> = ({ onStepTracked }) => {
           </Button>
         )}
 
-        <ButtonRow>
+        <SingleButtonRow>
           {!isTracking ? (
             <Button
               variant="primary"
               onClick={handleStartTracking}
               disabled={!isAppleHealthAvailable || !permissionsGranted}
-              style={{ flex: 1 }}
+              fullWidth
             >
               <Play size={16} />
               Start Tracking
@@ -239,22 +237,13 @@ export const StepTracker: React.FC<StepTrackerProps> = ({ onStepTracked }) => {
             <Button
               variant="secondary"
               onClick={handleStopTracking}
-              style={{ flex: 1 }}
+              fullWidth
             >
               <Square size={16} />
               Stop Tracking
             </Button>
           )}
-
-          <Button
-            variant="outline"
-            onClick={handleSyncHistorical}
-            disabled={!isAppleHealthAvailable || !permissionsGranted || isSyncing}
-            style={{ flex: 1 }}
-          >
-            {isSyncing ? 'Syncing...' : 'Sync Historical'}
-          </Button>
-        </ButtonRow>
+        </SingleButtonRow>
       </ControlsSection>
     </TrackerContainer>
   );

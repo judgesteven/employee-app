@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { Clock, Target, ChevronRight } from 'lucide-react';
 import { ProfileHeader } from '../components/Profile/ProfileHeader';
 import { QuickStats } from '../components/Profile/QuickStats';
-import { StepTracker } from '../components/HealthTracking/StepTracker';
+
 import { Container, Card, Button } from '../styles/GlobalStyles';
 import { theme } from '../styles/theme';
 import { User, Challenge } from '../types';
@@ -434,10 +434,6 @@ export const Home: React.FC = () => {
         animate="visible"
       >
         <ProfileHeader user={user} onViewMore={handleViewProfile} />
-        
-        <StepTracker onStepTracked={(stepCount) => {
-          console.log(`UI notified: ${stepCount} steps tracked to GameLayer`);
-        }} />
         
         <QuickStats
           dailySteps={user.dailyStepCount}
