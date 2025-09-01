@@ -65,9 +65,21 @@ const UserName = styled.h1`
   margin: 0;
 `;
 
+const UserMeta = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+`;
+
 const UserLevel = styled.span`
   font-size: ${theme.typography.fontSize.sm};
   opacity: 0.8;
+`;
+
+const UserTeam = styled.span`
+  font-size: ${theme.typography.fontSize.xs};
+  opacity: 0.7;
+  font-weight: ${theme.typography.fontWeight.medium};
 `;
 
 const GemsContainer = styled.div`
@@ -150,7 +162,10 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, onViewMore }
             <Avatar src={user.avatar} alt={user.name} />
             <UserDetails>
               <UserName>{user.name}</UserName>
-              <UserLevel>Level {user.level}</UserLevel>
+              <UserMeta>
+                <UserLevel>Level {user.level}</UserLevel>
+                <UserTeam>{user.team}</UserTeam>
+              </UserMeta>
             </UserDetails>
           </UserInfo>
           

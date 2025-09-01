@@ -67,6 +67,13 @@ const UserName = styled.h2`
 const UserLevel = styled.div`
   font-size: ${theme.typography.fontSize.lg};
   opacity: 0.9;
+  margin-bottom: ${theme.spacing.xs};
+`;
+
+const UserTeam = styled.div`
+  font-size: ${theme.typography.fontSize.base};
+  opacity: 0.8;
+  font-weight: ${theme.typography.fontWeight.medium};
   margin-bottom: ${theme.spacing.lg};
 `;
 
@@ -354,6 +361,7 @@ export const ProfileDetails: React.FC = () => {
     name: 'Alex Johnson',
     avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
     level: 12,
+    team: 'Marketing Team',
     dailyStepCount: 7843,
     allTimeStepCount: 2847392,
     gems: 1247,
@@ -572,6 +580,7 @@ export const ProfileDetails: React.FC = () => {
           <Avatar src={user.avatar} alt={user.name} />
           <UserName>{user.name}</UserName>
           <UserLevel>Level {user.level}</UserLevel>
+          <UserTeam>{user.team}</UserTeam>
           
           <BadgesContainer>
             <Badge>
