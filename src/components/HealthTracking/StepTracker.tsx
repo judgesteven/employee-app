@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { Play, Square, Activity, Smartphone, CheckCircle } from 'lucide-react';
 import { theme } from '../../styles/theme';
 import { Button } from '../../styles/GlobalStyles';
-import { appleHealthIntegration } from '../../services/appleHealthIntegration';
+import { unifiedHealthService, HealthProvider } from '../../services/unifiedHealthService';
 
 const TrackerContainer = styled.div`
   background: ${theme.colors.background};
@@ -70,11 +70,6 @@ const ControlsSection = styled.div`
   gap: ${theme.spacing.md};
 `;
 
-const ButtonRow = styled.div`
-  display: flex;
-  gap: ${theme.spacing.sm};
-`;
-
 const SingleButtonRow = styled.div`
   display: flex;
   width: 100%;
@@ -108,58 +103,96 @@ interface StepTrackerProps {
 export const StepTracker: React.FC<StepTrackerProps> = ({ onStepTracked }) => {
   const [isTracking, setIsTracking] = useState(false);
   const [stepsTracked, setStepsTracked] = useState(0);
-  const [isAppleHealthAvailable, setIsAppleHealthAvailable] = useState(false);
+  const [currentProvider, setCurrentProvider] = useState<HealthProvider>('apple_health');
+  const [isProviderAvailable, setIsProviderAvailable] = useState(false);
   const [permissionsGranted, setPermissionsGranted] = useState(false);
 
-
   useEffect(() => {
-    // Check if Apple Health is available
-    setIsAppleHealthAvailable(appleHealthIntegration.isAppleHealthAvailable());
+    // Get initial status
+    const updateStatus = () => {
+      const status = unifiedHealthService.getStatus();
+      setCurrentProvider(status.provider);
+      setIsProviderAvailable(status.isAvailable);
+      setIsTracking(status.isTracking);
+      setStepsTracked(status.stepsTracked);
+      setPermissionsGranted(status.permissionsGranted);
+    };
 
-    // Listen for step tracking events
+    updateStatus();
+
+    // Listen for unified step tracking events
     const handleStepTracked = (event: CustomEvent) => {
       const { stepCount } = event.detail;
       setStepsTracked(stepCount);
       onStepTracked?.(stepCount);
     };
 
-    window.addEventListener('stepTracked', handleStepTracked as EventListener);
+    // Listen for provider changes
+    const handleProviderChanged = () => {
+      updateStatus();
+    };
 
-    // Get initial tracking status
-    const status = appleHealthIntegration.getTrackingStatus();
-    setIsTracking(status.isTracking);
-    setStepsTracked(status.stepsTracked);
+    window.addEventListener('unifiedStepTracked', handleStepTracked as EventListener);
+    window.addEventListener('healthProviderChanged', handleProviderChanged as EventListener);
 
     return () => {
-      window.removeEventListener('stepTracked', handleStepTracked as EventListener);
+      window.removeEventListener('unifiedStepTracked', handleStepTracked as EventListener);
+      window.removeEventListener('healthProviderChanged', handleProviderChanged as EventListener);
     };
   }, [onStepTracked]);
 
   const handleStartTracking = async () => {
-    const success = await appleHealthIntegration.startStepTracking();
+    const success = await unifiedHealthService.startTracking();
     if (success) {
       setIsTracking(true);
       setPermissionsGranted(true);
     }
   };
 
-  const handleStopTracking = () => {
-    appleHealthIntegration.stopStepTracking();
+  const handleStopTracking = async () => {
+    await unifiedHealthService.stopTracking();
     setIsTracking(false);
   };
 
-
-
   const handleRequestPermissions = async () => {
-    const granted = await appleHealthIntegration.requestHealthPermissions();
+    const granted = await unifiedHealthService.requestPermissions();
     setPermissionsGranted(granted);
+  };
+
+  const getProviderDisplayName = () => {
+    return unifiedHealthService.getProviderDisplayName(currentProvider);
+  };
+
+  const getProviderIcon = () => {
+    switch (currentProvider) {
+      case 'apple_health':
+        return <Smartphone size={20} />;
+      case 'google_fit':
+        return <Activity size={20} />;
+      default:
+        return <Activity size={20} />;
+    }
+  };
+
+  const getAvailabilityDescription = () => {
+    if (!isProviderAvailable) {
+      switch (currentProvider) {
+        case 'apple_health':
+          return 'Not available (requires iOS device)';
+        case 'google_fit':
+          return 'Not available on this device';
+        default:
+          return 'Not available';
+      }
+    }
+    return `Available on this device`;
   };
 
   return (
     <TrackerContainer>
       <TrackerHeader>
         <Activity color={theme.colors.primary} size={24} />
-        <TrackerTitle>Apple Health Step Tracking</TrackerTitle>
+        <TrackerTitle>{getProviderDisplayName()} Step Tracking</TrackerTitle>
       </TrackerHeader>
 
       {stepsTracked > 0 && (
@@ -174,14 +207,14 @@ export const StepTracker: React.FC<StepTrackerProps> = ({ onStepTracked }) => {
       )}
 
       <StatusSection>
-        <StatusItem $active={isAppleHealthAvailable}>
-          <StatusIcon $active={isAppleHealthAvailable}>
-            <Smartphone size={20} />
+        <StatusItem $active={isProviderAvailable}>
+          <StatusIcon $active={isProviderAvailable}>
+            {getProviderIcon()}
           </StatusIcon>
           <StatusText>
-            <StatusLabel>Apple Health Availability</StatusLabel>
+            <StatusLabel>{getProviderDisplayName()} Availability</StatusLabel>
             <StatusDescription>
-              {isAppleHealthAvailable ? 'Available on this device' : 'Not available (requires iOS device)'}
+              {getAvailabilityDescription()}
             </StatusDescription>
           </StatusText>
         </StatusItem>
@@ -212,7 +245,7 @@ export const StepTracker: React.FC<StepTrackerProps> = ({ onStepTracked }) => {
       </StatusSection>
 
       <ControlsSection>
-        {!permissionsGranted && isAppleHealthAvailable && (
+        {!permissionsGranted && isProviderAvailable && (
           <Button
             variant="primary"
             onClick={handleRequestPermissions}
@@ -227,7 +260,7 @@ export const StepTracker: React.FC<StepTrackerProps> = ({ onStepTracked }) => {
             <Button
               variant="primary"
               onClick={handleStartTracking}
-              disabled={!isAppleHealthAvailable || !permissionsGranted}
+              disabled={!isProviderAvailable || !permissionsGranted}
               fullWidth
             >
               <Play size={16} />

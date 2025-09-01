@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { Container, Button } from '../styles/GlobalStyles';
 import { theme } from '../styles/theme';
 import { StepTracker } from '../components/HealthTracking/StepTracker';
+import { HealthProviderToggle } from '../components/HealthTracking/HealthProviderToggle';
 
 const SettingsContainer = styled(Container)`
   padding-top: ${theme.spacing.lg};
@@ -92,6 +93,12 @@ export const Settings: React.FC = () => {
             Health Integration
           </SectionTitle>
           
+          <motion.div variants={itemVariants}>
+            <HealthProviderToggle onProviderChange={(provider) => {
+              console.log(`Settings: Health provider changed to ${provider}`);
+            }} />
+          </motion.div>
+
           <motion.div variants={itemVariants}>
             <StepTracker onStepTracked={(stepCount) => {
               console.log(`Settings: ${stepCount} steps tracked to GameLayer`);

@@ -35,6 +35,17 @@ class AppleHealthIntegrationService {
     return /iPad|iPhone|iPod/.test(navigator.userAgent);
   }
 
+  // Interface compatibility method
+  isAvailable(): boolean {
+    // For web testing, make it available on all devices
+    return true;
+  }
+
+  // Interface compatibility method
+  async requestPermissions(): Promise<boolean> {
+    return this.requestHealthPermissions();
+  }
+
   // Request permission to access Apple Health data
   async requestHealthPermissions(): Promise<boolean> {
     try {
@@ -195,6 +206,45 @@ class AppleHealthIntegrationService {
       isTracking: this.isTracking,
       stepsTracked: this.lastProcessedStepCount
     };
+  }
+
+  // Interface compatibility methods for unified health integration
+  async getCurrentStepCount(): Promise<number> {
+    // In a native iOS app, this would query HealthKit for current steps
+    // For web simulation, we'll return a mock value
+    return Math.floor(Math.random() * 10000);
+  }
+
+  async startTrackingSteps(onStepTracked: (stepCount: number) => void): Promise<() => void> {
+    console.log('Starting Apple Health step tracking simulation...');
+    this.isTracking = true;
+    let simulatedSteps = 0;
+    
+    const interval = setInterval(async () => {
+      if (!this.isTracking) {
+        clearInterval(interval);
+        return;
+      }
+      
+      simulatedSteps += 1;
+      console.log(`Apple Health: Simulating step ${simulatedSteps}`);
+      await gameLayerApi.trackStep(); // Send individual step to GameLayer
+      onStepTracked(simulatedSteps);
+    }, 5000); // Simulate a step every 5 seconds
+
+    return () => {
+      this.isTracking = false;
+      clearInterval(interval);
+      console.log('Stopped Apple Health step tracking simulation.');
+    };
+  }
+
+  async syncHistoricalSteps(days: number = 7): Promise<number> {
+    console.log(`Apple Health: Syncing historical steps for the last ${days} days...`);
+    const totalSyncedSteps = Math.floor(Math.random() * 50000); // Simulate a large number of steps
+    await gameLayerApi.trackSteps(gameLayerApi.PLAYER_ID, totalSyncedSteps); // Send batch steps to GameLayer
+    console.log(`Apple Health: Synced ${totalSyncedSteps} historical steps.`);
+    return totalSyncedSteps;
   }
 }
 
