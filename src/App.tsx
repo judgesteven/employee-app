@@ -1,25 +1,34 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { ThemeProvider } from 'styled-components';
+import { GlobalStyles } from './styles/GlobalStyles';
+import { theme } from './styles/theme';
+import { BottomNavigation } from './components/Navigation/BottomNavigation';
+import { Home } from './pages/Home';
+import { Profile } from './pages/Profile';
+import { ProfileDetails } from './pages/ProfileDetails';
+import { Challenges } from './pages/Challenges';
+import { Competition } from './pages/Competition';
+import { Rewards } from './pages/Rewards';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <ThemeProvider theme={theme}>
+      <GlobalStyles />
+      <Router>
+        <div className="App">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/profile/details" element={<ProfileDetails />} />
+            <Route path="/challenges" element={<Challenges />} />
+            <Route path="/competition" element={<Competition />} />
+            <Route path="/rewards" element={<Rewards />} />
+          </Routes>
+          <BottomNavigation />
+        </div>
+      </Router>
+    </ThemeProvider>
   );
 }
 
