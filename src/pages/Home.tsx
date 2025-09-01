@@ -6,6 +6,7 @@ import { Clock, Target, ChevronRight } from 'lucide-react';
 import { ProfileHeader } from '../components/Profile/ProfileHeader';
 import { QuickStats } from '../components/Profile/QuickStats';
 
+
 import { Container, Card, Button } from '../styles/GlobalStyles';
 import { theme } from '../styles/theme';
 import { User, Challenge } from '../types';
@@ -240,6 +241,8 @@ export const Home: React.FC = () => {
     team: 'Marketing Team',
     dailyStepCount: 0,
     allTimeStepCount: 2847392,
+    dailyActiveMinutes: 78,
+    allTimeActiveMinutes: 156420,
     gems: 1247,
     achievements: [
       {

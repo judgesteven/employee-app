@@ -18,6 +18,14 @@ class UnifiedHealthService {
     apple_health: false,
     google_fit: false
   };
+  private trackingStatus: Record<HealthProvider, { isTracking: boolean; stepsTracked: number }> = {
+    apple_health: { isTracking: false, stepsTracked: 0 },
+    google_fit: { isTracking: false, stepsTracked: 0 }
+  };
+  private stopTrackingFunctions: Record<HealthProvider, (() => void) | null> = {
+    apple_health: null,
+    google_fit: null
+  };
 
   static getInstance(): UnifiedHealthService {
     if (!UnifiedHealthService.instance) {
@@ -42,7 +50,7 @@ class UnifiedHealthService {
     // Auto-detect based on platform
     if (appleHealthIntegration.isAppleHealthAvailable()) {
       return 'apple_health';
-    } else if (googleFitIntegration.isGoogleFitAvailable()) {
+    } else if (googleFitIntegration.isAvailable()) {
       return 'google_fit';
     }
 
@@ -58,18 +66,14 @@ class UnifiedHealthService {
   // Setup event listeners for both services
   private setupEventListeners(): void {
     // Listen for Apple Health step events
-    window.addEventListener('stepTracked', (event: CustomEvent) => {
+    window.addEventListener('stepTracked', ((event: CustomEvent) => {
       if (this.currentProvider === 'apple_health') {
+        this.trackingStatus.apple_health.stepsTracked = event.detail.stepCount;
         this.notifyStepTracked(event.detail.stepCount, 'apple_health');
       }
-    });
+    }) as EventListener);
 
-    // Listen for Google Fit step events
-    window.addEventListener('googleFitStepTracked', (event: CustomEvent) => {
-      if (this.currentProvider === 'google_fit') {
-        this.notifyStepTracked(event.detail.stepCount, 'google_fit');
-      }
-    });
+    // Listen for Google Fit step events (handled via callback in startTracking)
   }
 
   // Get current health provider
@@ -103,7 +107,7 @@ class UnifiedHealthService {
       case 'apple_health':
         return appleHealthIntegration.isAppleHealthAvailable();
       case 'google_fit':
-        return googleFitIntegration.isGoogleFitAvailable();
+        return googleFitIntegration.isAvailable();
       default:
         return false;
     }
@@ -119,7 +123,7 @@ class UnifiedHealthService {
       },
       {
         provider: 'google_fit',
-        available: googleFitIntegration.isGoogleFitAvailable(),
+        available: googleFitIntegration.isAvailable(),
         name: 'Google Fit'
       }
     ];
@@ -135,7 +139,7 @@ class UnifiedHealthService {
           granted = await appleHealthIntegration.requestHealthPermissions();
           break;
         case 'google_fit':
-          granted = await googleFitIntegration.requestHealthPermissions();
+          granted = await googleFitIntegration.requestPermissions();
           break;
       }
 
@@ -155,9 +159,18 @@ class UnifiedHealthService {
       switch (this.currentProvider) {
         case 'apple_health':
           success = await appleHealthIntegration.startStepTracking();
+          if (success) {
+            this.trackingStatus.apple_health.isTracking = true;
+          }
           break;
         case 'google_fit':
-          success = await googleFitIntegration.startStepTracking();
+          const stopFunction = await googleFitIntegration.startTrackingSteps((stepCount) => {
+            this.trackingStatus.google_fit.stepsTracked = stepCount;
+            this.notifyStepTracked(stepCount, 'google_fit');
+          });
+          this.stopTrackingFunctions.google_fit = stopFunction;
+          this.trackingStatus.google_fit.isTracking = true;
+          success = true;
           break;
       }
 
@@ -178,9 +191,14 @@ class UnifiedHealthService {
       switch (this.currentProvider) {
         case 'apple_health':
           appleHealthIntegration.stopStepTracking();
+          this.trackingStatus.apple_health.isTracking = false;
           break;
         case 'google_fit':
-          googleFitIntegration.stopStepTracking();
+          if (this.stopTrackingFunctions.google_fit) {
+            this.stopTrackingFunctions.google_fit();
+            this.stopTrackingFunctions.google_fit = null;
+          }
+          this.trackingStatus.google_fit.isTracking = false;
           break;
       }
     } catch (error) {
@@ -190,22 +208,14 @@ class UnifiedHealthService {
 
   // Get current status
   getStatus(): HealthServiceStatus {
-    let status = { isTracking: false, stepsTracked: 0 };
-
-    switch (this.currentProvider) {
-      case 'apple_health':
-        status = appleHealthIntegration.getTrackingStatus();
-        break;
-      case 'google_fit':
-        status = googleFitIntegration.getTrackingStatus();
-        break;
-    }
+    const currentTracking = this.trackingStatus[this.currentProvider];
 
     return {
-      ...status,
+      isTracking: currentTracking.isTracking,
+      stepsTracked: currentTracking.stepsTracked,
       provider: this.currentProvider,
       isAvailable: this.isCurrentProviderAvailable(),
-      permissionsGranted: this.permissionsStatus[this.currentProvider] || status.isTracking
+      permissionsGranted: this.permissionsStatus[this.currentProvider] || currentTracking.isTracking
     };
   }
 

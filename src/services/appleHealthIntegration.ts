@@ -9,6 +9,7 @@ interface AppleHealthStepData {
 }
 
 // Interface for the native bridge (will be implemented when app becomes native/hybrid)
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface AppleHealthBridge {
   requestAuthorization(): Promise<boolean>;
   getStepCount(startDate: Date, endDate: Date): Promise<AppleHealthStepData[]>;
@@ -132,7 +133,7 @@ class AppleHealthIntegrationService {
     this.isTracking = false;
   }
 
-  // Simulate real-time step tracking for testing
+  // Simulate real-time step tracking for testing - increment every 30 seconds
   private simulateRealTimeStepTracking(): void {
     const trackingInterval = setInterval(() => {
       if (!this.isTracking) {
@@ -140,56 +141,33 @@ class AppleHealthIntegrationService {
         return;
       }
 
-      // Simulate detecting a new step
-      if (Math.random() > 0.7) { // 30% chance of a step every 5 seconds
-        this.handleNewStep();
-      }
-    }, 5000); // Check every 5 seconds
+      // Simulate step increment every 30 seconds
+      this.handleStepIncrement();
+    }, 30000); // Check every 30 seconds
   }
 
-  // Handle when a new step is detected
-  private async handleNewStep(): Promise<void> {
+  // Handle step increment - send delta to GameLayer
+  private async handleStepIncrement(): Promise<void> {
     try {
-      console.log('New step detected! Sending to GameLayer...');
+      // Generate a random step increment (10-100 steps every 30 seconds)
+      const stepDelta = Math.floor(Math.random() * 91) + 10; // 10-100 steps
       
-      // Send the step event to GameLayer
-      await gameLayerApi.trackStep();
+      console.log(`Apple Health: ${stepDelta} new steps detected! Sending delta to GameLayer...`);
       
-      this.lastProcessedStepCount++;
-      console.log(`Step ${this.lastProcessedStepCount} tracked successfully`);
+      // Send the step delta to GameLayer
+      await gameLayerApi.trackSteps(undefined, stepDelta);
       
-      // You could emit an event here for the UI to update
+      this.lastProcessedStepCount += stepDelta;
+      console.log(`Apple Health: ${stepDelta} steps tracked successfully. Total session: ${this.lastProcessedStepCount}`);
+      
+      // Notify UI with the total session count
       this.notifyStepTracked();
     } catch (error) {
-      console.error('Error tracking step to GameLayer:', error);
+      console.error('Error tracking step increment to GameLayer:', error);
     }
   }
 
-  // Sync historical steps with GameLayer
-  async syncHistoricalSteps(days: number = 7): Promise<void> {
-    try {
-      console.log(`Syncing last ${days} days of step data...`);
-      
-      const endDate = new Date();
-      const startDate = new Date();
-      startDate.setDate(endDate.getDate() - days);
 
-      const stepData = await this.getHistoricalSteps(startDate, endDate);
-      
-      for (const dayData of stepData) {
-        if (dayData.count > 0) {
-          console.log(`Syncing ${dayData.count} steps for ${dayData.startDate.toDateString()}`);
-          
-          // Send steps to GameLayer in batches
-          await gameLayerApi.trackSteps(undefined, dayData.count, dayData.startDate);
-        }
-      }
-      
-      console.log('Historical step sync completed');
-    } catch (error) {
-      console.error('Error syncing historical steps:', error);
-    }
-  }
 
   // Notify UI components about step tracking
   private notifyStepTracked(): void {
@@ -242,7 +220,7 @@ class AppleHealthIntegrationService {
   async syncHistoricalSteps(days: number = 7): Promise<number> {
     console.log(`Apple Health: Syncing historical steps for the last ${days} days...`);
     const totalSyncedSteps = Math.floor(Math.random() * 50000); // Simulate a large number of steps
-    await gameLayerApi.trackSteps(gameLayerApi.PLAYER_ID, totalSyncedSteps); // Send batch steps to GameLayer
+    await gameLayerApi.trackSteps(undefined, totalSyncedSteps); // Send batch steps to GameLayer
     console.log(`Apple Health: Synced ${totalSyncedSteps} historical steps.`);
     return totalSyncedSteps;
   }

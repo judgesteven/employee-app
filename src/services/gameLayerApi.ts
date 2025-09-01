@@ -6,6 +6,9 @@ const API_KEY = 'eb0f1b46acd3fde97c008db5c4fe9ed0';
 const ACCOUNT_ID = 'employee-app';
 const PLAYER_ID = 'test-player';
 
+// Enable/disable API calls for testing
+const ENABLE_API_CALLS = true; // Set to true to test with real GameLayer API
+
 // Create axios instance with default config
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -16,10 +19,14 @@ const api = axios.create({
   },
 });
 
+// Mock delay to simulate API calls
+const mockDelay = (ms: number = 100) => new Promise(resolve => setTimeout(resolve, ms));
+
 // GameLayer Player API response type
 interface GameLayerPlayer {
   id: string;
   name: string;
+  points?: number; // Points represent step count in GameLayer
   // Add other fields as needed based on actual API response
 }
 
@@ -95,50 +102,33 @@ export const gameLayerApi = {
     await api.post(`/users/${userId}/achievements/${achievementId}/unlock`);
   },
 
-  // Events - for tracking activities like steps
-  async trackEvent(playerId: string, eventName: string, eventData: any): Promise<void> {
-    await api.post(`/players/${playerId}/events`, {
-      event: eventName,
-      data: eventData
-    }, {
-      params: {
-        account: ACCOUNT_ID
-      }
-    });
-  },
-
-  // Specific method for tracking steps
-  async trackStep(playerId: string = PLAYER_ID, timestamp?: Date): Promise<void> {
-    await this.trackEvent(playerId, 'step-tracker', {
-      timestamp: timestamp || new Date().toISOString(),
-      source: 'apple_health'
-    });
-  },
-
-  // Batch step tracking for efficiency
-  async trackSteps(playerId: string = PLAYER_ID, stepCount: number, timestamp?: Date): Promise<void> {
-    const stepEvents = Array.from({ length: stepCount }, (_, index) => ({
-      event: 'step-tracker',
-      data: {
-        timestamp: timestamp || new Date().toISOString(),
-        source: 'apple_health',
-        sequence: index + 1
-      }
-    }));
-
-    // Send in batches to avoid overwhelming the API
-    const batchSize = 100;
-    for (let i = 0; i < stepEvents.length; i += batchSize) {
-      const batch = stepEvents.slice(i, i + batchSize);
-      await api.post(`/players/${playerId}/events/batch`, {
-        events: batch
-      }, {
-        params: {
-          account: ACCOUNT_ID
-        }
-      });
+  // Complete step-tracker event with step count delta
+  async trackSteps(playerId: string | undefined, stepCount: number): Promise<void> {
+    const actualPlayerId = playerId || PLAYER_ID;
+    
+    if (!ENABLE_API_CALLS) {
+      console.log(`[MOCK] GameLayer trackSteps: ${stepCount} steps completed for ${actualPlayerId}`);
+      await mockDelay(100);
+      return;
     }
+
+    // Send the step count delta to GameLayer
+    // Event ID is in the path: /events/{event-id}/complete
+    // Headers already include API key from axios instance
+    // Payload has account and player information
+    await api.post(`/events/step-tracker/complete`, {
+      account: ACCOUNT_ID,
+      player: actualPlayerId,
+      count: stepCount
+    });
   },
+
+  // Single step tracking (for backwards compatibility)
+  async trackStep(playerId: string = PLAYER_ID): Promise<void> {
+    return this.trackSteps(playerId, 1);
+  },
+
+
 };
 
 export default gameLayerApi;

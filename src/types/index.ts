@@ -7,6 +7,8 @@ export interface User {
   team: string;
   dailyStepCount: number;
   allTimeStepCount: number;
+  dailyActiveMinutes: number;
+  allTimeActiveMinutes: number;
   gems: number;
   achievements: Achievement[];
 }

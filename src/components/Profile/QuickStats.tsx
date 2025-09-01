@@ -12,6 +12,8 @@ const StatsGrid = styled.div`
   margin-bottom: ${theme.spacing.lg};
 `;
 
+
+
 const StatCard = styled(motion.div)`
   background: ${theme.colors.background};
   border: 1px solid ${theme.colors.border};

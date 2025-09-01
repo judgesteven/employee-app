@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Award, Trophy, Gift, TrendingUp, Calendar, Footprints, Gem, ChevronRight, Settings as SettingsIcon } from 'lucide-react';
+import { ArrowLeft, Award, Trophy, Gift, TrendingUp, Calendar, Gem, ChevronRight, Settings as SettingsIcon, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Button } from '../styles/GlobalStyles';
 import { theme } from '../styles/theme';
@@ -57,11 +57,31 @@ const ProfileSummary = styled.div`
   border: none;
   border-radius: ${theme.borderRadius.xl};
   padding: ${theme.spacing.lg};
+  position: relative;
   
   /* Ensure the gradient background is always maintained */
   &:hover {
     background: ${theme.colors.gradients.primary};
   }
+`;
+
+const GemsCornerBadge = styled.div`
+  position: absolute;
+  top: ${theme.spacing.md};
+  right: ${theme.spacing.md};
+  display: flex;
+  align-items: center;
+  gap: ${theme.spacing.xs};
+  background: rgba(255, 255, 255, 0.2);
+  padding: ${theme.spacing.sm} ${theme.spacing.md};
+  border-radius: ${theme.borderRadius.full};
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+`;
+
+const GemsCount = styled.span`
+  font-weight: ${theme.typography.fontWeight.bold};
+  font-size: ${theme.typography.fontSize.base};
 `;
 
 const Avatar = styled.img`
@@ -92,48 +112,48 @@ const UserTeam = styled.div`
   margin-bottom: ${theme.spacing.lg};
 `;
 
-const BadgesContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  gap: ${theme.spacing.md};
+const ProfileStatsContainer = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: ${theme.spacing.lg};
   margin-bottom: ${theme.spacing.lg};
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
 `;
 
-const Badge = styled.div`
+const ProfileStatItem = styled.div`
   display: flex;
   align-items: center;
   gap: ${theme.spacing.sm};
-  background: rgba(255, 255, 255, 0.2);
-  padding: ${theme.spacing.md} ${theme.spacing.lg};
-  border-radius: ${theme.borderRadius.full};
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
 `;
 
-const BadgeIcon = styled.div`
+const ProfileStatIcon = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 40px;
+  height: 40px;
+  border-radius: ${theme.borderRadius.lg};
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
 `;
 
-const BadgeText = styled.div`
+const ProfileStatInfo = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  gap: 2px;
 `;
 
-const BadgeValue = styled.div`
-  font-size: ${theme.typography.fontSize.lg};
+const ProfileStatCount = styled.div`
+  font-size: ${theme.typography.fontSize.xl};
   font-weight: ${theme.typography.fontWeight.bold};
   line-height: 1;
 `;
 
-const BadgeLabel = styled.div`
+const ProfileStatLabel = styled.span`
   font-size: ${theme.typography.fontSize.xs};
   opacity: 0.8;
-  margin-top: 2px;
 `;
 
 const Section = styled.div`
@@ -379,6 +399,8 @@ export const ProfileDetails: React.FC = () => {
     team: 'Marketing Team',
     dailyStepCount: 7843,
     allTimeStepCount: 2847392,
+    dailyActiveMinutes: 78,
+    allTimeActiveMinutes: 156420,
     gems: 1247,
     achievements: [
       {
@@ -619,32 +641,37 @@ export const ProfileDetails: React.FC = () => {
         </Header>
 
         <ProfileSummary>
+          <GemsCornerBadge>
+            <Gem size={16} />
+            <GemsCount>{user.gems.toLocaleString()}</GemsCount>
+          </GemsCornerBadge>
+          
           <Avatar src={user.avatar} alt={user.name} />
           <UserName>{user.name}</UserName>
           <UserLevel>Level {user.level}</UserLevel>
           <UserTeam>{user.team}</UserTeam>
           
-          <BadgesContainer>
-            <Badge>
-              <BadgeIcon>
-                <Footprints size={24} />
-              </BadgeIcon>
-              <BadgeText>
-                <BadgeValue>{formatNumber(user.allTimeStepCount)}</BadgeValue>
-                <BadgeLabel>Total Steps</BadgeLabel>
-              </BadgeText>
-            </Badge>
+          <ProfileStatsContainer>
+            <ProfileStatItem>
+              <ProfileStatIcon>
+                👟
+              </ProfileStatIcon>
+              <ProfileStatInfo>
+                <ProfileStatCount>{formatNumber(user.allTimeStepCount)}</ProfileStatCount>
+                <ProfileStatLabel>total steps</ProfileStatLabel>
+              </ProfileStatInfo>
+            </ProfileStatItem>
             
-            <Badge>
-              <BadgeIcon>
-                <Gem size={24} />
-              </BadgeIcon>
-              <BadgeText>
-                <BadgeValue>{user.gems.toLocaleString()}</BadgeValue>
-                <BadgeLabel>Gems</BadgeLabel>
-              </BadgeText>
-            </Badge>
-          </BadgesContainer>
+            <ProfileStatItem>
+              <ProfileStatIcon>
+                <Clock size={20} />
+              </ProfileStatIcon>
+              <ProfileStatInfo>
+                <ProfileStatCount>{formatNumber(user.allTimeActiveMinutes)}</ProfileStatCount>
+                <ProfileStatLabel>active minutes</ProfileStatLabel>
+              </ProfileStatInfo>
+            </ProfileStatItem>
+          </ProfileStatsContainer>
         </ProfileSummary>
 
         <AdditionalStatsGrid>

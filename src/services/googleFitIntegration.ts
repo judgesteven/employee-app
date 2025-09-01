@@ -44,13 +44,20 @@ export const googleFitIntegration = {
 
   async startTrackingSteps(onStepTracked: (stepCount: number) => void): Promise<() => void> {
     console.log('Starting Google Fit step tracking simulation...');
-    let simulatedSteps = 0;
+    let totalSessionSteps = 0;
+    
     const interval = setInterval(async () => {
-      simulatedSteps += 1;
-      console.log(`Google Fit: Simulating step ${simulatedSteps}`);
-      await gameLayerApi.trackStep(); // Send individual step to GameLayer
-      onStepTracked(simulatedSteps);
-    }, 4000); // Simulate a step every 4 seconds (slightly different from Apple Health)
+      // Generate a random step increment (15-120 steps every 30 seconds)
+      const stepDelta = Math.floor(Math.random() * 106) + 15; // 15-120 steps
+      
+      console.log(`Google Fit: ${stepDelta} new steps detected! Sending delta to GameLayer...`);
+      await gameLayerApi.trackSteps(undefined, stepDelta); // Send step delta to GameLayer
+      
+      totalSessionSteps += stepDelta;
+      console.log(`Google Fit: ${stepDelta} steps tracked successfully. Total session: ${totalSessionSteps}`);
+      
+      onStepTracked(totalSessionSteps);
+    }, 30000); // Increment every 30 seconds
 
     return () => {
       clearInterval(interval);
@@ -61,7 +68,7 @@ export const googleFitIntegration = {
   async syncHistoricalSteps(days: number = 7): Promise<number> {
     console.log(`Google Fit: Syncing historical steps for the last ${days} days...`);
     const totalSyncedSteps = Math.floor(Math.random() * 60000); // Simulate a large number of steps
-    await gameLayerApi.trackSteps(gameLayerApi.PLAYER_ID, totalSyncedSteps); // Send batch steps to GameLayer
+    await gameLayerApi.trackSteps(undefined, totalSyncedSteps); // Send batch steps to GameLayer
     console.log(`Google Fit: Synced ${totalSyncedSteps} historical steps.`);
     return totalSyncedSteps;
   },

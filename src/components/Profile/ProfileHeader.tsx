@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { Gem, ChevronRight } from 'lucide-react';
+import { Gem, Clock } from 'lucide-react';
 import { theme } from '../../styles/theme';
 import { User } from '../../types';
 
@@ -97,43 +97,70 @@ const GemsCount = styled.span`
   font-size: ${theme.typography.fontSize.lg};
 `;
 
-const StepsSection = styled.div`
+const StatsSection = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-top: ${theme.spacing.md};
 `;
 
-const StepsInfo = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${theme.spacing.xs};
+const StatsGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: ${theme.spacing.lg};
+  flex: 1;
+  margin-right: ${theme.spacing.md};
 `;
 
-const StepsCount = styled.div`
-  font-size: ${theme.typography.fontSize['3xl']};
+const StatItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${theme.spacing.sm};
+`;
+
+const StatIcon = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: ${theme.borderRadius.lg};
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+`;
+
+const StatInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+`;
+
+const StatCount = styled.div`
+  font-size: ${theme.typography.fontSize.xl};
   font-weight: ${theme.typography.fontWeight.bold};
   line-height: 1;
 `;
 
-const StepsLabel = styled.span`
-  font-size: ${theme.typography.fontSize.sm};
+const StatLabel = styled.span`
+  font-size: ${theme.typography.fontSize.xs};
   opacity: 0.8;
 `;
 
 const ViewMoreButton = styled(motion.button)`
   display: flex;
   align-items: center;
-  gap: ${theme.spacing.xs};
+  justify-content: center;
   background: rgba(255, 255, 255, 0.2);
   border: none;
   color: ${theme.colors.text.inverse};
-  padding: ${theme.spacing.sm} ${theme.spacing.md};
+  padding: ${theme.spacing.sm};
   border-radius: ${theme.borderRadius.lg};
-  font-size: ${theme.typography.fontSize.sm};
+  font-size: ${theme.typography.fontSize.xs};
   font-weight: ${theme.typography.fontWeight.medium};
   cursor: pointer;
   backdrop-filter: blur(10px);
+  min-width: auto;
+  white-space: nowrap;
   
   &:hover {
     background: rgba(255, 255, 255, 0.3);
@@ -175,21 +202,37 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, onViewMore }
           </GemsContainer>
         </TopRow>
         
-        <StepsSection>
-          <StepsInfo>
-            <StepsCount>{formatStepCount(user.dailyStepCount)}</StepsCount>
-            <StepsLabel>steps today</StepsLabel>
-          </StepsInfo>
+        <StatsSection>
+          <StatsGrid>
+            <StatItem>
+              <StatIcon>
+                👟
+              </StatIcon>
+              <StatInfo>
+                <StatCount>{formatStepCount(user.dailyStepCount)}</StatCount>
+                <StatLabel>steps today</StatLabel>
+              </StatInfo>
+            </StatItem>
+            
+            <StatItem>
+              <StatIcon>
+                <Clock size={16} />
+              </StatIcon>
+              <StatInfo>
+                <StatCount>{user.dailyActiveMinutes}</StatCount>
+                <StatLabel>active minutes</StatLabel>
+              </StatInfo>
+            </StatItem>
+          </StatsGrid>
           
           <ViewMoreButton
             onClick={onViewMore}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            View Profile
-            <ChevronRight size={16} />
+            Profile
           </ViewMoreButton>
-        </StepsSection>
+        </StatsSection>
       </HeaderContent>
     </HeaderContainer>
   );

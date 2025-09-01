@@ -103,9 +103,12 @@ interface StepTrackerProps {
 export const StepTracker: React.FC<StepTrackerProps> = ({ onStepTracked }) => {
   const [isTracking, setIsTracking] = useState(false);
   const [stepsTracked, setStepsTracked] = useState(0);
+
   const [currentProvider, setCurrentProvider] = useState<HealthProvider>('apple_health');
   const [isProviderAvailable, setIsProviderAvailable] = useState(false);
   const [permissionsGranted, setPermissionsGranted] = useState(false);
+
+
 
   useEffect(() => {
     // Get initial status
@@ -195,6 +198,7 @@ export const StepTracker: React.FC<StepTrackerProps> = ({ onStepTracked }) => {
         <TrackerTitle>{getProviderDisplayName()} Step Tracking</TrackerTitle>
       </TrackerHeader>
 
+      {/* Display session steps if tracking */}
       {stepsTracked > 0 && (
         <StepCounter
           initial={{ scale: 0.9, opacity: 0 }}
