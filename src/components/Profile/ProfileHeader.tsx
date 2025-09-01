@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { Gem, ChevronRight } from 'lucide-react';
+import { Gem, ChevronRight, Footprints } from 'lucide-react';
 import { theme } from '../../styles/theme';
 import { User } from '../../types';
 
@@ -82,7 +82,14 @@ const UserTeam = styled.span`
   font-weight: ${theme.typography.fontWeight.medium};
 `;
 
-const GemsContainer = styled.div`
+const BadgesContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: ${theme.spacing.sm};
+  margin-top: ${theme.spacing.md};
+`;
+
+const Badge = styled.div`
   display: flex;
   align-items: center;
   gap: ${theme.spacing.xs};
@@ -90,35 +97,39 @@ const GemsContainer = styled.div`
   padding: ${theme.spacing.sm} ${theme.spacing.md};
   border-radius: ${theme.borderRadius.full};
   backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
 `;
 
-const GemsCount = styled.span`
-  font-weight: ${theme.typography.fontWeight.semibold};
-  font-size: ${theme.typography.fontSize.lg};
-`;
-
-const StepsSection = styled.div`
+const BadgeIcon = styled.div`
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-top: ${theme.spacing.md};
+  justify-content: center;
+  width: 20px;
+  height: 20px;
 `;
 
-const StepsInfo = styled.div`
+const BadgeText = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${theme.spacing.xs};
+  align-items: flex-start;
 `;
 
-const StepsCount = styled.div`
-  font-size: ${theme.typography.fontSize['3xl']};
-  font-weight: ${theme.typography.fontWeight.bold};
+const BadgeValue = styled.div`
+  font-size: ${theme.typography.fontSize.base};
+  font-weight: ${theme.typography.fontWeight.semibold};
   line-height: 1;
 `;
 
-const StepsLabel = styled.span`
-  font-size: ${theme.typography.fontSize.sm};
+const BadgeLabel = styled.div`
+  font-size: ${theme.typography.fontSize.xs};
   opacity: 0.8;
+  margin-top: 2px;
+`;
+
+const ViewMoreSection = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  margin-top: ${theme.spacing.md};
 `;
 
 const ViewMoreButton = styled(motion.button)`
@@ -168,19 +179,31 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, onViewMore }
               </UserMeta>
             </UserDetails>
           </UserInfo>
-          
-          <GemsContainer>
-            <Gem size={20} />
-            <GemsCount>{user.gems}</GemsCount>
-          </GemsContainer>
         </TopRow>
         
-        <StepsSection>
-          <StepsInfo>
-            <StepsCount>{formatStepCount(user.dailyStepCount)}</StepsCount>
-            <StepsLabel>steps today</StepsLabel>
-          </StepsInfo>
+        <BadgesContainer>
+          <Badge>
+            <BadgeIcon>
+              <Footprints size={20} />
+            </BadgeIcon>
+            <BadgeText>
+              <BadgeValue>{formatStepCount(user.dailyStepCount)}</BadgeValue>
+              <BadgeLabel>steps today</BadgeLabel>
+            </BadgeText>
+          </Badge>
           
+          <Badge>
+            <BadgeIcon>
+              <Gem size={20} />
+            </BadgeIcon>
+            <BadgeText>
+              <BadgeValue>{user.gems.toLocaleString()}</BadgeValue>
+              <BadgeLabel>gems</BadgeLabel>
+            </BadgeText>
+          </Badge>
+        </BadgesContainer>
+        
+        <ViewMoreSection>
           <ViewMoreButton
             onClick={onViewMore}
             whileHover={{ scale: 1.05 }}
@@ -189,7 +212,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, onViewMore }
             View Profile
             <ChevronRight size={16} />
           </ViewMoreButton>
-        </StepsSection>
+        </ViewMoreSection>
       </HeaderContent>
     </HeaderContainer>
   );
