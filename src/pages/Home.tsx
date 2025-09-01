@@ -9,6 +9,7 @@ import { Container, Card, Button } from '../styles/GlobalStyles';
 import { theme } from '../styles/theme';
 import { User, Challenge } from '../types';
 import { healthDataService } from '../services/healthData';
+import { gameLayerApi } from '../services/gameLayerApi';
 
 const HomeContainer = styled(Container)`
   padding-top: ${theme.spacing.lg};
@@ -310,12 +311,16 @@ export const Home: React.FC = () => {
         setLoading(true);
         setError(null);
 
+        // Get player data from GameLayer API
+        const gameLayerPlayer = await gameLayerApi.getPlayer();
+        
         // Get current step count from health service
         const currentSteps = await healthDataService.getCurrentStepCount();
         
-        // Update user data with real step count
+        // Update user data with real GameLayer name and step count
         const updatedUser = {
           ...mockUser,
+          name: gameLayerPlayer.name, // Use name from GameLayer API
           dailyStepCount: currentSteps,
         };
 
@@ -335,7 +340,13 @@ export const Home: React.FC = () => {
       } catch (err) {
         console.error('Error initializing home:', err);
         setError('Failed to load data. Please try again.');
-        setUser(mockUser);
+        // Fallback to mock data if GameLayer API fails
+        const currentSteps = await healthDataService.getCurrentStepCount();
+        const fallbackUser = {
+          ...mockUser,
+          dailyStepCount: currentSteps,
+        };
+        setUser(fallbackUser);
         setInProgressMissions(mockInProgressMissions);
       } finally {
         setLoading(false);

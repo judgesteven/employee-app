@@ -1,20 +1,40 @@
 import axios from 'axios';
 import { User, Challenge, Leaderboard, Reward, ApiResponse } from '../types';
 
-const API_BASE_URL = 'https://api.gamelayer.co'; // Update with actual GameLayer API URL
-const API_KEY = process.env.REACT_APP_GAMELAYER_API_KEY;
+const API_BASE_URL = 'https://api.gamelayer.co/api/v0';
+const API_KEY = 'eb0f1b46acd3fde97c008db5c4fe9ed0';
+const ACCOUNT_ID = 'employee-app';
+const PLAYER_ID = 'test-player';
 
 // Create axios instance with default config
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
-    'Authorization': `Bearer ${API_KEY}`,
     'Content-Type': 'application/json',
+    'Accept': 'application/json',
+    'api-key': API_KEY,
   },
 });
 
+// GameLayer Player API response type
+interface GameLayerPlayer {
+  id: string;
+  name: string;
+  // Add other fields as needed based on actual API response
+}
+
 // User API calls
 export const gameLayerApi = {
+  // GameLayer specific player fetch
+  async getPlayer(playerId: string = PLAYER_ID): Promise<GameLayerPlayer> {
+    const response = await api.get(`/players/${playerId}`, {
+      params: {
+        account: ACCOUNT_ID
+      }
+    });
+    return response.data;
+  },
+
   // User management
   async getUser(userId: string): Promise<User> {
     const response = await api.get<ApiResponse<User>>(`/users/${userId}`);

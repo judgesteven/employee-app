@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { Container, Button } from '../styles/GlobalStyles';
 import { theme } from '../styles/theme';
 import { User, Challenge, Reward } from '../types';
+import { gameLayerApi } from '../services/gameLayerApi';
 
 const ProfileDetailsContainer = styled(Container)`
   padding-top: ${theme.spacing.lg};
@@ -467,13 +468,34 @@ export const ProfileDetails: React.FC = () => {
   ];
 
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      setUser(mockUser);
-      setCompletedMissions(mockCompletedMissions);
-      setClaimedRewards(mockClaimedRewards);
-      setLoading(false);
-    }, 1000);
+    const initializeProfileDetails = async () => {
+      try {
+        setLoading(true);
+
+        // Get player data from GameLayer API
+        const gameLayerPlayer = await gameLayerApi.getPlayer();
+        
+        // Update user data with real GameLayer name
+        const updatedUser = {
+          ...mockUser,
+          name: gameLayerPlayer.name, // Use name from GameLayer API
+        };
+
+        setUser(updatedUser);
+        setCompletedMissions(mockCompletedMissions);
+        setClaimedRewards(mockClaimedRewards);
+      } catch (err) {
+        console.error('Error loading profile details:', err);
+        // Fallback to mock data if GameLayer API fails
+        setUser(mockUser);
+        setCompletedMissions(mockCompletedMissions);
+        setClaimedRewards(mockClaimedRewards);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initializeProfileDetails();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // mockUser, mockCompletedMissions, and mockClaimedRewards are static data
 
