@@ -505,11 +505,13 @@ export const ProfileDetails: React.FC = () => {
         // Get player data from GameLayer API
         const gameLayerPlayer = await gameLayerApi.getPlayer();
         
-        // Update user data with real GameLayer name and avatar
+        // Update user data with real GameLayer name, avatar, and level
         const updatedUser = {
           ...mockUser,
           name: gameLayerPlayer.name, // Use name from GameLayer API
           avatar: gameLayerPlayer.imgUrl || mockUser.avatar, // Use avatar from GameLayer API or fallback to mock
+          level: gameLayerPlayer.level?.number || mockUser.level, // Use level number from GameLayer API
+          levelName: gameLayerPlayer.level?.name, // Use level name from GameLayer API
         };
 
         setUser(updatedUser);
@@ -648,7 +650,7 @@ export const ProfileDetails: React.FC = () => {
           
           <Avatar src={user.avatar} alt={user.name} />
           <UserName>{user.name}</UserName>
-          <UserLevel>Tier: {user.level}</UserLevel>
+          <UserLevel>{user.levelName || `Tier: ${user.level}`}</UserLevel>
           <UserTeam>{user.team}</UserTeam>
           
           <ProfileStatsContainer>

@@ -28,6 +28,10 @@ interface GameLayerPlayer {
   name: string;
   points?: number; // Points represent step count in GameLayer
   imgUrl?: string; // Player avatar image URL from GameLayer API
+  level?: {
+    name: string;
+    number: number;
+  };
   // Add other fields as needed based on actual API response
 }
 
@@ -35,11 +39,20 @@ interface GameLayerPlayer {
 export const gameLayerApi = {
   // GameLayer specific player fetch
   async getPlayer(playerId: string = PLAYER_ID): Promise<GameLayerPlayer> {
+    console.log(`=== GameLayer getPlayer API Call ===`);
+    console.log('Player ID:', playerId);
+    console.log('Account ID:', ACCOUNT_ID);
+    
     const response = await api.get(`/players/${playerId}`, {
       params: {
         account: ACCOUNT_ID
       }
     });
+    
+    console.log('=== GameLayer getPlayer API Response ===');
+    console.log('Response status:', response.status);
+    console.log('Raw player data:', JSON.stringify(response.data, null, 2));
+    
     return response.data;
   },
 

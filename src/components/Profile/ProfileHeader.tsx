@@ -163,7 +163,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, onViewMore }
             <UserDetails>
               <UserName>{user.name}</UserName>
               <UserMeta>
-                <UserLevel>Tier: {user.level}</UserLevel>
+                <UserLevel>{user.levelName || `Tier: ${user.level}`}</UserLevel>
               </UserMeta>
             </UserDetails>
           </UserInfo>

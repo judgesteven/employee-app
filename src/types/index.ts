@@ -4,6 +4,7 @@ export interface User {
   name: string;
   avatar: string;
   level: number;
+  levelName?: string;
   team: string;
   dailyStepCount: number;
   allTimeStepCount: number;

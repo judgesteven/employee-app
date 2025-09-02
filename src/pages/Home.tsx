@@ -440,11 +440,13 @@ export const Home: React.FC = () => {
         // Use API achievements if available, otherwise fall back to mock data
         const finalAchievements = apiAchievements.length > 0 ? apiAchievements : mockUser.achievements;
         
-        // Update user data with real GameLayer name, avatar, and step count
+        // Update user data with real GameLayer name, avatar, level, and step count
         const updatedUser = {
           ...mockUser,
           name: gameLayerPlayer.name, // Use name from GameLayer API
           avatar: gameLayerPlayer.imgUrl || mockUser.avatar, // Use avatar from GameLayer API or fallback to mock
+          level: gameLayerPlayer.level?.number || mockUser.level, // Use level number from GameLayer API
+          levelName: gameLayerPlayer.level?.name, // Use level name from GameLayer API
           dailyStepCount: currentSteps,
           achievements: finalAchievements,
         };
