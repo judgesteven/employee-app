@@ -128,12 +128,15 @@ export const gameLayerApi = {
       });
       
       console.log(`✅ API RESPONSE: ${response.status}`);
-      console.log(`📊 Achievements Count: ${response.data?.length || 0}`);
       console.log('📋 Raw Achievements:', response.data);
       
       // Transform GameLayer achievement data to Achievement interface
-      const achievementData = response.data;
-      console.log('📋 Raw Achievement Data Structure:', achievementData);
+      const responseData = response.data;
+      console.log('📋 Raw API Response Structure:', responseData);
+      
+      // Extract achievements from nested structure
+      const achievementData = responseData.achievements || responseData;
+      console.log('📋 Achievement Data Structure:', achievementData);
       
       let allAchievements: any[] = [];
       
