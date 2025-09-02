@@ -157,6 +157,7 @@ export const gameLayerApi = {
           // Extract target and progress from objectives.events structure
           let targetValue = 1;
           let currentProgress = 0;
+          let objectives: any[] = [];
           
           console.log('GameLayer API: Checking objectives structure...');
           console.log('GameLayer API: mission.objectives exists:', !!mission.objectives);
@@ -171,6 +172,18 @@ export const gameLayerApi = {
             console.log('GameLayer API: events length:', objective.events?.length || 0);
             
             if (objective.events && Array.isArray(objective.events) && objective.events.length > 0) {
+              // Extract all objectives for multi-objective missions
+              objectives = objective.events.map((event: any, index: number) => ({
+                id: `${mission.id}_obj_${index}`,
+                name: event.name || event.title || event.type || `Objective ${index + 1}`,
+                targetValue: event.count || 1,
+                currentProgress: event.currentCount || 0,
+                unit: event.type || 'steps'
+              }));
+              
+              console.log('GameLayer API: Extracted objectives:', objectives);
+              
+              // Use the first event for main progress (backward compatibility)
               const event = objective.events[0];
               console.log('GameLayer API: First event:', JSON.stringify(event, null, 2));
               targetValue = event.count || 1;
@@ -248,12 +261,14 @@ export const gameLayerApi = {
             type: mission.category?.toLowerCase() || 'daily',
             targetValue: targetValue,
             currentProgress: currentProgress,
+            objectives: objectives.length > 1 ? objectives : undefined, // Only include if multiple objectives
             reward: mission.reward?.credits || mission.reward || 0,
             expiresAt: calculateEndDate(mission.category, mission.active),
             completed: mission.completed || false,
             icon: mission.imgUrl || mission.image || '🎯',
             imgUrl: mission.imgUrl || mission.image || '/api/placeholder/60/60',
-            tags: mission.tags || mission.labels || []
+            tags: mission.tags || mission.labels || [],
+            priority: mission.priority || 0 // Extract priority for ordering
           };
           console.log('GameLayer API: Transformed mission:', transformed);
           return transformed;

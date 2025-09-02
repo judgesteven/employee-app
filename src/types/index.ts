@@ -22,6 +22,15 @@ export interface Achievement {
   unlockedAt?: Date;
 }
 
+// Challenge objective for missions with multiple objectives
+export interface ChallengeObjective {
+  id: string;
+  name: string;
+  targetValue: number;
+  currentProgress: number;
+  unit: string; // 'steps', 'minutes', etc.
+}
+
 // Challenge types
 export interface Challenge {
   id: string;
@@ -30,6 +39,7 @@ export interface Challenge {
   type: 'daily' | 'weekly' | 'monthly';
   targetValue: number;
   currentProgress: number;
+  objectives?: ChallengeObjective[]; // For missions with multiple objectives
   reward: number; // gems
   experience?: number; // experience points
   expiresAt: Date;
@@ -37,6 +47,7 @@ export interface Challenge {
   icon: string;
   imgUrl?: string; // Mission image URL from GameLayer API
   tags?: string[]; // Tags from GameLayer API
+  priority?: number; // Priority for ordering missions
 }
 
 // Leaderboard types

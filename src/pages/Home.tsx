@@ -348,54 +348,7 @@ export const Home: React.FC = () => {
     ],
   };
 
-  // Mock in-progress missions
-  const mockInProgressMissions: Challenge[] = [
-    {
-      id: '1',
-      title: 'Step Sprint',
-      description: 'Take 8,000 steps today',
-      type: 'daily',
-      targetValue: 8000,
-      currentProgress: 5243,
-      reward: 50,
-      experience: 100,
-      expiresAt: new Date(Date.now() + 8 * 60 * 60 * 1000),
-      completed: false,
-      icon: '🏃‍♂️',
-      imgUrl: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=200&fit=crop',
-      tags: ['steps'],
-    },
-    {
-      id: '3',
-      title: 'Weekly Warrior',
-      description: 'Accumulate 50,000 steps this week',
-      type: 'weekly',
-      targetValue: 50000,
-      currentProgress: 32450,
-      reward: 200,
-      experience: 350,
-      expiresAt: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
-      completed: false,
-      icon: '⚡',
-      imgUrl: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=200&fit=crop',
-      tags: ['steps'],
-    },
-    {
-      id: '4',
-      title: 'Consistency Champion',
-      description: 'Complete daily challenges for 7 days straight',
-      type: 'weekly',
-      targetValue: 7,
-      currentProgress: 4,
-      reward: 150,
-      experience: 250,
-      expiresAt: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
-      completed: false,
-      icon: '🏆',
-      imgUrl: 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=400&h=200&fit=crop',
-      tags: ['minutes'],
-    },
-  ];
+
 
   useEffect(() => {
     const initializeHome = async () => {
@@ -421,11 +374,10 @@ export const Home: React.FC = () => {
         console.log('Home: Fetched missions from GameLayer API:', missions);
         console.log('Home: Number of missions fetched:', missions?.length || 0);
         
-        // If no missions from API, use mock data as fallback
-        if (!missions || missions.length === 0) {
-          console.log('Home: No missions from API, using mock data');
-          missions = mockInProgressMissions;
-        }
+        // Filter incomplete missions and sort by priority (priority 1 is highest)
+        missions = missions
+          .filter(mission => !mission.completed)
+          .sort((a, b) => (a.priority || 999) - (b.priority || 999));
         
         // Log mission data (removed step override logic)
         const updatedMissions = missions.map(mission => {
@@ -458,25 +410,15 @@ export const Home: React.FC = () => {
       } catch (err) {
         console.error('Error initializing home:', err);
         setError('Failed to load data. Please try again.');
-        // Fallback to mock data if GameLayer API fails
+        // Set fallback data without missions
         const currentSteps = await healthDataService.getCurrentStepCount();
         const fallbackUser = {
           ...mockUser,
           dailyStepCount: currentSteps,
         };
         
-        // Apply same filtering to mock data
-        const filteredMockMissions = mockInProgressMissions.filter(mission => {
-          // Only remove missions that are clearly invalid or incomplete
-          if (!mission.id || !mission.title) {
-            console.log('Home: Filtering out invalid fallback mission:', mission);
-            return false;
-          }
-          return true;
-        });
-        
         setUser(fallbackUser);
-        setInProgressMissions(filteredMockMissions.slice(0, 3)); // Fallback to mock data
+        setInProgressMissions([]); // Fallback to mock data
       } finally {
         setLoading(false);
       }
@@ -645,19 +587,43 @@ export const Home: React.FC = () => {
                   </MissionHeader>
 
                   <ProgressSection>
-                    <ProgressText>
-                      <ProgressCurrent>
-                        {mission.currentProgress.toLocaleString()} / {mission.targetValue.toLocaleString()}
-                      </ProgressCurrent>
-                    </ProgressText>
-                    <ProgressBar>
-                      <ProgressFill
-                        $progress={getProgressPercentage(mission.currentProgress, mission.targetValue)}
-                      />
-                    </ProgressBar>
-                    <ProgressPercentage>
-                      {Math.round(getProgressPercentage(mission.currentProgress, mission.targetValue))}% complete
-                    </ProgressPercentage>
+                    {mission.objectives && mission.objectives.length > 1 ? (
+                      // Multiple objectives - show each one
+                      mission.objectives.map((objective, index) => (
+                        <div key={objective.id} style={{ marginBottom: index < mission.objectives!.length - 1 ? '16px' : '0' }}>
+                          <ProgressText>
+                            <ProgressCurrent>
+                              {objective.currentProgress.toLocaleString()} / {objective.targetValue.toLocaleString()}
+                            </ProgressCurrent>
+                          </ProgressText>
+                          <ProgressBar>
+                            <ProgressFill
+                              $progress={getProgressPercentage(objective.currentProgress, objective.targetValue)}
+                            />
+                          </ProgressBar>
+                          <ProgressPercentage>
+                            {Math.round(getProgressPercentage(objective.currentProgress, objective.targetValue))}% complete
+                          </ProgressPercentage>
+                        </div>
+                      ))
+                    ) : (
+                      // Single objective - show normal progress
+                      <>
+                        <ProgressText>
+                          <ProgressCurrent>
+                            {mission.currentProgress.toLocaleString()} / {mission.targetValue.toLocaleString()}
+                          </ProgressCurrent>
+                        </ProgressText>
+                        <ProgressBar>
+                          <ProgressFill
+                            $progress={getProgressPercentage(mission.currentProgress, mission.targetValue)}
+                          />
+                        </ProgressBar>
+                        <ProgressPercentage>
+                          {Math.round(getProgressPercentage(mission.currentProgress, mission.targetValue))}% complete
+                        </ProgressPercentage>
+                      </>
+                    )}
                   </ProgressSection>
 
 

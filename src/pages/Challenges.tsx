@@ -274,100 +274,7 @@ const TagBadge = styled.div<{ $tag: string }>`
 
 type FilterType = 'all' | 'daily' | 'weekly' | 'monthly';
 
-// Mock challenges data - in production this would come from GameLayer API
-// Only showing incomplete/available challenges here
-const mockChallenges: Challenge[] = [
-    {
-      id: '1',
-      title: 'Step Sprint',
-      description: 'Take 8,000 steps today',
-      type: 'daily',
-      targetValue: 8000,
-      currentProgress: 5243,
-      reward: 50,
-      experience: 100,
-      expiresAt: new Date(Date.now() + 8 * 60 * 60 * 1000), // 8 hours from now
-      completed: false,
-      icon: '🏃‍♂️',
-      imgUrl: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=200&fit=crop',
-      tags: ['steps'],
-    },
-    {
-      id: '3',
-      title: 'Weekly Warrior',
-      description: 'Accumulate 50,000 steps this week',
-      type: 'weekly',
-      targetValue: 50000,
-      currentProgress: 32450,
-      reward: 200,
-      experience: 350,
-      expiresAt: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3 days from now
-      completed: false,
-      icon: '⚡',
-      imgUrl: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=200&fit=crop',
-      tags: ['steps'],
-    },
-    {
-      id: '4',
-      title: 'Consistency Champion',
-      description: 'Complete daily challenges for 7 days straight',
-      type: 'weekly',
-      targetValue: 7,
-      currentProgress: 4,
-      reward: 150,
-      experience: 250,
-      expiresAt: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 days from now
-      completed: false,
-      icon: '🏆',
-      imgUrl: 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=400&h=200&fit=crop',
-      tags: ['minutes'],
-    },
-    {
-      id: '5',
-      title: 'Monthly Marathon',
-      description: 'Walk 200,000 steps this month',
-      type: 'monthly',
-      targetValue: 200000,
-      currentProgress: 87650,
-      reward: 500,
-      experience: 750,
-      expiresAt: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000), // 15 days from now
-      completed: false,
-      icon: '🎯',
-      imgUrl: 'https://images.unsplash.com/photo-1464822759844-d150ad6d1dff?w=400&h=200&fit=crop',
-      tags: ['steps'],
-    },
-    {
-      id: '6',
-      title: 'Evening Stroll',
-      description: 'Take 3,000 steps after 6 PM',
-      type: 'daily',
-      targetValue: 3000,
-      currentProgress: 850,
-      reward: 35,
-      experience: 75,
-      expiresAt: new Date(Date.now() + 5 * 60 * 60 * 1000), // 5 hours from now
-      completed: false,
-      icon: '🌙',
-      imgUrl: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=200&fit=crop',
-      tags: ['steps'],
-    },
-    {
-      id: '7',
-      title: 'Weekend Warrior',
-      description: 'Complete 15,000 steps on weekend days',
-      type: 'daily',
-      targetValue: 15000,
-      currentProgress: 2340,
-      reward: 75,
-      experience: 125,
-      expiresAt: new Date(Date.now() + 12 * 60 * 60 * 1000), // 12 hours from now
-      completed: false,
-      icon: '🎉',
-      imgUrl: 'https://images.unsplash.com/photo-1551632436-cbf8dd35adfa?w=400&h=200&fit=crop',
-      tags: ['steps'],
-    },
-  ];
+
 
 export const Challenges: React.FC = () => {
   const [challenges, setChallenges] = useState<Challenge[]>([]);
@@ -380,11 +287,16 @@ export const Challenges: React.FC = () => {
         setLoading(true);
         const missions = await gameLayerApi.getMissions();
         console.log('Fetched missions from GameLayer API:', missions);
-        setChallenges(missions);
+        
+        // Filter incomplete missions and sort by priority (priority 1 is highest)
+        const sortedMissions = missions
+          .filter(mission => !mission.completed)
+          .sort((a, b) => (a.priority || 999) - (b.priority || 999));
+        
+        setChallenges(sortedMissions);
       } catch (error) {
         console.error('Error fetching missions:', error);
-        // Fallback to mock data on error
-        setChallenges(mockChallenges);
+        setChallenges([]);
       } finally {
         setLoading(false);
       }
@@ -541,19 +453,43 @@ export const Challenges: React.FC = () => {
               </ChallengeHeader>
 
               <ProgressSection>
-                <ProgressText>
-                  <ProgressCurrent>
-                    {challenge.currentProgress.toLocaleString()} / {challenge.targetValue.toLocaleString()}
-                  </ProgressCurrent>
-                </ProgressText>
-                <ProgressBar>
-                  <ProgressFill
-                    $progress={getProgressPercentage(challenge.currentProgress, challenge.targetValue)}
-                  />
-                </ProgressBar>
-                <ProgressPercentage>
-                  {Math.round(getProgressPercentage(challenge.currentProgress, challenge.targetValue))}% complete
-                </ProgressPercentage>
+                {challenge.objectives && challenge.objectives.length > 1 ? (
+                  // Multiple objectives - show each one
+                  challenge.objectives.map((objective, index) => (
+                                            <div key={objective.id} style={{ marginBottom: index < challenge.objectives!.length - 1 ? '16px' : '0' }}>
+                          <ProgressText>
+                            <ProgressCurrent>
+                              {objective.currentProgress.toLocaleString()} / {objective.targetValue.toLocaleString()}
+                            </ProgressCurrent>
+                          </ProgressText>
+                      <ProgressBar>
+                        <ProgressFill
+                          $progress={getProgressPercentage(objective.currentProgress, objective.targetValue)}
+                        />
+                      </ProgressBar>
+                      <ProgressPercentage>
+                        {Math.round(getProgressPercentage(objective.currentProgress, objective.targetValue))}% complete
+                      </ProgressPercentage>
+                    </div>
+                  ))
+                ) : (
+                  // Single objective - show normal progress
+                  <>
+                    <ProgressText>
+                      <ProgressCurrent>
+                        {challenge.currentProgress.toLocaleString()} / {challenge.targetValue.toLocaleString()}
+                      </ProgressCurrent>
+                    </ProgressText>
+                    <ProgressBar>
+                      <ProgressFill
+                        $progress={getProgressPercentage(challenge.currentProgress, challenge.targetValue)}
+                      />
+                    </ProgressBar>
+                    <ProgressPercentage>
+                      {Math.round(getProgressPercentage(challenge.currentProgress, challenge.targetValue))}% complete
+                    </ProgressPercentage>
+                  </>
+                )}
               </ProgressSection>
 
 
