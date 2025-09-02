@@ -100,9 +100,8 @@ const AchievementsList = styled.div`
 `;
 
 const AchievementCard = styled(motion.div)<{ $bgColor?: string }>`
-  background: ${props => props.$bgColor || 'linear-gradient(135deg, #FFE4E1, #FFF0F5)'};
-  border-radius: ${theme.borderRadius.lg};
-  padding: ${theme.spacing.md};
+  background: ${props => props.$bgColor || theme.colors.background};
+  border-radius: ${theme.borderRadius.xl};
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -112,23 +111,25 @@ const AchievementCard = styled(motion.div)<{ $bgColor?: string }>`
   flex-shrink: 0;
   position: relative;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   
   &:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
     transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
   }
+  
+  transition: all 0.3s ease;
 `;
 
 const AchievementStatusBadge = styled.div<{ $status: 'completed' | 'started' | 'locked' }>`
   position: absolute;
   top: ${theme.spacing.sm};
   right: ${theme.spacing.sm};
-  padding: 2px ${theme.spacing.xs};
+  padding: ${theme.spacing.xs} ${theme.spacing.sm};
   border-radius: ${theme.borderRadius.full};
   font-size: ${theme.typography.fontSize.xs};
   font-weight: ${theme.typography.fontWeight.semibold};
-  text-transform: capitalize;
+  text-transform: lowercase;
   
   ${props => {
     switch (props.$status) {
@@ -151,42 +152,57 @@ const AchievementStatusBadge = styled.div<{ $status: 'completed' | 'started' | '
   }}
 `;
 
-const AchievementBadgeContainer = styled.div`
-  margin: ${theme.spacing.sm} 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: 1;
+const AchievementImageSection = styled.div<{ $bgImage?: string; $status: 'completed' | 'started' | 'locked' }>`
   position: relative;
-`;
-
-const AchievementBadgeImage = styled.img`
+  height: 120px;
   width: 100%;
-  height: 140px;
-  object-fit: contain;
+  background: ${props => props.$bgImage ? `url("${props.$bgImage}")` : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'};
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+  opacity: ${props => {
+    switch (props.$status) {
+      case 'completed':
+        return '1';
+      case 'started':
+        return '0.5';
+      case 'locked':
+        return '0.3';
+      default:
+        return '1';
+    }
+  }};
 `;
 
 const AchievementIcon = styled.div`
-  font-size: 100px;
+  font-size: 80px;
   line-height: 1;
   width: 100%;
-  height: 140px;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+`;
+
+const AchievementContent = styled.div`
+  padding: ${theme.spacing.md};
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
 `;
 
 const AchievementCategoryTag = styled.div`
   position: absolute;
-  top: ${theme.spacing.xs};
-  left: ${theme.spacing.xs};
+  top: calc(120px - ${theme.spacing.md} - 20px); /* Position slightly higher in image section */
+  left: ${theme.spacing.sm};
   background: rgba(0, 0, 0, 0.8);
   color: white;
-  padding: 2px ${theme.spacing.xs};
+  padding: ${theme.spacing.xs} ${theme.spacing.sm};
   border-radius: ${theme.borderRadius.full};
   font-size: ${theme.typography.fontSize.xs};
   font-weight: ${theme.typography.fontWeight.semibold};
-  text-transform: uppercase;
+  text-transform: lowercase;
   letter-spacing: 0.3px;
   backdrop-filter: blur(4px);
   z-index: 2;
@@ -221,8 +237,8 @@ const AchievementProgress = styled.div`
 
 const ProgressBar = styled.div`
   width: 100%;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.3);
+  height: 8px;
+  background: ${theme.colors.surfaceHover};
   border-radius: ${theme.borderRadius.full};
   overflow: hidden;
   margin-bottom: 4px;
@@ -230,20 +246,10 @@ const ProgressBar = styled.div`
 
 const ProgressFill = styled.div<{ $progress: number; $status: 'completed' | 'started' | 'locked' }>`
   height: 100%;
+  background: ${theme.colors.gradients.success};
   border-radius: ${theme.borderRadius.full};
-  transition: width 0.3s ease;
+  transition: width 0.3s ease-in-out;
   width: ${props => props.$progress}%;
-  
-  ${props => {
-    switch (props.$status) {
-      case 'completed':
-        return `background: ${theme.colors.success};`;
-      case 'started':
-        return `background: ${theme.colors.primary};`;
-      case 'locked':
-        return `background: ${theme.colors.text.tertiary};`;
-    }
-  }}
 `;
 
 const ProgressText = styled.div`
@@ -359,35 +365,26 @@ export const QuickStats: React.FC<QuickStatsProps> = ({
                   whileHover={{ scale: 1.02 }}
                   $bgColor={achievement.backgroundColor}
                 >
+                  <AchievementImageSection $bgImage={achievement.badgeImage} $status={achievement.status}>
+                    {!achievement.badgeImage && (
+                      <AchievementIcon>
+                        {achievement.icon}
+                      </AchievementIcon>
+                    )}
+                  </AchievementImageSection>
+
                   <AchievementStatusBadge $status={achievement.status}>
                     {achievement.status}
                   </AchievementStatusBadge>
 
-                  <AchievementBadgeContainer>
-                    {achievement.badgeImage ? (
-                      <AchievementBadgeImage 
-                        src={achievement.badgeImage} 
-                        alt={achievement.title}
-                        onError={(e) => {
-                          // Fallback to icon if image fails to load
-                          e.currentTarget.style.display = 'none';
-                          const iconElement = e.currentTarget.nextElementSibling as HTMLElement;
-                          if (iconElement) iconElement.style.display = 'block';
-                        }}
-                      />
-                    ) : null}
-                    <AchievementIcon style={{ display: achievement.badgeImage ? 'none' : 'block' }}>
-                      {achievement.icon}
-                    </AchievementIcon>
-                    
-                    {achievement.category && (
-                      <AchievementCategoryTag>
-                        {achievement.category}
-                      </AchievementCategoryTag>
-                    )}
-                  </AchievementBadgeContainer>
+                  {achievement.category && (
+                    <AchievementCategoryTag>
+                      {achievement.category}
+                    </AchievementCategoryTag>
+                  )}
 
-                  <AchievementInfo>
+                  <AchievementContent>
+                    <AchievementInfo>
                     <AchievementName>{achievement.title}</AchievementName>
                     <AchievementDescription>{achievement.description}</AchievementDescription>
                     
@@ -408,6 +405,7 @@ export const QuickStats: React.FC<QuickStatsProps> = ({
                       </ProgressText>
                     </AchievementProgress>
                   </AchievementInfo>
+                  </AchievementContent>
                 </AchievementCard>
               );
             })}

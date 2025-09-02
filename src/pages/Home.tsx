@@ -373,25 +373,19 @@ export const Home: React.FC = () => {
         };
         
         setAchievements(finalAchievements);
-        console.log('🏠 Home: Setting achievements state:', finalAchievements);
-        console.log('🏠 Home: Achievement count:', finalAchievements.length);
 
-        // Get missions from GameLayer API
-        let missions = await gameLayerApi.getMissions();
-        console.log(`🎯 Home: Fetched ${missions?.length || 0} missions from API`);
+        // Get player missions with progress data from single endpoint
+        const playerMissionsResponse = await gameLayerApi.getPlayerMissionProgress();
+        const missions = await gameLayerApi.getMissions();
         
-        // Filter for Priority 1 missions only (featured missions)
-        missions = missions
+        // Filter for Priority 1 missions and merge with progress
+        const updatedMissions = missions
           .filter(mission => !mission.completed && mission.priority === 1)
+          .map(mission => {
+            const progress = playerMissionsResponse[mission.id];
+            return progress ? { ...mission, ...progress } : mission;
+          })
           .sort((a, b) => (a.priority || 999) - (b.priority || 999));
-        
-        // Log mission data (removed step override logic)
-        const updatedMissions = missions.map(mission => {
-
-          
-          // Use the progress data directly from GameLayer API
-          return mission;
-        });
 
 
 
@@ -406,7 +400,7 @@ export const Home: React.FC = () => {
           return true;
         });
 
-        console.log(`🎯 Home: Displaying ${Math.min(filteredMissions.length, 3)} featured missions`);
+
 
         setUser(updatedUser);
         setFeaturedMissions(filteredMissions.slice(0, 3)); // Show only first 3 featured missions on home

@@ -110,6 +110,8 @@ const LevelBadge = styled.span<{ levelName: string }>`
   font-weight: ${theme.typography.fontWeight.semibold};
   color: white;
   background: ${({ levelName }) => getLevelBadgeColor(levelName)};
+  width: fit-content;
+  white-space: nowrap;
 `;
 
 

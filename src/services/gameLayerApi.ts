@@ -239,7 +239,7 @@ export const gameLayerApi = {
     return this.trackSteps(playerId, 1);
   },
 
-  // Missions - GET with player ID as query parameter
+  // Missions - GET /missions with player ID as query parameter (includes progress data)
   async getMissions(playerId: string = PLAYER_ID): Promise<Challenge[]> {
     if (!ENABLE_API_CALLS) {
       console.log(`[MOCK] GameLayer getMissions for player: ${playerId}`);
@@ -248,7 +248,6 @@ export const gameLayerApi = {
     }
 
     try {
-      console.log(`[API] GameLayer getMissions for player: ${playerId}`);
       const response = await api.get('/missions', {
         params: {
           player: playerId,
@@ -256,31 +255,18 @@ export const gameLayerApi = {
         }
       });
       
-      console.log('GameLayer getMissions API response:', response.data);
-      
       // Transform GameLayer mission data to Challenge interface
       const missions = response.data;
       if (Array.isArray(missions)) {
         const transformedMissions = missions.map((mission: any) => {
-          console.log('=== GameLayer API: Processing Mission ===');
-          console.log('GameLayer API: Full raw mission data:', JSON.stringify(mission, null, 2));
-          
-          // Extract target and progress from objectives.events structure
+          // Extract target and progress from mission data
           let targetValue = 1;
           let currentProgress = 0;
           let objectives: any[] = [];
           
-          console.log('GameLayer API: Checking objectives structure...');
-          console.log('GameLayer API: mission.objectives exists:', !!mission.objectives);
-          console.log('GameLayer API: objectives is object:', typeof mission.objectives === 'object');
-          
-          // objectives is an object, not an array
+          // Extract from objectives structure if available
           if (mission.objectives && typeof mission.objectives === 'object') {
             const objective = mission.objectives;
-            console.log('GameLayer API: Objective:', JSON.stringify(objective, null, 2));
-            console.log('GameLayer API: objective.events exists:', !!objective.events);
-            console.log('GameLayer API: events is array:', Array.isArray(objective.events));
-            console.log('GameLayer API: events length:', objective.events?.length || 0);
             
             if (objective.events && Array.isArray(objective.events) && objective.events.length > 0) {
               // Extract all objectives for multi-objective missions
@@ -292,31 +278,22 @@ export const gameLayerApi = {
                 unit: event.type || 'steps'
               }));
               
-              console.log('GameLayer API: Extracted objectives:', objectives);
-              
-              // Use the first event for main progress (backward compatibility)
+              // Use the first event for main progress
               const event = objective.events[0];
-              console.log('GameLayer API: First event:', JSON.stringify(event, null, 2));
               targetValue = event.count || 1;
               currentProgress = event.currentCount || 0;
-              console.log('GameLayer API: SUCCESS! Extracted from objectives.events - target:', targetValue, 'progress:', currentProgress);
-            } else {
-              console.log('GameLayer API: No events found in objective');
             }
-          } else {
-            console.log('GameLayer API: No objectives found, checking fallback structures...');
           }
           
-          // Fallback to old structure if objectives structure not found
+          // Fallback extraction
           if (targetValue === 1 && currentProgress === 0) {
-            console.log('GameLayer API: Trying fallback extraction...');
-            console.log('GameLayer API: mission.events:', mission.events);
-            console.log('GameLayer API: mission.goal:', mission.goal);
-            console.log('GameLayer API: mission.progress:', mission.progress);
+            currentProgress = mission.currentProgress || mission.progress || 0;
+            targetValue = mission.target || mission.targetValue || mission.goal || 1;
             
-            targetValue = mission.events?.[0]?.count || mission.goal || 1;
-            currentProgress = mission.events?.[0]?.currentCount || mission.progress || 0;
-            console.log('GameLayer API: Using fallback values - target:', targetValue, 'progress:', currentProgress);
+            if (targetValue === 1 && currentProgress === 0) {
+              targetValue = mission.events?.[0]?.count || mission.goal || 1;
+              currentProgress = mission.events?.[0]?.currentCount || mission.progress || 0;
+            }
           }
           
           // Calculate end date based on category rules
@@ -324,44 +301,29 @@ export const gameLayerApi = {
             const categoryLower = category?.toLowerCase() || 'daily';
             const now = new Date();
             
-            console.log('GameLayer API: Calculating end date for category:', categoryLower);
-            console.log('GameLayer API: Active section:', activeSection);
-            
             switch (categoryLower) {
               case 'daily':
-                // 00:00 same day (end of current day)
                 const endOfDay = new Date(now);
-                endOfDay.setHours(23, 59, 59, 999); // End of current day
-                console.log('GameLayer API: Daily end date:', endOfDay);
+                endOfDay.setHours(23, 59, 59, 999);
                 return endOfDay;
                 
               case 'weekly':
-                // 00:00 on Sunday of same week
-                const daysUntilSunday = (7 - now.getDay()) % 7; // 0 = Sunday, so this gets days until next Sunday
+                const daysUntilSunday = (7 - now.getDay()) % 7;
                 const endOfWeek = new Date(now);
                 endOfWeek.setDate(now.getDate() + daysUntilSunday);
-                endOfWeek.setHours(0, 0, 0, 0); // 00:00 on Sunday
-                console.log('GameLayer API: Weekly end date (Sunday 00:00):', endOfWeek);
+                endOfWeek.setHours(0, 0, 0, 0);
                 return endOfWeek;
                 
               case 'monthly':
-                // 00:00 on last day of current month
-                const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0); // Last day of current month
-                endOfMonth.setHours(0, 0, 0, 0); // 00:00 on last day
-                console.log('GameLayer API: Monthly end date (last day 00:00):', endOfMonth);
+                const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+                endOfMonth.setHours(0, 0, 0, 0);
                 return endOfMonth;
                 
               case 'special':
-                // Use date provided by API 'to' field in 'active' section
-                const specialDate = activeSection?.to ? new Date(activeSection.to) : new Date(Date.now() + 24 * 60 * 60 * 1000);
-                console.log('GameLayer API: Special end date from API:', specialDate);
-                return specialDate;
+                return activeSection?.to ? new Date(activeSection.to) : new Date(Date.now() + 24 * 60 * 60 * 1000);
                 
               default:
-                // Fallback to API date or 24 hours from now
-                const fallbackDate = activeSection?.to ? new Date(activeSection.to) : new Date(Date.now() + 24 * 60 * 60 * 1000);
-                console.log('GameLayer API: Fallback end date:', fallbackDate);
-                return fallbackDate;
+                return activeSection?.to ? new Date(activeSection.to) : new Date(Date.now() + 24 * 60 * 60 * 1000);
             }
           };
 
@@ -381,10 +343,9 @@ export const gameLayerApi = {
             tags: mission.tags || mission.labels || [],
             priority: mission.priority || 0 // Extract priority for ordering
           };
-          console.log('GameLayer API: Transformed mission:', transformed);
           return transformed;
         });
-        console.log('GameLayer API: All transformed missions:', transformedMissions);
+        
         return transformedMissions;
       }
       
@@ -392,6 +353,38 @@ export const gameLayerApi = {
     } catch (error) {
       console.error('GameLayer getMissions API error:', error);
       return [];
+    }
+  },
+
+  // Get player mission progress - GET /players/{player}/missions
+  async getPlayerMissionProgress(playerId: string = PLAYER_ID): Promise<Record<string, { currentProgress: number; targetValue: number }>> {
+    if (!ENABLE_API_CALLS) {
+      return {};
+    }
+
+    try {
+      const response = await api.get(`/players/${playerId}/missions`, {
+        params: { account: ACCOUNT_ID }
+      });
+      
+      const progressMap: Record<string, { currentProgress: number; targetValue: number }> = {};
+      
+      if (Array.isArray(response.data?.missions?.started)) {
+        response.data.missions.started.forEach((mission: any) => {
+          if (mission.id && mission.objectives?.events?.[0]) {
+            const event = mission.objectives.events[0];
+            progressMap[mission.id] = {
+              currentProgress: event.currentCount || 0,
+              targetValue: event.count || 1
+            };
+          }
+        });
+      }
+      
+      return progressMap;
+    } catch (error) {
+      console.error('Error fetching player mission progress:', error);
+      return {};
     }
   },
 
