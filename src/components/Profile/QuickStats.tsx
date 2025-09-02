@@ -333,10 +333,18 @@ export const QuickStats: React.FC<QuickStatsProps> = ({
           </AchievementsHeader>
           
           <AchievementsList>
-            {recentAchievements
-              .filter(achievement => achievement.status === 'started' || achievement.status === 'completed')
-              .slice(0, 6)
-              .map((achievement) => {
+            {(() => {
+              const filteredAchievements = recentAchievements
+                .filter(achievement => achievement.status === 'started' || achievement.status === 'completed');
+              
+              console.log('=== QuickStats Achievement Filtering ===');
+              console.log('Total achievements received:', recentAchievements.length);
+              console.log('Filtered achievements (started/completed):', filteredAchievements.length);
+              console.log('Filtered achievements data:', filteredAchievements);
+              console.log('Displaying first 6 achievements');
+              
+              return filteredAchievements.slice(0, 6);
+            })().map((achievement) => {
               const progressPercentage = achievement.totalSteps 
                 ? (achievement.currentProgress || 0) / achievement.totalSteps * 100 
                 : achievement.status === 'completed' ? 100 : 0;

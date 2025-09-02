@@ -115,7 +115,11 @@ export const gameLayerApi = {
         }
       });
       
-      console.log('GameLayer getAchievements API response:', response.data);
+      console.log('=== GameLayer getAchievements API Response ===');
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
+      console.log('Raw response data:', JSON.stringify(response.data, null, 2));
+      console.log('Number of achievements received:', response.data?.length || 0);
       
       // Transform GameLayer achievement data to Achievement interface
       const achievements = response.data;
@@ -150,7 +154,19 @@ export const gameLayerApi = {
           return transformed;
         });
         
-        console.log('GameLayer API: All transformed achievements:', transformedAchievements);
+        console.log('=== GameLayer API: Final Results ===');
+        console.log('All transformed achievements:', transformedAchievements);
+        
+        const completedCount = transformedAchievements.filter(a => a.status === 'completed').length;
+        const startedCount = transformedAchievements.filter(a => a.status === 'started').length;
+        const lockedCount = transformedAchievements.filter(a => a.status === 'locked').length;
+        
+        console.log(`Achievement status summary:`);
+        console.log(`- Completed: ${completedCount}`);
+        console.log(`- Started: ${startedCount}`);
+        console.log(`- Locked: ${lockedCount}`);
+        console.log(`- Total: ${transformedAchievements.length}`);
+        
         return transformedAchievements;
       }
       
