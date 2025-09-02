@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { Gem, Clock, Zap } from 'lucide-react';
+import { Gem, Clock } from 'lucide-react';
 import { theme } from '../../styles/theme';
 import { User } from '../../types';
 
@@ -150,7 +150,7 @@ const StatIcon = styled.div`
 const StatInfo = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 2px;
   min-width: 0; /* Allow shrinking */
 `;
 
@@ -161,6 +161,13 @@ const StatCount = styled.div`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+`;
+
+const StatLabel = styled.div`
+  font-size: ${theme.typography.fontSize.xs};
+  opacity: 0.8;
+  font-weight: ${theme.typography.fontWeight.medium};
+  line-height: 1;
 `;
 
 
@@ -210,6 +217,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, onViewMore }
               </StatIcon>
               <StatInfo>
                 <StatCount>{formatStepCount(user.dailyStepCount)}</StatCount>
+                <StatLabel>Steps</StatLabel>
               </StatInfo>
             </StatItem>
             
@@ -219,6 +227,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, onViewMore }
               </StatIcon>
               <StatInfo>
                 <StatCount>{user.dailyActiveMinutes}</StatCount>
+                <StatLabel>Minutes</StatLabel>
               </StatInfo>
             </StatItem>
             
@@ -228,15 +237,17 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, onViewMore }
               </StatIcon>
               <StatInfo>
                 <StatCount>{user.gems.toLocaleString()}</StatCount>
+                <StatLabel>Gems</StatLabel>
               </StatInfo>
             </StatItem>
             
             <StatItem>
               <StatIcon>
-                <Zap size={16} />
+                ⚡
               </StatIcon>
               <StatInfo>
                 <StatCount>{user.xp.toLocaleString()}</StatCount>
+                <StatLabel>XP</StatLabel>
               </StatInfo>
             </StatItem>
           </StatsGrid>

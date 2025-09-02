@@ -371,12 +371,29 @@ export const gameLayerApi = {
       
       if (Array.isArray(response.data?.missions?.started)) {
         response.data.missions.started.forEach((mission: any) => {
-          if (mission.id && mission.objectives?.events?.[0]) {
-            const event = mission.objectives.events[0];
-            progressMap[mission.id] = {
-              currentProgress: event.currentCount || 0,
-              targetValue: event.count || 1
-            };
+          if (mission.id && mission.objectives?.events) {
+            const events = mission.objectives.events;
+            
+            // For missions with multiple objectives, use the first event for main progress
+            // but also store individual objective progress
+            if (events.length > 0) {
+              const firstEvent = events[0];
+              progressMap[mission.id] = {
+                currentProgress: firstEvent.currentCount || 0,
+                targetValue: firstEvent.count || 1
+              };
+              
+              // If there are multiple events, also create entries for individual objectives
+              if (events.length > 1) {
+                events.forEach((event: any, index: number) => {
+                  const objectiveId = `${mission.id}_obj_${index}`;
+                  progressMap[objectiveId] = {
+                    currentProgress: event.currentCount || 0,
+                    targetValue: event.count || 1
+                  };
+                });
+              }
+            }
           }
         });
       }

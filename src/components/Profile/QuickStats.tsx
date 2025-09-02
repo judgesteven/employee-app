@@ -271,51 +271,35 @@ export const QuickStats: React.FC<QuickStatsProps> = ({
   monthlySteps,
   recentAchievements,
 }) => {
-  console.log('🏠 QuickStats: Received achievements:', recentAchievements);
-  console.log('🏠 QuickStats: Total achievements count:', recentAchievements.length);
-  const formatNumber = (num: number): string => {
-    if (num >= 1000000) {
-      return `${(num / 1000000).toFixed(1)}M`;
-    }
-    if (num >= 1000) {
-      return `${(num / 1000).toFixed(1)}k`;
-    }
-    return num.toLocaleString();
-  };
+
+  const formatNumber = (num: number): string => 
+    num >= 1000000 ? `${(num / 1000000).toFixed(1)}M` :
+    num >= 1000 ? `${(num / 1000).toFixed(1)}k` : 
+    num.toLocaleString();
 
 
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
+  const variants = {
+    container: {
+      hidden: { opacity: 0 },
+      visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
     },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.3,
-      },
-    },
+    item: {
+      hidden: { opacity: 0, y: 20 },
+      visible: { opacity: 1, y: 0, transition: { duration: 0.3 } }
+    }
   };
 
   return (
     <motion.div
-      variants={containerVariants}
+      variants={variants.container}
       initial="hidden"
       animate="visible"
     >
       {(weeklySteps > 0 || monthlySteps > 0) && (
         <StatsGrid>
           {weeklySteps > 0 && (
-            <StatCard variants={itemVariants} whileHover={{ scale: 1.02 }}>
+            <StatCard variants={variants.item} whileHover={{ scale: 1.02 }}>
               <StatIcon color={theme.colors.primary}>
                 <TrendingUp size={24} />
               </StatIcon>
@@ -326,7 +310,7 @@ export const QuickStats: React.FC<QuickStatsProps> = ({
           )}
 
           {monthlySteps > 0 && (
-            <StatCard variants={itemVariants} whileHover={{ scale: 1.02 }}>
+            <StatCard variants={variants.item} whileHover={{ scale: 1.02 }}>
               <StatIcon color={theme.colors.secondary}>
                 <Calendar size={24} />
               </StatIcon>
@@ -346,14 +330,10 @@ export const QuickStats: React.FC<QuickStatsProps> = ({
           </AchievementsHeader>
           
           <AchievementsList>
-            {(() => {
-              const filteredAchievements = recentAchievements
-                .filter(achievement => achievement.status === 'started' || achievement.status === 'completed');
-              
-              console.log(`🎯 QuickStats: Showing ${Math.min(filteredAchievements.length, 6)} of ${filteredAchievements.length} active achievements`);
-              
-              return filteredAchievements.slice(0, 6);
-            })().map((achievement) => {
+            {recentAchievements
+              .filter(achievement => achievement.status !== 'locked')
+              .slice(0, 6)
+              .map((achievement) => {
               const progressPercentage = achievement.totalSteps 
                 ? (achievement.currentProgress || 0) / achievement.totalSteps * 100 
                 : achievement.status === 'completed' ? 100 : 0;
@@ -361,7 +341,7 @@ export const QuickStats: React.FC<QuickStatsProps> = ({
               return (
                 <AchievementCard
                   key={achievement.id}
-                  variants={itemVariants}
+                  variants={variants.item}
                   whileHover={{ scale: 1.02 }}
                   $bgColor={achievement.backgroundColor}
                 >

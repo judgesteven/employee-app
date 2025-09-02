@@ -40,21 +40,14 @@ class UnifiedHealthService {
     this.setupEventListeners();
   }
 
-  // Load provider preference from localStorage or auto-detect
+  // Load provider preference from localStorage or default to Google Fit
   private loadProviderPreference(): HealthProvider {
     const saved = localStorage.getItem('healthProvider') as HealthProvider;
-    if (saved && (saved === 'apple_health' || saved === 'google_fit')) {
+    if (saved && saved === 'google_fit') {
       return saved;
     }
 
-    // Auto-detect based on platform
-    if (appleHealthIntegration.isAppleHealthAvailable()) {
-      return 'apple_health';
-    } else if (googleFitIntegration.isAvailable()) {
-      return 'google_fit';
-    }
-
-    // Default to Google Fit for web
+    // Always default to Google Fit (Apple Health disabled)
     return 'google_fit';
   }
 
@@ -113,14 +106,9 @@ class UnifiedHealthService {
     }
   }
 
-  // Get available providers
+  // Get available providers (Google Fit only)
   getAvailableProviders(): { provider: HealthProvider; available: boolean; name: string }[] {
     return [
-      {
-        provider: 'apple_health',
-        available: appleHealthIntegration.isAppleHealthAvailable(),
-        name: 'Apple Health'
-      },
       {
         provider: 'google_fit',
         available: googleFitIntegration.isAvailable(),

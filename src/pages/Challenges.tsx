@@ -285,11 +285,47 @@ export const Challenges: React.FC = () => {
     const fetchMissions = async () => {
       try {
         setLoading(true);
+        
+        // Get missions from GameLayer API
         const missions = await gameLayerApi.getMissions();
-        console.log('Fetched missions from GameLayer API:', missions);
+        
+        // Get player progress data from separate endpoint
+        const playerProgress = await gameLayerApi.getPlayerMissionProgress();
+        
+        // Update missions with player progress data
+        const updatedMissions = missions.map(mission => {
+          const progress = playerProgress[mission.id];
+          let updatedMission = { ...mission };
+          
+          if (progress) {
+            updatedMission.currentProgress = progress.currentProgress;
+            updatedMission.targetValue = progress.targetValue;
+          }
+          
+          // Also update individual objectives if they exist
+          if (mission.objectives && Array.isArray(mission.objectives)) {
+            updatedMission.objectives = mission.objectives.map((objective: any, index: number) => {
+              const objectiveId = `${mission.id}_obj_${index}`;
+              const objectiveProgress = playerProgress[objectiveId];
+              
+              if (objectiveProgress) {
+                return {
+                  ...objective,
+                  currentProgress: objectiveProgress.currentProgress,
+                  targetValue: objectiveProgress.targetValue
+                };
+              }
+              return objective;
+            });
+          }
+          
+          return updatedMission;
+        });
+        
+        console.log('Fetched missions with progress from GameLayer API:', updatedMissions);
         
         // Filter incomplete missions and sort by priority (priority 1 is highest)
-        const sortedMissions = missions
+        const sortedMissions = updatedMissions
           .filter(mission => !mission.completed)
           .sort((a, b) => (a.priority || 999) - (b.priority || 999));
         

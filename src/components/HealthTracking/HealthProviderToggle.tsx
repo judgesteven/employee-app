@@ -114,7 +114,7 @@ interface HealthProviderToggleProps {
 }
 
 export const HealthProviderToggle: React.FC<HealthProviderToggleProps> = ({ onProviderChange }) => {
-  const [currentProvider, setCurrentProvider] = useState<HealthProvider>('apple_health');
+  const [currentProvider, setCurrentProvider] = useState<HealthProvider>('google_fit');
   const [availableProviders, setAvailableProviders] = useState<{ provider: HealthProvider; available: boolean; name: string }[]>([]);
   const [isChanging, setIsChanging] = useState(false);
 
@@ -190,7 +190,7 @@ export const HealthProviderToggle: React.FC<HealthProviderToggleProps> = ({ onPr
       </ToggleHeader>
 
       <ToggleDescription>
-        Choose your preferred health data source for step tracking. You can switch between available providers at any time.
+        Connect with Google Fit to automatically track your steps and sync with your fitness data.
       </ToggleDescription>
 
       <ProviderOptions>
