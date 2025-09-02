@@ -265,15 +265,7 @@ export const QuickStats: React.FC<QuickStatsProps> = ({
     return num.toLocaleString();
   };
 
-  const formatDate = (date: Date): string => {
-    const now = new Date();
-    const diffTime = Math.abs(now.getTime() - date.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    if (diffDays === 1) return 'Yesterday';
-    if (diffDays < 7) return `${diffDays} days ago`;
-    return date.toLocaleDateString();
-  };
+
 
   const containerVariants = {
     hidden: { opacity: 0 },

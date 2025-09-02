@@ -381,15 +381,7 @@ export const Rewards: React.FC = () => {
     }
   };
 
-  const getRewardBackgroundColor = (category: string): string => {
-    switch (category) {
-      case 'entertainment': return theme.colors.primary + '20';
-      case 'fitness': return theme.colors.success + '20';
-      case 'food': return theme.colors.accent + '20';
-      case 'shopping': return theme.colors.secondary + '20';
-      default: return theme.colors.surface;
-    }
-  };
+
 
   const containerVariants = {
     hidden: { opacity: 0 },

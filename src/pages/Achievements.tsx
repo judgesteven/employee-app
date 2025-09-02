@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Award, Filter, Search } from 'lucide-react';
+import { ArrowLeft, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Button } from '../styles/GlobalStyles';
 import { theme } from '../styles/theme';
@@ -298,15 +298,8 @@ const EmptyStateText = styled.p`
   font-size: ${theme.typography.fontSize.base};
 `;
 
-export const Achievements: React.FC = () => {
-  const navigate = useNavigate();
-  const [achievements, setAchievements] = useState<Achievement[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [activeFilter, setActiveFilter] = useState<string>('all');
-
-  // Mock achievements data (same as ProfileDetails for consistency)
-  const mockAchievements: Achievement[] = [
+// Mock achievements data (same as ProfileDetails for consistency)
+const mockAchievements: Achievement[] = [
     {
       id: '1',
       name: 'Dancing Queen',
@@ -409,7 +402,14 @@ export const Achievements: React.FC = () => {
       totalSteps: 1,
       backgroundColor: 'linear-gradient(135deg, #E0FFFF, #F0FFFF)',
     },
-  ];
+];
+
+export const Achievements: React.FC = () => {
+  const navigate = useNavigate();
+  const [achievements, setAchievements] = useState<Achievement[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [activeFilter, setActiveFilter] = useState<string>('all');
 
   useEffect(() => {
     const initializeAchievements = async () => {
