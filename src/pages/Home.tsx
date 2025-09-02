@@ -373,6 +373,8 @@ export const Home: React.FC = () => {
         };
         
         setAchievements(finalAchievements);
+        console.log('🏠 Home: Setting achievements state:', finalAchievements);
+        console.log('🏠 Home: Achievement count:', finalAchievements.length);
 
         // Get missions from GameLayer API
         let missions = await gameLayerApi.getMissions();
@@ -505,6 +507,9 @@ export const Home: React.FC = () => {
       </HomeContainer>
     );
   }
+
+  console.log('🏠 Home: Rendering with achievements:', achievements);
+  console.log('🏠 Home: Achievement count before render:', achievements.length);
 
   return (
     <HomeContainer>
