@@ -304,6 +304,16 @@ const EmptyStateText = styled.p`
   margin-bottom: ${theme.spacing.md};
 `;
 
+const PoweredByText = styled.div`
+  text-align: center;
+  color: ${theme.colors.text.tertiary};
+  font-size: ${theme.typography.fontSize.xs};
+  margin-bottom: ${theme.spacing.sm};
+  font-weight: ${theme.typography.fontWeight.medium};
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+`;
+
 
 
 export const Home: React.FC = () => {
@@ -583,6 +593,7 @@ export const Home: React.FC = () => {
         initial="hidden"
         animate="visible"
       >
+        <PoweredByText>Powered by GameLayer</PoweredByText>
         <ProfileHeader user={user} onViewMore={handleViewProfile} />
         
         <QuickStats
