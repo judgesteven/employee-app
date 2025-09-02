@@ -132,44 +132,59 @@ export const gameLayerApi = {
       console.log('📋 Raw Achievements:', response.data);
       
       // Transform GameLayer achievement data to Achievement interface
-      const achievements = response.data;
-      if (Array.isArray(achievements)) {
-        const transformedAchievements = achievements.map((achievement: any) => {
-          console.log('=== GameLayer API: Processing Achievement ===');
-          console.log('GameLayer API: Full raw achievement data:', JSON.stringify(achievement, null, 2));
-          
-          // Determine status based on completion
-          let status: 'completed' | 'started' | 'locked' = 'locked';
-          if (achievement.completed || achievement.unlocked) {
-            status = 'completed';
-          } else if (achievement.progress > 0 || achievement.currentProgress > 0) {
-            status = 'started';
-          }
-
+      const achievementData = response.data;
+      console.log('📋 Raw Achievement Data Structure:', achievementData);
+      
+      let allAchievements: any[] = [];
+      
+      // Handle the GameLayer API format with completed/started arrays
+      if (achievementData && typeof achievementData === 'object') {
+        // Add completed achievements
+        if (Array.isArray(achievementData.completed)) {
+          const completedWithStatus = achievementData.completed.map((achievement: any) => ({
+            ...achievement,
+            status: 'completed'
+          }));
+          allAchievements = allAchievements.concat(completedWithStatus);
+          console.log(`📋 Found ${achievementData.completed.length} completed achievements`);
+        }
+        
+        // Add started achievements
+        if (Array.isArray(achievementData.started)) {
+          const startedWithStatus = achievementData.started.map((achievement: any) => ({
+            ...achievement,
+            status: 'started'
+          }));
+          allAchievements = allAchievements.concat(startedWithStatus);
+          console.log(`📋 Found ${achievementData.started.length} started achievements`);
+        }
+      }
+      
+      console.log(`📊 Processing ${allAchievements.length} achievements from API`);
+      
+      if (allAchievements.length > 0) {
+        const transformedAchievements = allAchievements.map((achievement: any) => {
           const transformed = {
             id: achievement.id,
-            name: achievement.name || achievement.title || 'Untitled Achievement',
-            description: achievement.description || '',
-            icon: achievement.icon || achievement.emoji || '🏆',
-            unlockedAt: achievement.unlockedAt || achievement.completedAt ? new Date(achievement.unlockedAt || achievement.completedAt) : undefined,
-            category: achievement.category || achievement.tag || achievement.type,
-            status: status,
-            currentProgress: achievement.progress || achievement.currentProgress || 0,
-            totalSteps: achievement.target || achievement.targetValue || achievement.maxProgress || 1,
-            badgeImage: achievement.badgeImage || achievement.image || achievement.imgUrl,
+            title: achievement.name || 'Unknown Achievement',
+            description: achievement.description || 'No description available',
+            category: achievement.category || 'general',
+            unlockedAt: achievement.status === 'completed' ? (achievement.actions?.completedOn || new Date().toISOString()) : null,
+            status: achievement.status,
+            currentProgress: achievement.count || 0,
+            totalSteps: achievement.steps || 1,
+            badgeImage: achievement.imgUrl,
             backgroundColor: achievement.backgroundColor || achievement.color
           };
           
-
           return transformed;
         });
         
         const completedCount = transformedAchievements.filter(a => a.status === 'completed').length;
         const startedCount = transformedAchievements.filter(a => a.status === 'started').length;
-        const lockedCount = transformedAchievements.filter(a => a.status === 'locked').length;
         
         console.log(`📈 Achievement Summary: ${transformedAchievements.length} total`);
-        console.log(`   ✅ Completed: ${completedCount} | 🔄 Started: ${startedCount} | 🔒 Locked: ${lockedCount}`);
+        console.log(`   ✅ Completed: ${completedCount} | 🔄 Started: ${startedCount}`);
         
         return transformedAchievements;
       }

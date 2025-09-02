@@ -337,86 +337,7 @@ export const Home: React.FC = () => {
     allTimeActiveMinutes: 156420,
     gems: 1247,
     xp: 8450,
-    achievements: [
-      {
-        id: '1',
-        name: 'Dancing Queen',
-        description: 'Way to channel your inner Swede!',
-        icon: '👑',
-        unlockedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-        category: 'POP MUSIC',
-        status: 'completed' as const,
-        currentProgress: 1,
-        totalSteps: 1,
-        backgroundColor: 'linear-gradient(135deg, #FFE4E1, #FFF0F5)',
-        badgeImage: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=120&h=120&fit=crop'
-      },
-      {
-        id: '2',
-        name: 'Rocket Man',
-        description: 'You rock!',
-        icon: '🚀',
-        unlockedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
-        category: 'POP MUSIC',
-        status: 'completed' as const,
-        currentProgress: 1,
-        totalSteps: 1,
-        backgroundColor: 'linear-gradient(135deg, #FFB6C1, #FFC0CB)',
-        badgeImage: 'https://images.unsplash.com/photo-1446776877081-d282a0f896e2?w=120&h=120&fit=crop'
-      },
-      {
-        id: '3',
-        name: 'King Of Pop',
-        description: 'That was a Thriller of an effort, congratulations!',
-        icon: '🎤',
-        unlockedAt: undefined, // Not unlocked yet
-        category: 'POP MUSIC',
-        status: 'started' as const,
-        currentProgress: 3,
-        totalSteps: 10,
-        backgroundColor: 'linear-gradient(135deg, #F0F8FF, #E6E6FA)',
-        badgeImage: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=120&h=120&fit=crop'
-      },
-      {
-        id: '4',
-        name: 'Step Streak',
-        description: 'Complete 5 days of step goals',
-        icon: '🔥',
-        unlockedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-        category: 'STREAKS',
-        status: 'completed' as const,
-        currentProgress: 5,
-        totalSteps: 5,
-        backgroundColor: 'linear-gradient(135deg, #FFE4E1, #FFCCCB)',
-        badgeImage: 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=120&h=120&fit=crop'
-      },
-      {
-        id: '5',
-        name: 'Weekend Warrior',
-        description: 'Stay active on weekends',
-        icon: '⚡',
-        unlockedAt: undefined,
-        category: 'FITNESS',
-        status: 'started' as const,
-        currentProgress: 2,
-        totalSteps: 4,
-        backgroundColor: 'linear-gradient(135deg, #E0FFFF, #F0FFFF)',
-        badgeImage: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=120&h=120&fit=crop'
-      },
-      {
-        id: '6',
-        name: 'Social Butterfly',
-        description: 'Share achievements with friends',
-        icon: '🦋',
-        unlockedAt: undefined,
-        category: 'SOCIAL',
-        status: 'locked' as const,
-        currentProgress: 0,
-        totalSteps: 3,
-        backgroundColor: 'linear-gradient(135deg, #F5F5DC, #FFF8DC)',
-        badgeImage: 'https://images.unsplash.com/photo-1502904550040-7534597429ae?w=120&h=120&fit=crop'
-      },
-    ],
+    achievements: [], // Will be populated from GameLayer API
   };
 
 
@@ -437,8 +358,8 @@ export const Home: React.FC = () => {
         const apiAchievements = await gameLayerApi.getAchievements();
 
         
-        // Use API achievements if available, otherwise fall back to mock data
-        const finalAchievements = apiAchievements.length > 0 ? apiAchievements : mockUser.achievements;
+        // Use API achievements only
+        const finalAchievements = apiAchievements;
         
         // Update user data with real GameLayer name, avatar, level, and step count
         const updatedUser = {

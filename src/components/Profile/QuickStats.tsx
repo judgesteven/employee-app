@@ -360,7 +360,7 @@ export const QuickStats: React.FC<QuickStatsProps> = ({
                     {achievement.badgeImage ? (
                       <AchievementBadgeImage 
                         src={achievement.badgeImage} 
-                        alt={achievement.name}
+                        alt={achievement.title}
                         onError={(e) => {
                           // Fallback to icon if image fails to load
                           e.currentTarget.style.display = 'none';
@@ -381,7 +381,7 @@ export const QuickStats: React.FC<QuickStatsProps> = ({
                   </AchievementBadgeContainer>
 
                   <AchievementInfo>
-                    <AchievementName>{achievement.name}</AchievementName>
+                    <AchievementName>{achievement.title}</AchievementName>
                     <AchievementDescription>{achievement.description}</AchievementDescription>
                     
                     <AchievementProgress>

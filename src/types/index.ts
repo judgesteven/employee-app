@@ -18,15 +18,15 @@ export interface User {
 // Achievement types
 export interface Achievement {
   id: string;
-  name: string;
+  title: string; // Changed from 'name' to 'title' to match GameLayer API
   description: string;
-  icon: string;
-  unlockedAt?: Date;
-  category?: string; // Category like "POP MUSIC"
+  icon?: string; // Made optional since GameLayer uses badgeImage
+  unlockedAt?: Date | string | null; // Can be Date, ISO string, or null
+  category?: string; // Category like "Steps"
   status: 'completed' | 'started' | 'locked'; // Achievement status
-  currentProgress?: number; // Current progress (e.g., 3)
-  totalSteps?: number; // Total steps needed (e.g., 10)
-  badgeImage?: string; // URL to achievement badge image
+  currentProgress?: number; // Current progress (e.g., count: 119)
+  totalSteps?: number; // Total steps needed (e.g., steps: 100000)
+  badgeImage?: string; // URL to achievement badge image (imgUrl from API)
   backgroundColor?: string; // Background color for the card
 }
 

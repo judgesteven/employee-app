@@ -399,68 +399,7 @@ export const ProfileDetails: React.FC = () => {
     allTimeActiveMinutes: 156420,
     gems: 1247,
     xp: 8450,
-    achievements: [
-      {
-        id: '1',
-        name: 'Early Bird',
-        description: 'Complete a morning challenge',
-        icon: '🌅',
-        unlockedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-        status: 'completed' as const,
-        currentProgress: 1,
-        totalSteps: 1,
-        category: 'DAILY CHALLENGES',
-        backgroundColor: 'linear-gradient(135deg, #FFF8DC, #FFFACD)',
-      },
-      {
-        id: '2',
-        name: 'Step Master',
-        description: 'Reach 10,000 steps in a day',
-        icon: '👟',
-        unlockedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
-        status: 'completed' as const,
-        currentProgress: 1,
-        totalSteps: 1,
-        category: 'FITNESS',
-        backgroundColor: 'linear-gradient(135deg, #E0FFFF, #F0FFFF)',
-      },
-      {
-        id: '3',
-        name: 'Consistency King',
-        description: 'Complete challenges for 7 days straight',
-        icon: '👑',
-        unlockedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
-        status: 'completed' as const,
-        currentProgress: 7,
-        totalSteps: 7,
-        category: 'STREAKS',
-        backgroundColor: 'linear-gradient(135deg, #FFE4B5, #FFEFD5)',
-      },
-      {
-        id: '4',
-        name: 'Marathon Walker',
-        description: 'Walk 50,000 steps in a week',
-        icon: '🏃‍♂️',
-        unlockedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
-        status: 'completed' as const,
-        currentProgress: 1,
-        totalSteps: 1,
-        category: 'FITNESS',
-        backgroundColor: 'linear-gradient(135deg, #E6E6FA, #F8F8FF)',
-      },
-      {
-        id: '5',
-        name: 'Gem Collector',
-        description: 'Earn 1000 gems total',
-        icon: '💎',
-        unlockedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-        status: 'completed' as const,
-        currentProgress: 1000,
-        totalSteps: 1000,
-        category: 'REWARDS',
-        backgroundColor: 'linear-gradient(135deg, #F0F8FF, #E0FFFF)',
-      },
-    ],
+    achievements: [], // Will be populated from GameLayer API
   };
 
   const mockCompletedMissions: Challenge[] = [
@@ -738,9 +677,9 @@ export const ProfileDetails: React.FC = () => {
               >
                 <AchievementIcon>{achievement.icon}</AchievementIcon>
                 <ItemInfo>
-                  <ItemName>{achievement.name}</ItemName>
+                  <ItemName>{achievement.title}</ItemName>
                   <ItemDescription>{achievement.description}</ItemDescription>
-                  <ItemDate>Unlocked {formatDate(achievement.unlockedAt!)}</ItemDate>
+                  <ItemDate>Unlocked {formatDate(new Date(achievement.unlockedAt!))}</ItemDate>
                 </ItemInfo>
               </AchievementItem>
             ))}

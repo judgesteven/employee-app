@@ -298,111 +298,7 @@ const EmptyStateText = styled.p`
   font-size: ${theme.typography.fontSize.base};
 `;
 
-// Mock achievements data (same as ProfileDetails for consistency)
-const mockAchievements: Achievement[] = [
-    {
-      id: '1',
-      name: 'Dancing Queen',
-      description: 'Way to channel your inner Swede!',
-      icon: '👑',
-      unlockedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-      category: 'POP MUSIC',
-      status: 'completed' as const,
-      currentProgress: 1,
-      totalSteps: 1,
-      backgroundColor: 'linear-gradient(135deg, #FFE4B5, #FFEFD5)',
-      badgeImage: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=120&h=120&fit=crop'
-    },
-    {
-      id: '2',
-      name: 'Step Master',
-      description: 'Reach 10,000 steps in a day',
-      icon: '👟',
-      unlockedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
-      category: 'FITNESS',
-      status: 'completed' as const,
-      currentProgress: 10000,
-      totalSteps: 10000,
-      backgroundColor: 'linear-gradient(135deg, #E0FFFF, #F0FFFF)',
-      badgeImage: 'https://images.unsplash.com/photo-1446776877081-d282a0f896e2?w=120&h=120&fit=crop'
-    },
-    {
-      id: '3',
-      name: 'Consistency King',
-      description: 'Complete challenges for 7 days straight',
-      icon: '🔥',
-      unlockedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
-      category: 'STREAKS',
-      status: 'completed' as const,
-      currentProgress: 7,
-      totalSteps: 7,
-      backgroundColor: 'linear-gradient(135deg, #FFE4E1, #FFF0F5)',
-      badgeImage: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=120&h=120&fit=crop'
-    },
-    {
-      id: '4',
-      name: 'Marathon Walker',
-      description: 'Walk 50,000 steps in a week',
-      icon: '🏃‍♂️',
-      unlockedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
-      category: 'FITNESS',
-      status: 'completed' as const,
-      currentProgress: 50000,
-      totalSteps: 50000,
-      backgroundColor: 'linear-gradient(135deg, #E6E6FA, #F8F8FF)',
-      badgeImage: 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=120&h=120&fit=crop'
-    },
-    {
-      id: '5',
-      name: 'Gem Collector',
-      description: 'Earn 1000 gems total',
-      icon: '💎',
-      unlockedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-      category: 'REWARDS',
-      status: 'completed' as const,
-      currentProgress: 1000,
-      totalSteps: 1000,
-      backgroundColor: 'linear-gradient(135deg, #F0F8FF, #E0FFFF)',
-      badgeImage: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=120&h=120&fit=crop'
-    },
-    {
-      id: '6',
-      name: 'Social Butterfly',
-      description: 'Share achievements with friends',
-      icon: '🦋',
-      unlockedAt: undefined,
-      category: 'SOCIAL',
-      status: 'started' as const,
-      currentProgress: 2,
-      totalSteps: 5,
-      backgroundColor: 'linear-gradient(135deg, #F0F8FF, #E0FFFF)',
-      badgeImage: 'https://images.unsplash.com/photo-1502904550040-7534597429ae?w=120&h=120&fit=crop'
-    },
-    {
-      id: '7',
-      name: 'Early Bird',
-      description: 'Complete morning challenges',
-      icon: '🌅',
-      unlockedAt: undefined,
-      category: 'DAILY CHALLENGES',
-      status: 'locked' as const,
-      currentProgress: 0,
-      totalSteps: 3,
-      backgroundColor: 'linear-gradient(135deg, #FFF8DC, #FFFACD)',
-    },
-    {
-      id: '8',
-      name: 'Team Player',
-      description: 'Participate in team challenges',
-      icon: '🤝',
-      unlockedAt: undefined,
-      category: 'TEAM',
-      status: 'locked' as const,
-      currentProgress: 0,
-      totalSteps: 1,
-      backgroundColor: 'linear-gradient(135deg, #E0FFFF, #F0FFFF)',
-    },
-];
+
 
 export const Achievements: React.FC = () => {
   const navigate = useNavigate();
@@ -420,13 +316,12 @@ export const Achievements: React.FC = () => {
         const apiAchievements = await gameLayerApi.getAchievements();
         console.log('Achievements: Fetched achievements from GameLayer API:', apiAchievements);
         
-        // Use API achievements if available, otherwise fall back to mock data
-        const finalAchievements = apiAchievements.length > 0 ? apiAchievements : mockAchievements;
-        setAchievements(finalAchievements);
+        // Use API achievements only
+        setAchievements(apiAchievements);
       } catch (err) {
         console.error('Error loading achievements:', err);
-        // Fallback to mock data if GameLayer API fails
-        setAchievements(mockAchievements);
+        // No fallback - show empty state if API fails
+        setAchievements([]);
       } finally {
         setLoading(false);
       }
@@ -448,7 +343,7 @@ export const Achievements: React.FC = () => {
   const allFilters = [...filters, ...categoryFilters];
 
   const filteredAchievements = achievements.filter(achievement => {
-    const matchesSearch = achievement.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const matchesSearch = achievement.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          achievement.description.toLowerCase().includes(searchTerm.toLowerCase());
     
     if (!matchesSearch) return false;
@@ -573,7 +468,7 @@ export const Achievements: React.FC = () => {
                     {achievement.badgeImage ? (
                       <AchievementBadgeImage 
                         src={achievement.badgeImage} 
-                        alt={achievement.name}
+                        alt={achievement.title}
                         onError={(e) => {
                           // Fallback to icon if image fails to load
                           e.currentTarget.style.display = 'none';
@@ -594,7 +489,7 @@ export const Achievements: React.FC = () => {
                   )}
 
                   <AchievementInfo>
-                    <AchievementName>{achievement.name}</AchievementName>
+                    <AchievementName>{achievement.title}</AchievementName>
                     <AchievementDescription>{achievement.description}</AchievementDescription>
                     
                     <AchievementProgress>
