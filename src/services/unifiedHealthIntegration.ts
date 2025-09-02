@@ -137,3 +137,4 @@ class UnifiedHealthIntegration {
 // Export a singleton instance
 export const unifiedHealthIntegration = new UnifiedHealthIntegration();
 export default unifiedHealthIntegration;
+

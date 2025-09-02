@@ -31,6 +31,7 @@ export interface Challenge {
   targetValue: number;
   currentProgress: number;
   reward: number; // gems
+  experience?: number; // experience points
   expiresAt: Date;
   completed: boolean;
   icon: string;

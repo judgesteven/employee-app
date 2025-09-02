@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Clock, Target, ChevronRight, Gem } from 'lucide-react';
+import { Clock, Target, ChevronRight, Gem, Star, Diamond } from 'lucide-react';
 import { ProfileHeader } from '../components/Profile/ProfileHeader';
 import { QuickStats } from '../components/Profile/QuickStats';
 
@@ -77,16 +77,75 @@ const MissionsList = styled.div`
 `;
 
 const MissionCard = styled(motion.div)`
-  background: ${theme.colors.background};
-  border: 1px solid ${theme.colors.border};
+  background: ${theme.colors.white};
   border-radius: ${theme.borderRadius.xl};
-  padding: ${theme.spacing.lg};
-  position: relative;
   overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  position: relative;
   
   &:hover {
-    border-color: ${theme.colors.primary};
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
   }
+  
+  transition: all 0.3s ease;
+`;
+
+const HeroImageSection = styled.div`
+  position: relative;
+  height: 200px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  overflow: hidden;
+`;
+
+const HeroImage = styled.div<{ $bgImage?: string }>`
+  width: 100%;
+  height: 100%;
+  background: ${props => props.$bgImage ? `url(${props.$bgImage})` : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'};
+  background-size: cover;
+  background-position: center;
+  position: relative;
+`;
+
+const RewardsOverlay = styled.div`
+  position: absolute;
+  top: ${theme.spacing.md};
+  right: ${theme.spacing.md};
+  display: flex;
+  flex-direction: column;
+  gap: ${theme.spacing.xs};
+`;
+
+const RewardBadge = styled.div<{ $type: 'gems' | 'experience' }>`
+  display: flex;
+  align-items: center;
+  gap: ${theme.spacing.xs};
+  padding: ${theme.spacing.xs} ${theme.spacing.sm};
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(8px);
+  border-radius: ${theme.borderRadius.full};
+  color: ${theme.colors.white};
+  font-size: ${theme.typography.fontSize.sm};
+  font-weight: ${theme.typography.fontWeight.semibold};
+`;
+
+const CategoryBadge = styled.div`
+  position: absolute;
+  bottom: ${theme.spacing.md};
+  left: ${theme.spacing.md};
+  padding: ${theme.spacing.sm} ${theme.spacing.md};
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(8px);
+  border-radius: ${theme.borderRadius.full};
+  color: ${theme.colors.primary};
+  font-size: ${theme.typography.fontSize.sm};
+  font-weight: ${theme.typography.fontWeight.bold};
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+`;
+
+const CardContent = styled.div`
+  padding: ${theme.spacing.lg};
 `;
 
 const MissionHeader = styled.div`
@@ -412,9 +471,11 @@ export const Home: React.FC = () => {
       targetValue: 8000,
       currentProgress: 5243,
       reward: 50,
+      experience: 100,
       expiresAt: new Date(Date.now() + 8 * 60 * 60 * 1000),
       completed: false,
       icon: '🏃‍♂️',
+      imgUrl: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=200&fit=crop',
       tags: ['fitness', 'cardio'],
     },
     {
@@ -425,9 +486,11 @@ export const Home: React.FC = () => {
       targetValue: 50000,
       currentProgress: 32450,
       reward: 200,
+      experience: 350,
       expiresAt: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
       completed: false,
       icon: '⚡',
+      imgUrl: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=200&fit=crop',
       tags: ['endurance', 'challenge'],
     },
     {
@@ -657,7 +720,26 @@ export const Home: React.FC = () => {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  <MissionHeader>
+                  <HeroImageSection>
+                    <HeroImage $bgImage={mission.imgUrl}>
+                      <RewardsOverlay>
+                        <RewardBadge $type="experience">
+                          <Star size={16} />
+                          {mission.experience || 250}
+                        </RewardBadge>
+                        <RewardBadge $type="gems">
+                          <Diamond size={16} />
+                          {mission.reward}
+                        </RewardBadge>
+                      </RewardsOverlay>
+                      <CategoryBadge>
+                        {mission.type}
+                      </CategoryBadge>
+                    </HeroImage>
+                  </HeroImageSection>
+                  
+                  <CardContent>
+                    <MissionHeader>
                     <MissionInfo>
                       <MissionTitleContainer>
                         <MissionTitle>{mission.title}</MissionTitle>
@@ -711,6 +793,7 @@ export const Home: React.FC = () => {
                       <span>{formatTimeLeft(mission.expiresAt)}</span>
                     </TimeLeft>
                   </MissionFooter>
+                  </CardContent>
                 </MissionCard>
               ))}
             </MissionsList>

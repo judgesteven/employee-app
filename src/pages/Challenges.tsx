@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { Clock, Gem } from 'lucide-react';
+import { Clock, Gem, Star, Diamond } from 'lucide-react';
 import { Container, Button } from '../styles/GlobalStyles';
 import { theme } from '../styles/theme';
 import { Challenge } from '../types';
@@ -61,16 +61,75 @@ const ChallengesList = styled.div`
 `;
 
 const ChallengeCard = styled(motion.div)`
-  background: ${theme.colors.background};
-  border: 1px solid ${theme.colors.border};
+  background: ${theme.colors.white};
   border-radius: ${theme.borderRadius.xl};
-  padding: ${theme.spacing.lg};
-  position: relative;
   overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  position: relative;
   
   &:hover {
-    border-color: ${theme.colors.primary};
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
   }
+  
+  transition: all 0.3s ease;
+`;
+
+const HeroImageSection = styled.div`
+  position: relative;
+  height: 200px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  overflow: hidden;
+`;
+
+const HeroImage = styled.div<{ $bgImage?: string }>`
+  width: 100%;
+  height: 100%;
+  background: ${props => props.$bgImage ? `url(${props.$bgImage})` : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'};
+  background-size: cover;
+  background-position: center;
+  position: relative;
+`;
+
+const RewardsOverlay = styled.div`
+  position: absolute;
+  top: ${theme.spacing.md};
+  right: ${theme.spacing.md};
+  display: flex;
+  flex-direction: column;
+  gap: ${theme.spacing.xs};
+`;
+
+const RewardBadge = styled.div<{ $type: 'gems' | 'experience' }>`
+  display: flex;
+  align-items: center;
+  gap: ${theme.spacing.xs};
+  padding: ${theme.spacing.xs} ${theme.spacing.sm};
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(8px);
+  border-radius: ${theme.borderRadius.full};
+  color: ${theme.colors.white};
+  font-size: ${theme.typography.fontSize.sm};
+  font-weight: ${theme.typography.fontWeight.semibold};
+`;
+
+const CategoryBadge = styled.div`
+  position: absolute;
+  bottom: ${theme.spacing.md};
+  left: ${theme.spacing.md};
+  padding: ${theme.spacing.sm} ${theme.spacing.md};
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(8px);
+  border-radius: ${theme.borderRadius.full};
+  color: ${theme.colors.primary};
+  font-size: ${theme.typography.fontSize.sm};
+  font-weight: ${theme.typography.fontWeight.bold};
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+`;
+
+const CardContent = styled.div`
+  padding: ${theme.spacing.lg};
 `;
 
 const ChallengeHeader = styled.div`
@@ -341,9 +400,11 @@ const mockChallenges: Challenge[] = [
       targetValue: 8000,
       currentProgress: 5243,
       reward: 50,
+      experience: 100,
       expiresAt: new Date(Date.now() + 8 * 60 * 60 * 1000), // 8 hours from now
       completed: false,
       icon: '🏃‍♂️',
+      imgUrl: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=200&fit=crop',
       tags: ['fitness', 'cardio'],
     },
     {
@@ -354,9 +415,11 @@ const mockChallenges: Challenge[] = [
       targetValue: 50000,
       currentProgress: 32450,
       reward: 200,
+      experience: 350,
       expiresAt: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3 days from now
       completed: false,
       icon: '⚡',
+      imgUrl: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=200&fit=crop',
       tags: ['endurance', 'challenge'],
     },
     {
@@ -367,9 +430,11 @@ const mockChallenges: Challenge[] = [
       targetValue: 7,
       currentProgress: 4,
       reward: 150,
+      experience: 250,
       expiresAt: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 days from now
       completed: false,
       icon: '🏆',
+      imgUrl: 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=400&h=200&fit=crop',
       tags: ['habit', 'streak'],
     },
     {
@@ -380,9 +445,11 @@ const mockChallenges: Challenge[] = [
       targetValue: 200000,
       currentProgress: 87650,
       reward: 500,
+      experience: 750,
       expiresAt: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000), // 15 days from now
       completed: false,
       icon: '🎯',
+      imgUrl: 'https://images.unsplash.com/photo-1464822759844-d150ad6d1dff?w=400&h=200&fit=crop',
       tags: ['marathon', 'long-term'],
     },
     {
@@ -393,9 +460,11 @@ const mockChallenges: Challenge[] = [
       targetValue: 3000,
       currentProgress: 850,
       reward: 35,
+      experience: 75,
       expiresAt: new Date(Date.now() + 5 * 60 * 60 * 1000), // 5 hours from now
       completed: false,
       icon: '🌙',
+      imgUrl: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=200&fit=crop',
       tags: ['evening', 'relaxation'],
     },
     {
@@ -549,7 +618,26 @@ export const Challenges: React.FC = () => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              <ChallengeHeader>
+              <HeroImageSection>
+                <HeroImage $bgImage={challenge.imgUrl}>
+                  <RewardsOverlay>
+                    <RewardBadge $type="experience">
+                      <Star size={16} />
+                      {challenge.experience || 250}
+                    </RewardBadge>
+                    <RewardBadge $type="gems">
+                      <Diamond size={16} />
+                      {challenge.reward}
+                    </RewardBadge>
+                  </RewardsOverlay>
+                  <CategoryBadge>
+                    {challenge.type}
+                  </CategoryBadge>
+                </HeroImage>
+              </HeroImageSection>
+              
+              <CardContent>
+                <ChallengeHeader>
                 <ChallengeInfo>
                   <ChallengeTitleContainer>
                     <ChallengeTitle>{challenge.title}</ChallengeTitle>
@@ -603,6 +691,7 @@ export const Challenges: React.FC = () => {
                   <span>{formatTimeLeft(challenge.expiresAt)}</span>
                 </TimeLeft>
               </ChallengeFooter>
+              </CardContent>
             </ChallengeCard>
           ))}
         </ChallengesList>
