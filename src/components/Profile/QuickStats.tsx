@@ -161,14 +161,19 @@ const AchievementBadgeContainer = styled.div`
 `;
 
 const AchievementBadgeImage = styled.img`
-  width: 60px;
-  height: 60px;
+  width: 140px;
+  height: 140px;
   object-fit: contain;
 `;
 
 const AchievementIcon = styled.div`
-  font-size: 48px;
+  font-size: 100px;
   line-height: 1;
+  width: 140px;
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
 const AchievementCategoryTag = styled.div`
