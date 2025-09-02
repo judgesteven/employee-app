@@ -337,11 +337,7 @@ export const QuickStats: React.FC<QuickStatsProps> = ({
               const filteredAchievements = recentAchievements
                 .filter(achievement => achievement.status === 'started' || achievement.status === 'completed');
               
-              console.log('=== QuickStats Achievement Filtering ===');
-              console.log('Total achievements received:', recentAchievements.length);
-              console.log('Filtered achievements (started/completed):', filteredAchievements.length);
-              console.log('Filtered achievements data:', filteredAchievements);
-              console.log('Displaying first 6 achievements');
+              console.log(`🎯 QuickStats: Showing ${Math.min(filteredAchievements.length, 6)} of ${filteredAchievements.length} active achievements`);
               
               return filteredAchievements.slice(0, 6);
             })().map((achievement) => {

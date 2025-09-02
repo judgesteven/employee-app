@@ -435,7 +435,7 @@ export const Home: React.FC = () => {
         
         // Get achievements from GameLayer API
         const apiAchievements = await gameLayerApi.getAchievements();
-        console.log('Home: Fetched achievements from GameLayer API:', apiAchievements);
+
         
         // Use API achievements if available, otherwise fall back to mock data
         const finalAchievements = apiAchievements.length > 0 ? apiAchievements : mockUser.achievements;
@@ -455,8 +455,7 @@ export const Home: React.FC = () => {
 
         // Get missions from GameLayer API
         let missions = await gameLayerApi.getMissions();
-        console.log('Home: Fetched missions from GameLayer API:', missions);
-        console.log('Home: Number of missions fetched:', missions?.length || 0);
+        console.log(`🎯 Home: Fetched ${missions?.length || 0} missions from API`);
         
         // Filter for Priority 1 missions only (featured missions)
         missions = missions
@@ -465,29 +464,26 @@ export const Home: React.FC = () => {
         
         // Log mission data (removed step override logic)
         const updatedMissions = missions.map(mission => {
-          console.log('Home: Processing mission:', mission.title);
-          console.log('Home: Mission progress from API:', mission.currentProgress, '/', mission.targetValue);
-          console.log('Home: Mission tags:', mission.tags);
+
           
           // Use the progress data directly from GameLayer API
           return mission;
         });
 
-        console.log('Home: Updated missions:', updatedMissions.length);
+
 
         // Only filter out truly invalid missions - be more permissive
         const filteredMissions = updatedMissions.filter(mission => {
           // Only remove missions that are clearly invalid or incomplete
           // Don't filter based on 0/1 as this might be valid for some mission types
           if (!mission.id || !mission.title) {
-            console.log('Home: Filtering out invalid mission:', mission);
+
             return false;
           }
           return true;
         });
 
-        console.log('Home: Filtered missions:', filteredMissions.length);
-        console.log('Home: Final missions to display:', filteredMissions.slice(0, 3));
+        console.log(`🎯 Home: Displaying ${Math.min(filteredMissions.length, 3)} featured missions`);
 
         setUser(updatedUser);
         setFeaturedMissions(filteredMissions.slice(0, 3)); // Show only first 3 featured missions on home

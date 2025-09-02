@@ -5,6 +5,23 @@ import { Gem, Clock, Zap } from 'lucide-react';
 import { theme } from '../../styles/theme';
 import { User } from '../../types';
 
+// Level badge color helper
+const getLevelBadgeColor = (levelName: string) => {
+  const name = levelName.toLowerCase();
+  
+  if (name.includes('bronze')) {
+    return '#CD7F32';
+  } else if (name.includes('silver')) {
+    return '#C0C0C0';
+  } else if (name.includes('gold')) {
+    return '#FFD700';
+  } else if (name.includes('diamond')) {
+    return '#00BFFF';
+  } else {
+    return '#6B73FF'; // Default fallback
+  }
+};
+
 const HeaderContainer = styled(motion.div)`
   background: ${theme.colors.gradients.primary};
   border-radius: ${theme.borderRadius.xl};
@@ -85,6 +102,16 @@ const UserLevel = styled.span`
   line-height: 1.2;
 `;
 
+const LevelBadge = styled.span<{ levelName: string }>`
+  display: inline-block;
+  padding: ${theme.spacing.xs} ${theme.spacing.sm};
+  border-radius: ${theme.borderRadius.full};
+  font-size: ${theme.typography.fontSize.xs};
+  font-weight: ${theme.typography.fontWeight.semibold};
+  color: white;
+  background: ${({ levelName }) => getLevelBadgeColor(levelName)};
+`;
+
 
 
 
@@ -163,7 +190,11 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, onViewMore }
             <UserDetails>
               <UserName>{user.name}</UserName>
               <UserMeta>
-                <UserLevel>{user.levelName || `Tier: ${user.level}`}</UserLevel>
+                {user.levelName ? (
+                  <LevelBadge levelName={user.levelName}>{user.levelName}</LevelBadge>
+                ) : (
+                  <UserLevel>Tier: {user.level}</UserLevel>
+                )}
               </UserMeta>
             </UserDetails>
           </UserInfo>

@@ -39,9 +39,8 @@ interface GameLayerPlayer {
 export const gameLayerApi = {
   // GameLayer specific player fetch
   async getPlayer(playerId: string = PLAYER_ID): Promise<GameLayerPlayer> {
-    console.log(`=== GameLayer getPlayer API Call ===`);
-    console.log('Player ID:', playerId);
-    console.log('Account ID:', ACCOUNT_ID);
+    console.log(`🚀 API CALL: GET /players/${playerId}`);
+    console.log(`   Account: ${ACCOUNT_ID}`);
     
     const response = await api.get(`/players/${playerId}`, {
       params: {
@@ -49,9 +48,8 @@ export const gameLayerApi = {
       }
     });
     
-    console.log('=== GameLayer getPlayer API Response ===');
-    console.log('Response status:', response.status);
-    console.log('Raw player data:', JSON.stringify(response.data, null, 2));
+    console.log(`✅ API RESPONSE: ${response.status}`);
+    console.log('📋 Player Data:', response.data);
     
     return response.data;
   },
@@ -120,7 +118,9 @@ export const gameLayerApi = {
     }
 
     try {
-      console.log(`[API] GameLayer getAchievements for player: ${playerId}`);
+      console.log(`🚀 API CALL: GET /achievements`);
+      console.log(`   Player: ${playerId}, Account: ${ACCOUNT_ID}`);
+      
       const response = await api.get('/achievements', {
         params: {
           player: playerId,
@@ -128,11 +128,9 @@ export const gameLayerApi = {
         }
       });
       
-      console.log('=== GameLayer getAchievements API Response ===');
-      console.log('Response status:', response.status);
-      console.log('Response headers:', response.headers);
-      console.log('Raw response data:', JSON.stringify(response.data, null, 2));
-      console.log('Number of achievements received:', response.data?.length || 0);
+      console.log(`✅ API RESPONSE: ${response.status}`);
+      console.log(`📊 Achievements Count: ${response.data?.length || 0}`);
+      console.log('📋 Raw Achievements:', response.data);
       
       // Transform GameLayer achievement data to Achievement interface
       const achievements = response.data;
@@ -163,22 +161,16 @@ export const gameLayerApi = {
             backgroundColor: achievement.backgroundColor || achievement.color
           };
           
-          console.log('GameLayer API: Transformed achievement:', transformed);
+
           return transformed;
         });
-        
-        console.log('=== GameLayer API: Final Results ===');
-        console.log('All transformed achievements:', transformedAchievements);
         
         const completedCount = transformedAchievements.filter(a => a.status === 'completed').length;
         const startedCount = transformedAchievements.filter(a => a.status === 'started').length;
         const lockedCount = transformedAchievements.filter(a => a.status === 'locked').length;
         
-        console.log(`Achievement status summary:`);
-        console.log(`- Completed: ${completedCount}`);
-        console.log(`- Started: ${startedCount}`);
-        console.log(`- Locked: ${lockedCount}`);
-        console.log(`- Total: ${transformedAchievements.length}`);
+        console.log(`📈 Achievement Summary: ${transformedAchievements.length} total`);
+        console.log(`   ✅ Completed: ${completedCount} | 🔄 Started: ${startedCount} | 🔒 Locked: ${lockedCount}`);
         
         return transformedAchievements;
       }

@@ -8,6 +8,23 @@ import { theme } from '../styles/theme';
 import { User, Challenge, Reward } from '../types';
 import { gameLayerApi } from '../services/gameLayerApi';
 
+// Level badge color helper
+const getLevelBadgeColor = (levelName: string) => {
+  const name = levelName.toLowerCase();
+  
+  if (name.includes('bronze')) {
+    return '#CD7F32';
+  } else if (name.includes('silver')) {
+    return '#C0C0C0';
+  } else if (name.includes('gold')) {
+    return '#FFD700';
+  } else if (name.includes('diamond')) {
+    return '#00BFFF';
+  } else {
+    return '#6B73FF'; // Default fallback
+  }
+};
+
 const ProfileDetailsContainer = styled(Container)`
   padding-top: ${theme.spacing.lg};
   padding-bottom: calc(80px + ${theme.spacing.lg});
@@ -123,6 +140,17 @@ const UserName = styled.h2`
 const UserLevel = styled.div`
   font-size: ${theme.typography.fontSize.lg};
   opacity: 0.9;
+  margin-bottom: ${theme.spacing.xs};
+`;
+
+const LevelBadge = styled.span<{ levelName: string }>`
+  display: inline-block;
+  padding: ${theme.spacing.xs} ${theme.spacing.sm};
+  border-radius: ${theme.borderRadius.full};
+  font-size: ${theme.typography.fontSize.sm};
+  font-weight: ${theme.typography.fontWeight.semibold};
+  color: white;
+  background: ${({ levelName }) => getLevelBadgeColor(levelName)};
   margin-bottom: ${theme.spacing.xs};
 `;
 
@@ -650,7 +678,11 @@ export const ProfileDetails: React.FC = () => {
           
           <Avatar src={user.avatar} alt={user.name} />
           <UserName>{user.name}</UserName>
-          <UserLevel>{user.levelName || `Tier: ${user.level}`}</UserLevel>
+          {user.levelName ? (
+            <LevelBadge levelName={user.levelName}>{user.levelName}</LevelBadge>
+          ) : (
+            <UserLevel>Tier: {user.level}</UserLevel>
+          )}
           <UserTeam>{user.team}</UserTeam>
           
           <ProfileStatsContainer>
