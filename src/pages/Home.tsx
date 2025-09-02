@@ -336,6 +336,7 @@ export const Home: React.FC = () => {
     dailyActiveMinutes: 78,
     allTimeActiveMinutes: 156420,
     gems: 1247,
+    xp: 8450,
     achievements: [
       {
         id: '1',

@@ -10,6 +10,7 @@ export interface User {
   dailyActiveMinutes: number;
   allTimeActiveMinutes: number;
   gems: number;
+  xp: number;
   achievements: Achievement[];
 }
 

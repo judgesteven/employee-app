@@ -157,6 +157,7 @@ const AchievementBadgeContainer = styled.div`
   align-items: center;
   justify-content: center;
   flex: 1;
+  position: relative;
 `;
 
 const AchievementBadgeImage = styled.img`
@@ -171,7 +172,10 @@ const AchievementIcon = styled.div`
 `;
 
 const AchievementCategoryTag = styled.div`
-  background: rgba(0, 0, 0, 0.7);
+  position: absolute;
+  top: ${theme.spacing.xs};
+  left: ${theme.spacing.xs};
+  background: rgba(0, 0, 0, 0.8);
   color: white;
   padding: 2px ${theme.spacing.xs};
   border-radius: ${theme.borderRadius.full};
@@ -179,7 +183,8 @@ const AchievementCategoryTag = styled.div`
   font-weight: ${theme.typography.fontWeight.semibold};
   text-transform: uppercase;
   letter-spacing: 0.3px;
-  margin-bottom: ${theme.spacing.sm};
+  backdrop-filter: blur(4px);
+  z-index: 2;
 `;
 
 const AchievementInfo = styled.div`
@@ -328,7 +333,10 @@ export const QuickStats: React.FC<QuickStatsProps> = ({
           </AchievementsHeader>
           
           <AchievementsList>
-            {recentAchievements.slice(0, 6).map((achievement) => {
+            {recentAchievements
+              .filter(achievement => achievement.status === 'started' || achievement.status === 'completed')
+              .slice(0, 6)
+              .map((achievement) => {
               const progressPercentage = achievement.totalSteps 
                 ? (achievement.currentProgress || 0) / achievement.totalSteps * 100 
                 : achievement.status === 'completed' ? 100 : 0;
@@ -360,13 +368,13 @@ export const QuickStats: React.FC<QuickStatsProps> = ({
                     <AchievementIcon style={{ display: achievement.badgeImage ? 'none' : 'block' }}>
                       {achievement.icon}
                     </AchievementIcon>
+                    
+                    {achievement.category && (
+                      <AchievementCategoryTag>
+                        {achievement.category}
+                      </AchievementCategoryTag>
+                    )}
                   </AchievementBadgeContainer>
-
-                  {achievement.category && (
-                    <AchievementCategoryTag>
-                      {achievement.category}
-                    </AchievementCategoryTag>
-                  )}
 
                   <AchievementInfo>
                     <AchievementName>{achievement.name}</AchievementName>
@@ -380,9 +388,11 @@ export const QuickStats: React.FC<QuickStatsProps> = ({
                         />
                       </ProgressBar>
                       <ProgressText>
-                        {achievement.totalSteps 
-                          ? `${achievement.currentProgress || 0} / ${achievement.totalSteps} steps`
-                          : achievement.status === 'completed' ? 'Completed!' : 'In Progress'
+                        {achievement.status === 'completed' 
+                          ? 'Completed!' 
+                          : achievement.totalSteps 
+                            ? `${achievement.currentProgress || 0} / ${achievement.totalSteps}`
+                            : 'In Progress'
                         }
                       </ProgressText>
                     </AchievementProgress>

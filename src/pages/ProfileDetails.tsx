@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Award, Trophy, Gift, Gem, ChevronRight, Settings as SettingsIcon, Clock } from 'lucide-react';
+import { ArrowLeft, Award, Trophy, Gift, Gem, ChevronRight, Settings as SettingsIcon, Clock, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Button } from '../styles/GlobalStyles';
 import { theme } from '../styles/theme';
@@ -80,6 +80,25 @@ const GemsCornerBadge = styled.div`
 `;
 
 const GemsCount = styled.span`
+  font-weight: ${theme.typography.fontWeight.bold};
+  font-size: ${theme.typography.fontSize.base};
+`;
+
+const XPBadge = styled.div`
+  position: absolute;
+  top: calc(${theme.spacing.md} + 50px); /* Position below gems badge */
+  right: ${theme.spacing.md};
+  display: flex;
+  align-items: center;
+  gap: ${theme.spacing.xs};
+  background: rgba(255, 255, 255, 0.2);
+  padding: ${theme.spacing.sm} ${theme.spacing.md};
+  border-radius: ${theme.borderRadius.full};
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+`;
+
+const XPCount = styled.span`
   font-weight: ${theme.typography.fontWeight.bold};
   font-size: ${theme.typography.fontSize.base};
 `;
@@ -351,6 +370,7 @@ export const ProfileDetails: React.FC = () => {
     dailyActiveMinutes: 78,
     allTimeActiveMinutes: 156420,
     gems: 1247,
+    xp: 8450,
     achievements: [
       {
         id: '1',
@@ -620,6 +640,11 @@ export const ProfileDetails: React.FC = () => {
             <Gem size={16} />
             <GemsCount>{user.gems.toLocaleString()}</GemsCount>
           </GemsCornerBadge>
+          
+          <XPBadge>
+            <Zap size={16} />
+            <XPCount>{user.xp.toLocaleString()}</XPCount>
+          </XPBadge>
           
           <Avatar src={user.avatar} alt={user.name} />
           <UserName>{user.name}</UserName>

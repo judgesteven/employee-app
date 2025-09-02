@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { Gem, Clock } from 'lucide-react';
+import { Gem, Clock, Zap } from 'lucide-react';
 import { theme } from '../../styles/theme';
 import { User } from '../../types';
 
@@ -95,42 +95,43 @@ const StatsSection = styled.div`
 
 const StatsGrid = styled.div`
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: ${theme.spacing.md};
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: ${theme.spacing.xs};
 `;
 
 const StatItem = styled.div`
   display: flex;
   align-items: center;
-  gap: ${theme.spacing.sm};
+  gap: ${theme.spacing.xs};
+  min-width: 0; /* Allow shrinking */
 `;
 
 const StatIcon = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border-radius: ${theme.borderRadius.lg};
   background: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(10px);
+  flex-shrink: 0;
 `;
 
 const StatInfo = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 0;
+  min-width: 0; /* Allow shrinking */
 `;
 
 const StatCount = styled.div`
-  font-size: ${theme.typography.fontSize.xl};
+  font-size: ${theme.typography.fontSize.base};
   font-weight: ${theme.typography.fontWeight.bold};
   line-height: 1;
-`;
-
-const StatLabel = styled.span`
-  font-size: ${theme.typography.fontSize.xs};
-  opacity: 0.8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
 
@@ -176,7 +177,6 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, onViewMore }
               </StatIcon>
               <StatInfo>
                 <StatCount>{formatStepCount(user.dailyStepCount)}</StatCount>
-                <StatLabel>steps</StatLabel>
               </StatInfo>
             </StatItem>
             
@@ -186,7 +186,6 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, onViewMore }
               </StatIcon>
               <StatInfo>
                 <StatCount>{user.dailyActiveMinutes}</StatCount>
-                <StatLabel>minutes</StatLabel>
               </StatInfo>
             </StatItem>
             
@@ -196,7 +195,15 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, onViewMore }
               </StatIcon>
               <StatInfo>
                 <StatCount>{user.gems.toLocaleString()}</StatCount>
-                <StatLabel>gems</StatLabel>
+              </StatInfo>
+            </StatItem>
+            
+            <StatItem>
+              <StatIcon>
+                <Zap size={16} />
+              </StatIcon>
+              <StatInfo>
+                <StatCount>{user.xp.toLocaleString()}</StatCount>
               </StatInfo>
             </StatItem>
           </StatsGrid>
