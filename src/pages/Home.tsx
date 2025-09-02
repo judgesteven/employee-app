@@ -304,6 +304,49 @@ const EmptyStateText = styled.p`
   margin-bottom: ${theme.spacing.md};
 `;
 
+// GameLayer Banner
+const GameLayerBanner = styled(motion.div)`
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: ${theme.borderRadius.xl};
+  padding: ${theme.spacing.lg};
+  margin-bottom: ${theme.spacing.lg};
+  color: ${theme.colors.text.inverse};
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+    pointer-events: none;
+  }
+`;
+
+const BannerContent = styled.div`
+  position: relative;
+  z-index: 1;
+`;
+
+const BannerTitle = styled.h2`
+  font-size: ${theme.typography.fontSize['2xl']};
+  font-weight: ${theme.typography.fontWeight.bold};
+  margin: 0 0 ${theme.spacing.xs} 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+`;
+
+const BannerSubtitle = styled.p`
+  font-size: ${theme.typography.fontSize.sm};
+  opacity: 0.9;
+  margin: 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+`;
+
 export const Home: React.FC = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
@@ -582,6 +625,17 @@ export const Home: React.FC = () => {
         animate="visible"
       >
         <ProfileHeader user={user} onViewMore={handleViewProfile} />
+        
+        <GameLayerBanner
+          variants={itemVariants}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <BannerContent>
+            <BannerTitle>Step-Up with GameLayer</BannerTitle>
+            <BannerSubtitle>Transform your daily steps into achievements and rewards</BannerSubtitle>
+          </BannerContent>
+        </GameLayerBanner>
         
         <QuickStats
           dailySteps={user.dailyStepCount}
