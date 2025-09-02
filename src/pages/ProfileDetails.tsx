@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Award, Trophy, Gift, TrendingUp, Calendar, Gem, ChevronRight, Settings as SettingsIcon, Clock } from 'lucide-react';
+import { ArrowLeft, Award, Trophy, Gift, Gem, ChevronRight, Settings as SettingsIcon, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Button } from '../styles/GlobalStyles';
 import { theme } from '../styles/theme';
@@ -84,6 +84,8 @@ const GemsCount = styled.span`
   font-size: ${theme.typography.fontSize.base};
 `;
 
+
+
 const Avatar = styled.img`
   width: 100px;
   height: 100px;
@@ -113,8 +115,8 @@ const UserTeam = styled.div`
 `;
 
 const ProfileStatsContainer = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-direction: column;
   gap: ${theme.spacing.lg};
   margin-bottom: ${theme.spacing.lg};
   max-width: 400px;
@@ -141,8 +143,8 @@ const ProfileStatIcon = styled.div`
 
 const ProfileStatInfo = styled.div`
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: baseline;
+  gap: ${theme.spacing.xs};
 `;
 
 const ProfileStatCount = styled.div`
@@ -152,8 +154,9 @@ const ProfileStatCount = styled.div`
 `;
 
 const ProfileStatLabel = styled.span`
-  font-size: ${theme.typography.fontSize.xs};
+  font-size: ${theme.typography.fontSize.sm};
   opacity: 0.8;
+  font-weight: ${theme.typography.fontWeight.medium};
 `;
 
 const Section = styled.div`
@@ -197,32 +200,6 @@ const ItemsList = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${theme.spacing.md};
-`;
-
-const AchievementItem = styled(motion.div)`
-  display: flex;
-  align-items: center;
-  gap: ${theme.spacing.md};
-  padding: ${theme.spacing.lg};
-  background: ${theme.colors.background};
-  border: 1px solid ${theme.colors.border};
-  border-radius: ${theme.borderRadius.xl};
-  
-  &:hover {
-    border-color: ${theme.colors.primary};
-  }
-`;
-
-const AchievementIcon = styled.div`
-  width: 48px;
-  height: 48px;
-  border-radius: ${theme.borderRadius.lg};
-  background: ${theme.colors.gradients.secondary};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: ${theme.typography.fontSize.xl};
-  color: ${theme.colors.text.inverse};
 `;
 
 const ItemInfo = styled.div`
@@ -324,63 +301,34 @@ const EmptyStateText = styled.p`
   font-size: ${theme.typography.fontSize.base};
 `;
 
-// Additional stats components
-const AdditionalStatsGrid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+// Original achievement components (vertical list design)
+const AchievementItem = styled(motion.div)`
+  display: flex;
+  align-items: center;
   gap: ${theme.spacing.md};
-  margin-bottom: ${theme.spacing.xl};
-`;
-
-const StatCard = styled(motion.div)`
+  padding: ${theme.spacing.lg};
   background: ${theme.colors.background};
   border: 1px solid ${theme.colors.border};
   border-radius: ${theme.borderRadius.xl};
-  padding: ${theme.spacing.lg};
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: ${theme.spacing.sm};
-  position: relative;
-  overflow: hidden;
   
   &:hover {
     border-color: ${theme.colors.primary};
   }
 `;
 
-const StatIcon = styled.div<{ color: string }>`
+const AchievementIcon = styled.div`
+  width: 48px;
+  height: 48px;
+  border-radius: ${theme.borderRadius.lg};
+  background: ${theme.colors.gradients.secondary};
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 48px;
-  border-radius: ${theme.borderRadius.full};
-  background: ${props => props.color}20;
-  color: ${props => props.color};
-  margin-bottom: ${theme.spacing.xs};
+  font-size: ${theme.typography.fontSize.xl};
+  color: ${theme.colors.text.inverse};
 `;
 
-const StatCardValue = styled.div`
-  font-size: ${theme.typography.fontSize['2xl']};
-  font-weight: ${theme.typography.fontWeight.bold};
-  color: ${theme.colors.text.primary};
-  line-height: 1;
-`;
 
-const StatCardLabel = styled.div`
-  font-size: ${theme.typography.fontSize.sm};
-  color: ${theme.colors.text.secondary};
-  font-weight: ${theme.typography.fontWeight.medium};
-`;
-
-const StatChange = styled.div<{ positive: boolean }>`
-  font-size: ${theme.typography.fontSize.xs};
-  color: ${props => props.positive ? theme.colors.success : theme.colors.error};
-  font-weight: ${theme.typography.fontWeight.medium};
-  margin-top: ${theme.spacing.xs};
-`;
 
 export const ProfileDetails: React.FC = () => {
   const navigate = useNavigate();
@@ -389,6 +337,7 @@ export const ProfileDetails: React.FC = () => {
   const [claimedRewards, setClaimedRewards] = useState<Reward[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
+
 
   // Mock data - in production this would come from GameLayer API
   const mockUser: User = {
@@ -409,6 +358,11 @@ export const ProfileDetails: React.FC = () => {
         description: 'Complete a morning challenge',
         icon: '🌅',
         unlockedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+        status: 'completed' as const,
+        currentProgress: 1,
+        totalSteps: 1,
+        category: 'DAILY CHALLENGES',
+        backgroundColor: 'linear-gradient(135deg, #FFF8DC, #FFFACD)',
       },
       {
         id: '2',
@@ -416,6 +370,11 @@ export const ProfileDetails: React.FC = () => {
         description: 'Reach 10,000 steps in a day',
         icon: '👟',
         unlockedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+        status: 'completed' as const,
+        currentProgress: 1,
+        totalSteps: 1,
+        category: 'FITNESS',
+        backgroundColor: 'linear-gradient(135deg, #E0FFFF, #F0FFFF)',
       },
       {
         id: '3',
@@ -423,6 +382,11 @@ export const ProfileDetails: React.FC = () => {
         description: 'Complete challenges for 7 days straight',
         icon: '👑',
         unlockedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+        status: 'completed' as const,
+        currentProgress: 7,
+        totalSteps: 7,
+        category: 'STREAKS',
+        backgroundColor: 'linear-gradient(135deg, #FFE4B5, #FFEFD5)',
       },
       {
         id: '4',
@@ -430,6 +394,11 @@ export const ProfileDetails: React.FC = () => {
         description: 'Walk 50,000 steps in a week',
         icon: '🏃‍♂️',
         unlockedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
+        status: 'completed' as const,
+        currentProgress: 1,
+        totalSteps: 1,
+        category: 'FITNESS',
+        backgroundColor: 'linear-gradient(135deg, #E6E6FA, #F8F8FF)',
       },
       {
         id: '5',
@@ -437,6 +406,11 @@ export const ProfileDetails: React.FC = () => {
         description: 'Earn 1000 gems total',
         icon: '💎',
         unlockedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+        status: 'completed' as const,
+        currentProgress: 1000,
+        totalSteps: 1000,
+        category: 'REWARDS',
+        backgroundColor: 'linear-gradient(135deg, #F0F8FF, #E0FFFF)',
       },
     ],
   };
@@ -511,10 +485,11 @@ export const ProfileDetails: React.FC = () => {
         // Get player data from GameLayer API
         const gameLayerPlayer = await gameLayerApi.getPlayer();
         
-        // Update user data with real GameLayer name
+        // Update user data with real GameLayer name and avatar
         const updatedUser = {
           ...mockUser,
           name: gameLayerPlayer.name, // Use name from GameLayer API
+          avatar: gameLayerPlayer.imgUrl || mockUser.avatar, // Use avatar from GameLayer API or fallback to mock
         };
 
         setUser(updatedUser);
@@ -564,7 +539,7 @@ export const ProfileDetails: React.FC = () => {
   };
 
   const handleViewAllAchievements = () => {
-    setExpandedSection(expandedSection === 'achievements' ? null : 'achievements');
+    navigate('/achievements');
   };
 
   const handleViewAllMissions = () => {
@@ -648,7 +623,7 @@ export const ProfileDetails: React.FC = () => {
           
           <Avatar src={user.avatar} alt={user.name} />
           <UserName>{user.name}</UserName>
-          <UserLevel>Level {user.level}</UserLevel>
+          <UserLevel>Tier: {user.level}</UserLevel>
           <UserTeam>{user.team}</UserTeam>
           
           <ProfileStatsContainer>
@@ -658,7 +633,7 @@ export const ProfileDetails: React.FC = () => {
               </ProfileStatIcon>
               <ProfileStatInfo>
                 <ProfileStatCount>{formatNumber(user.allTimeStepCount)}</ProfileStatCount>
-                <ProfileStatLabel>total steps</ProfileStatLabel>
+                <ProfileStatLabel>lifetime steps</ProfileStatLabel>
               </ProfileStatInfo>
             </ProfileStatItem>
             
@@ -668,31 +643,13 @@ export const ProfileDetails: React.FC = () => {
               </ProfileStatIcon>
               <ProfileStatInfo>
                 <ProfileStatCount>{formatNumber(user.allTimeActiveMinutes)}</ProfileStatCount>
-                <ProfileStatLabel>active minutes</ProfileStatLabel>
+                <ProfileStatLabel>lifetime minutes</ProfileStatLabel>
               </ProfileStatInfo>
             </ProfileStatItem>
           </ProfileStatsContainer>
         </ProfileSummary>
 
-        <AdditionalStatsGrid>
-          <StatCard variants={itemVariants} whileHover={{ scale: 1.02 }}>
-            <StatIcon color={theme.colors.primary}>
-              <TrendingUp size={24} />
-            </StatIcon>
-            <StatCardValue>{formatNumber(user.dailyStepCount * 7)}</StatCardValue>
-            <StatCardLabel>This Week</StatCardLabel>
-            <StatChange positive={true}>+12% from last week</StatChange>
-          </StatCard>
 
-          <StatCard variants={itemVariants} whileHover={{ scale: 1.02 }}>
-            <StatIcon color={theme.colors.secondary}>
-              <Calendar size={24} />
-            </StatIcon>
-            <StatCardValue>{formatNumber(user.dailyStepCount * 30)}</StatCardValue>
-            <StatCardLabel>This Month</StatCardLabel>
-            <StatChange positive={true}>+8% from last month</StatChange>
-          </StatCard>
-        </AdditionalStatsGrid>
 
         <Section>
           <SectionHeader>
@@ -701,24 +658,19 @@ export const ProfileDetails: React.FC = () => {
               <SectionTitle>Achievements</SectionTitle>
               <SectionCount>{user.achievements.filter(a => a.unlockedAt).length}</SectionCount>
             </SectionTitleArea>
-            {user.achievements.filter(a => a.unlockedAt).length > 3 && (
-              <ViewAllButton
-                variant="ghost"
-                size="sm"
-                onClick={handleViewAllAchievements}
-              >
-                {expandedSection === 'achievements' ? 'Show Less' : 'View All'}
-                <ChevronRight size={16} style={{ 
-                  transform: expandedSection === 'achievements' ? 'rotate(90deg)' : 'rotate(0deg)',
-                  transition: 'transform 0.2s ease-in-out'
-                }} />
-              </ViewAllButton>
-            )}
+            <ViewAllButton
+              variant="ghost"
+              size="sm"
+              onClick={handleViewAllAchievements}
+            >
+              View All
+              <ChevronRight size={16} />
+            </ViewAllButton>
           </SectionHeader>
           
           <ItemsList>
             {user.achievements.filter(a => a.unlockedAt)
-              .slice(0, expandedSection === 'achievements' ? undefined : 3)
+              .slice(0, 3)
               .map((achievement) => (
               <AchievementItem
                 key={achievement.id}

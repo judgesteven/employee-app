@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { TrendingUp, Calendar, Award } from 'lucide-react';
 import { theme } from '../../styles/theme';
+import { Achievement } from '../../types';
 
 
 const StatsGrid = styled.div`
@@ -84,57 +85,168 @@ const AchievementsTitle = styled.h2`
 
 const AchievementsList = styled.div`
   display: flex;
-  flex-direction: column;
-  gap: ${theme.spacing.sm};
-`;
-
-const AchievementItem = styled(motion.div)`
-  display: flex;
-  align-items: center;
   gap: ${theme.spacing.md};
-  padding: ${theme.spacing.md};
-  background: ${theme.colors.surface};
-  border-radius: ${theme.borderRadius.lg};
-  border: 1px solid ${theme.colors.border};
+  overflow-x: auto;
+  padding-bottom: ${theme.spacing.sm};
+  scroll-behavior: smooth;
+  
+  /* Hide scrollbar but keep functionality */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  
+  &::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
 `;
 
-const AchievementIcon = styled.div`
-  font-size: ${theme.typography.fontSize.xl};
-  width: 40px;
-  height: 40px;
+const AchievementCard = styled(motion.div)<{ $bgColor?: string }>`
+  background: ${props => props.$bgColor || 'linear-gradient(135deg, #FFE4E1, #FFF0F5)'};
+  border-radius: ${theme.borderRadius.lg};
+  padding: ${theme.spacing.md};
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 160px;
+  min-height: 200px;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  }
+`;
+
+const AchievementStatusBadge = styled.div<{ $status: 'completed' | 'started' | 'locked' }>`
+  position: absolute;
+  top: ${theme.spacing.sm};
+  right: ${theme.spacing.sm};
+  padding: 2px ${theme.spacing.xs};
+  border-radius: ${theme.borderRadius.full};
+  font-size: ${theme.typography.fontSize.xs};
+  font-weight: ${theme.typography.fontWeight.semibold};
+  text-transform: capitalize;
+  
+  ${props => {
+    switch (props.$status) {
+      case 'completed':
+        return `
+          background: ${theme.colors.success};
+          color: white;
+        `;
+      case 'started':
+        return `
+          background: ${theme.colors.primary};
+          color: white;
+        `;
+      case 'locked':
+        return `
+          background: ${theme.colors.text.tertiary};
+          color: white;
+        `;
+    }
+  }}
+`;
+
+const AchievementBadgeContainer = styled.div`
+  margin: ${theme.spacing.sm} 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: ${theme.colors.gradients.secondary};
-  border-radius: ${theme.borderRadius.lg};
-  color: ${theme.colors.text.inverse};
-`;
-
-const AchievementInfo = styled.div`
   flex: 1;
 `;
 
-const AchievementName = styled.div`
-  font-weight: ${theme.typography.fontWeight.semibold};
-  color: ${theme.colors.text.primary};
-  margin-bottom: ${theme.spacing.xs};
+const AchievementBadgeImage = styled.img`
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
 `;
 
-const AchievementDate = styled.div`
+const AchievementIcon = styled.div`
+  font-size: 48px;
+  line-height: 1;
+`;
+
+const AchievementCategoryTag = styled.div`
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 2px ${theme.spacing.xs};
+  border-radius: ${theme.borderRadius.full};
+  font-size: ${theme.typography.fontSize.xs};
+  font-weight: ${theme.typography.fontWeight.semibold};
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: ${theme.spacing.sm};
+`;
+
+const AchievementInfo = styled.div`
+  width: 100%;
+`;
+
+const AchievementName = styled.h3`
+  font-size: ${theme.typography.fontSize.sm};
+  font-weight: ${theme.typography.fontWeight.bold};
+  color: ${theme.colors.text.primary};
+  margin: ${theme.spacing.xs} 0;
+  line-height: 1.2;
+`;
+
+const AchievementDescription = styled.p`
   font-size: ${theme.typography.fontSize.xs};
   color: ${theme.colors.text.secondary};
+  margin-bottom: ${theme.spacing.sm};
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+`;
+
+const AchievementProgress = styled.div`
+  width: 100%;
+`;
+
+const ProgressBar = styled.div`
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: ${theme.borderRadius.full};
+  overflow: hidden;
+  margin-bottom: 4px;
+`;
+
+const ProgressFill = styled.div<{ $progress: number; $status: 'completed' | 'started' | 'locked' }>`
+  height: 100%;
+  border-radius: ${theme.borderRadius.full};
+  transition: width 0.3s ease;
+  width: ${props => props.$progress}%;
+  
+  ${props => {
+    switch (props.$status) {
+      case 'completed':
+        return `background: ${theme.colors.success};`;
+      case 'started':
+        return `background: ${theme.colors.primary};`;
+      case 'locked':
+        return `background: ${theme.colors.text.tertiary};`;
+    }
+  }}
+`;
+
+const ProgressText = styled.div`
+  font-size: ${theme.typography.fontSize.xs};
+  color: ${theme.colors.text.secondary};
+  font-weight: ${theme.typography.fontWeight.medium};
 `;
 
 interface QuickStatsProps {
   dailySteps: number;
   weeklySteps: number;
   monthlySteps: number;
-  recentAchievements: Array<{
-    id: string;
-    name: string;
-    icon: string;
-    unlockedAt: Date;
-  }>;
+  recentAchievements: Achievement[];
 }
 
 export const QuickStats: React.FC<QuickStatsProps> = ({
@@ -224,21 +336,68 @@ export const QuickStats: React.FC<QuickStatsProps> = ({
           </AchievementsHeader>
           
           <AchievementsList>
-            {recentAchievements.slice(0, 3).map((achievement) => (
-              <AchievementItem
-                key={achievement.id}
-                variants={itemVariants}
-                whileHover={{ scale: 1.02 }}
-              >
-                <AchievementIcon>{achievement.icon}</AchievementIcon>
-                <AchievementInfo>
-                  <AchievementName>{achievement.name}</AchievementName>
-                  <AchievementDate>
-                    Unlocked {formatDate(achievement.unlockedAt)}
-                  </AchievementDate>
-                </AchievementInfo>
-              </AchievementItem>
-            ))}
+            {recentAchievements.slice(0, 6).map((achievement) => {
+              const progressPercentage = achievement.totalSteps 
+                ? (achievement.currentProgress || 0) / achievement.totalSteps * 100 
+                : achievement.status === 'completed' ? 100 : 0;
+
+              return (
+                <AchievementCard
+                  key={achievement.id}
+                  variants={itemVariants}
+                  whileHover={{ scale: 1.02 }}
+                  $bgColor={achievement.backgroundColor}
+                >
+                  <AchievementStatusBadge $status={achievement.status}>
+                    {achievement.status}
+                  </AchievementStatusBadge>
+
+                  <AchievementBadgeContainer>
+                    {achievement.badgeImage ? (
+                      <AchievementBadgeImage 
+                        src={achievement.badgeImage} 
+                        alt={achievement.name}
+                        onError={(e) => {
+                          // Fallback to icon if image fails to load
+                          e.currentTarget.style.display = 'none';
+                          const iconElement = e.currentTarget.nextElementSibling as HTMLElement;
+                          if (iconElement) iconElement.style.display = 'block';
+                        }}
+                      />
+                    ) : null}
+                    <AchievementIcon style={{ display: achievement.badgeImage ? 'none' : 'block' }}>
+                      {achievement.icon}
+                    </AchievementIcon>
+                  </AchievementBadgeContainer>
+
+                  {achievement.category && (
+                    <AchievementCategoryTag>
+                      {achievement.category}
+                    </AchievementCategoryTag>
+                  )}
+
+                  <AchievementInfo>
+                    <AchievementName>{achievement.name}</AchievementName>
+                    <AchievementDescription>{achievement.description}</AchievementDescription>
+                    
+                    <AchievementProgress>
+                      <ProgressBar>
+                        <ProgressFill 
+                          $progress={progressPercentage} 
+                          $status={achievement.status}
+                        />
+                      </ProgressBar>
+                      <ProgressText>
+                        {achievement.totalSteps 
+                          ? `${achievement.currentProgress || 0} / ${achievement.totalSteps} steps`
+                          : achievement.status === 'completed' ? 'Completed!' : 'In Progress'
+                        }
+                      </ProgressText>
+                    </AchievementProgress>
+                  </AchievementInfo>
+                </AchievementCard>
+              );
+            })}
           </AchievementsList>
         </RecentAchievements>
       )}

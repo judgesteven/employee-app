@@ -20,6 +20,12 @@ export interface Achievement {
   description: string;
   icon: string;
   unlockedAt?: Date;
+  category?: string; // Category like "POP MUSIC"
+  status: 'completed' | 'started' | 'locked'; // Achievement status
+  currentProgress?: number; // Current progress (e.g., 3)
+  totalSteps?: number; // Total steps needed (e.g., 10)
+  badgeImage?: string; // URL to achievement badge image
+  backgroundColor?: string; // Background color for the card
 }
 
 // Challenge objective for missions with multiple objectives
@@ -76,6 +82,12 @@ export interface Reward {
   category: string;
   available: boolean;
   claimed?: boolean;
+  brand?: string; // Brand name like "NINTENDO", "LEGO"
+  brandColor?: string; // Brand badge color
+  heroImage?: string; // Large hero image URL
+  availableCount?: number; // Number available (e.g., 5, 100, 1000)
+  expiresAt?: Date; // Expiration date for countdown
+  rarity?: 'large' | 'medium' | 'refreshing' | 'small'; // Prize tier
 }
 
 // Health data types

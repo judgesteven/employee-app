@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { User, Challenge, Leaderboard, Reward, ApiResponse } from '../types';
+import { User, Challenge, Leaderboard, Reward, Achievement, ApiResponse } from '../types';
 
 const API_BASE_URL = 'https://api.gamelayer.co/api/v0';
 const API_KEY = 'eb0f1b46acd3fde97c008db5c4fe9ed0';
@@ -27,6 +27,7 @@ interface GameLayerPlayer {
   id: string;
   name: string;
   points?: number; // Points represent step count in GameLayer
+  imgUrl?: string; // Player avatar image URL from GameLayer API
   // Add other fields as needed based on actual API response
 }
 
@@ -97,9 +98,81 @@ export const gameLayerApi = {
     return response.data.data;
   },
 
-  // Achievements
-  async unlockAchievement(userId: string, achievementId: string): Promise<void> {
-    await api.post(`/users/${userId}/achievements/${achievementId}/unlock`);
+  // Achievements - GET with player ID as query parameter
+  async getAchievements(playerId: string = PLAYER_ID): Promise<Achievement[]> {
+    if (!ENABLE_API_CALLS) {
+      console.log(`[MOCK] GameLayer getAchievements for player: ${playerId}`);
+      await mockDelay(100);
+      return [];
+    }
+
+    try {
+      console.log(`[API] GameLayer getAchievements for player: ${playerId}`);
+      const response = await api.get('/achievements', {
+        params: {
+          player: playerId,
+          account: ACCOUNT_ID
+        }
+      });
+      
+      console.log('GameLayer getAchievements API response:', response.data);
+      
+      // Transform GameLayer achievement data to Achievement interface
+      const achievements = response.data;
+      if (Array.isArray(achievements)) {
+        const transformedAchievements = achievements.map((achievement: any) => {
+          console.log('=== GameLayer API: Processing Achievement ===');
+          console.log('GameLayer API: Full raw achievement data:', JSON.stringify(achievement, null, 2));
+          
+          // Determine status based on completion
+          let status: 'completed' | 'started' | 'locked' = 'locked';
+          if (achievement.completed || achievement.unlocked) {
+            status = 'completed';
+          } else if (achievement.progress > 0 || achievement.currentProgress > 0) {
+            status = 'started';
+          }
+
+          const transformed = {
+            id: achievement.id,
+            name: achievement.name || achievement.title || 'Untitled Achievement',
+            description: achievement.description || '',
+            icon: achievement.icon || achievement.emoji || '🏆',
+            unlockedAt: achievement.unlockedAt || achievement.completedAt ? new Date(achievement.unlockedAt || achievement.completedAt) : undefined,
+            category: achievement.category || achievement.tag || achievement.type,
+            status: status,
+            currentProgress: achievement.progress || achievement.currentProgress || 0,
+            totalSteps: achievement.target || achievement.targetValue || achievement.maxProgress || 1,
+            badgeImage: achievement.badgeImage || achievement.image || achievement.imgUrl,
+            backgroundColor: achievement.backgroundColor || achievement.color
+          };
+          
+          console.log('GameLayer API: Transformed achievement:', transformed);
+          return transformed;
+        });
+        
+        console.log('GameLayer API: All transformed achievements:', transformedAchievements);
+        return transformedAchievements;
+      }
+      
+      return [];
+    } catch (error) {
+      console.error('GameLayer getAchievements API error:', error);
+      return [];
+    }
+  },
+
+  // Unlock achievement
+  async unlockAchievement(playerId: string = PLAYER_ID, achievementId: string): Promise<void> {
+    if (!ENABLE_API_CALLS) {
+      console.log(`[MOCK] GameLayer unlockAchievement: ${achievementId} for player ${playerId}`);
+      await mockDelay(100);
+      return;
+    }
+
+    await api.post(`/achievements/${achievementId}/unlock`, {
+      account: ACCOUNT_ID,
+      player: playerId
+    });
   },
 
   // Complete step-tracker event with step count delta

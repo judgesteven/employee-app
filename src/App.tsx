@@ -11,6 +11,7 @@ import { Settings } from './pages/Settings';
 import { Challenges } from './pages/Challenges';
 import { Competition } from './pages/Competition';
 import { Rewards } from './pages/Rewards';
+import { Achievements } from './pages/Achievements';
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/profile/details" element={<ProfileDetails />} />
+            <Route path="/achievements" element={<Achievements />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/challenges" element={<Challenges />} />
             <Route path="/competition" element={<Competition />} />

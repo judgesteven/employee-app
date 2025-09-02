@@ -35,14 +35,14 @@ const FilterTabs = styled.div`
   margin-bottom: ${theme.spacing.lg};
   padding: ${theme.spacing.sm};
   background: ${theme.colors.surface};
-  border-radius: ${theme.borderRadius.xl};
+  border-radius: ${theme.borderRadius.full};
 `;
 
 const FilterTab = styled(Button)<{ $isActive: boolean }>`
   flex: 1;
   padding: ${theme.spacing.sm} ${theme.spacing.md};
   font-size: ${theme.typography.fontSize.sm};
-  border-radius: ${theme.borderRadius.lg};
+  border-radius: ${theme.borderRadius['2xl']};
   background: ${props => props.$isActive ? theme.colors.primary : 'transparent'};
   color: ${props => props.$isActive ? theme.colors.text.inverse : theme.colors.text.secondary};
   border: none;

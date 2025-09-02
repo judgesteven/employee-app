@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { Gem } from 'lucide-react';
+import { Gem, Clock } from 'lucide-react';
 import { Container, Button } from '../styles/GlobalStyles';
 import { theme } from '../styles/theme';
 import { Reward } from '../types';
@@ -106,29 +106,76 @@ const RewardsGrid = styled.div`
 
 const RewardCard = styled(motion.div)<{ $available: boolean }>`
   background: ${theme.colors.background};
-  border: 1px solid ${props => props.$available ? theme.colors.border : theme.colors.border};
   border-radius: ${theme.borderRadius.xl};
-  padding: ${theme.spacing.lg};
-  position: relative;
   overflow: hidden;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   opacity: ${props => props.$available ? 1 : 0.6};
   
   &:hover {
-    border-color: ${props => props.$available ? theme.colors.primary : theme.colors.border};
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
   }
 `;
 
-const RewardImage = styled.div<{ $bgColor: string }>`
+const RewardHeroImage = styled.div<{ $heroImage?: string }>`
   width: 100%;
-  height: 120px;
-  border-radius: ${theme.borderRadius.lg};
-  background: ${props => props.$bgColor};
+  height: 200px;
+  background: ${props => props.$heroImage 
+    ? `url("${props.$heroImage}") center/cover` 
+    : 'linear-gradient(135deg, #f0f0f0, #e0e0e0)'};
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: ${theme.typography.fontSize['3xl']};
-  margin-bottom: ${theme.spacing.md};
-  position: relative;
+  font-size: ${theme.typography.fontSize['4xl']};
+`;
+
+const BrandBadge = styled.div<{ $brandColor?: string }>`
+  position: absolute;
+  top: ${theme.spacing.md};
+  left: ${theme.spacing.md};
+  background: ${props => props.$brandColor || theme.colors.primary};
+  color: white;
+  padding: ${theme.spacing.xs} ${theme.spacing.sm};
+  border-radius: ${theme.borderRadius.md};
+  font-size: ${theme.typography.fontSize.sm};
+  font-weight: ${theme.typography.fontWeight.bold};
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+`;
+
+const GemCostBadge = styled.div`
+  position: absolute;
+  top: ${theme.spacing.md};
+  right: ${theme.spacing.md};
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: ${theme.spacing.xs} ${theme.spacing.sm};
+  border-radius: ${theme.borderRadius.full};
+  font-size: ${theme.typography.fontSize.sm};
+  font-weight: ${theme.typography.fontWeight.semibold};
+  display: flex;
+  align-items: center;
+  gap: 4px;
+`;
+
+const CountdownBadge = styled.div`
+  background: linear-gradient(135deg, #ff6b35, #ff8c42);
+  color: white;
+  padding: ${theme.spacing.sm} ${theme.spacing.md};
+  border-radius: ${theme.borderRadius.full};
+  font-size: ${theme.typography.fontSize.sm};
+  font-weight: ${theme.typography.fontWeight.semibold};
+  display: flex;
+  align-items: center;
+  gap: ${theme.spacing.xs};
+  margin: ${theme.spacing.md} ${theme.spacing.md} 0;
+  width: fit-content;
+`;
+
+const RewardContent = styled.div`
+  padding: ${theme.spacing.md} ${theme.spacing.lg} ${theme.spacing.lg};
 `;
 
 const RewardInfo = styled.div`
@@ -148,23 +195,22 @@ const RewardDescription = styled.p`
   line-height: 1.4;
 `;
 
-const RewardFooter = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-`;
-
-const RewardCost = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${theme.spacing.xs};
-  font-weight: ${theme.typography.fontWeight.semibold};
-  color: ${theme.colors.accent};
+const AvailabilityText = styled.div`
+  font-size: ${theme.typography.fontSize.sm};
+  color: ${theme.colors.text.secondary};
+  margin-bottom: ${theme.spacing.md};
 `;
 
 const ClaimButton = styled(Button)<{ $canAfford: boolean }>`
-  padding: ${theme.spacing.sm} ${theme.spacing.md};
-  font-size: ${theme.typography.fontSize.sm};
+  width: 100%;
+  padding: ${theme.spacing.md};
+  font-size: ${theme.typography.fontSize.base};
+  font-weight: ${theme.typography.fontWeight.semibold};
+  background: ${theme.colors.primary};
+  
+  &:hover {
+    background: ${theme.colors.primary}dd;
+  }
   
   ${props => !props.$canAfford && `
     opacity: 0.5;
@@ -208,83 +254,99 @@ export const Rewards: React.FC = () => {
   const mockRewards: Reward[] = [
     {
       id: '1',
-      name: 'Cinema Tickets',
-      description: 'Two tickets to any movie at participating cinemas',
-      cost: 500,
-      image: '🎬',
+      name: 'Large Prize',
+      description: 'This is a Large Prize - these are very rare',
+      cost: 1000,
+      image: '🎮',
       category: 'entertainment',
       available: true,
       claimed: false,
+      brand: 'NINTENDO',
+      brandColor: '#e60012',
+      heroImage: 'https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?w=400&h=200&fit=crop',
+      availableCount: 5,
+      expiresAt: new Date(Date.now() + 121 * 24 * 60 * 60 * 1000),
+      rarity: 'large'
     },
     {
       id: '2',
-      name: 'Coffee Voucher',
-      description: 'Free coffee and pastry at local coffee shops',
-      cost: 150,
+      name: 'Medium Prize',
+      description: 'This is a Medium Prize - there are less of these',
+      cost: 500,
+      image: '🧱',
+      category: 'entertainment',
+      available: true,
+      claimed: false,
+      brand: 'LEGO',
+      brandColor: '#ffcf00',
+      heroImage: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=200&fit=crop',
+      availableCount: 100,
+      expiresAt: new Date(Date.now() + 121 * 24 * 60 * 60 * 1000),
+      rarity: 'medium'
+    },
+    {
+      id: '3',
+      name: 'Refreshing Prize',
+      description: 'This prize refreshes stock monthly',
+      cost: 250,
       image: '☕',
       category: 'food',
       available: true,
       claimed: false,
-    },
-    {
-      id: '3',
-      name: 'Running Shoes Raffle',
-      description: 'Entry into raffle to win premium running shoes',
-      cost: 300,
-      image: '👟',
-      category: 'fitness',
-      available: true,
-      claimed: false,
+      brand: 'STARBUCKS',
+      brandColor: '#00704a',
+      heroImage: 'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=400&h=200&fit=crop',
+      availableCount: 100,
+      expiresAt: new Date(Date.now() + 121 * 24 * 60 * 60 * 1000),
+      rarity: 'refreshing'
     },
     {
       id: '4',
+      name: 'Small Prize',
+      description: 'This is a Small Prize - there are many of these',
+      cost: 100,
+      image: '🎬',
+      category: 'entertainment',
+      available: true,
+      claimed: false,
+      brand: 'DISNEY',
+      brandColor: '#0066cc',
+      heroImage: 'https://images.unsplash.com/photo-1489599162436-ba8bf4a8e7e2?w=400&h=200&fit=crop',
+      availableCount: 1000,
+      expiresAt: new Date(Date.now() + 121 * 24 * 60 * 60 * 1000),
+      rarity: 'small'
+    },
+    {
+      id: '5',
       name: 'Fitness Tracker',
       description: 'Latest fitness tracking wearable device',
-      cost: 2000,
+      cost: 800,
       image: '⌚',
       category: 'fitness',
       available: true,
       claimed: false,
-    },
-    {
-      id: '5',
-      name: 'Restaurant Voucher',
-      description: '£25 voucher for participating restaurants',
-      cost: 400,
-      image: '🍽️',
-      category: 'food',
-      available: true,
-      claimed: false,
+      brand: 'APPLE',
+      brandColor: '#007aff',
+      heroImage: 'https://images.unsplash.com/photo-1434493789847-2f02dc6ca35d?w=400&h=200&fit=crop',
+      availableCount: 25,
+      expiresAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
+      rarity: 'medium'
     },
     {
       id: '6',
-      name: 'Shopping Credit',
-      description: '£15 credit for online shopping',
-      cost: 250,
-      image: '🛍️',
-      category: 'shopping',
-      available: true,
-      claimed: false,
-    },
-    {
-      id: '7',
-      name: 'Concert Tickets',
-      description: 'Tickets to local music events and concerts',
-      cost: 800,
-      image: '🎵',
+      name: 'Gaming Console',
+      description: 'Next-gen gaming console with controller',
+      cost: 1500,
+      image: '🎮',
       category: 'entertainment',
       available: false, // Out of stock
       claimed: false,
-    },
-    {
-      id: '8',
-      name: 'Gym Membership',
-      description: 'One month free gym membership',
-      cost: 600,
-      image: '💪',
-      category: 'fitness',
-      available: true,
-      claimed: true, // Already claimed
+      brand: 'SONY',
+      brandColor: '#003791',
+      heroImage: 'https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?w=400&h=200&fit=crop',
+      availableCount: 0,
+      expiresAt: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000),
+      rarity: 'large'
     },
   ];
 
@@ -301,6 +363,13 @@ export const Rewards: React.FC = () => {
     if (activeCategory === 'all') return true;
     return reward.category === activeCategory;
   });
+
+  const calculateDaysLeft = (expiresAt?: Date): number => {
+    if (!expiresAt) return 0;
+    const now = new Date();
+    const diffTime = expiresAt.getTime() - now.getTime();
+    return Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+  };
 
   const handleClaimReward = (rewardId: string, cost: number) => {
     if (userGems >= cost) {
@@ -412,6 +481,7 @@ export const Rewards: React.FC = () => {
           {filteredRewards.map((reward) => {
             const canAfford = userGems >= reward.cost;
             const canClaim = reward.available && !reward.claimed && canAfford;
+            const daysLeft = calculateDaysLeft(reward.expiresAt);
             
             return (
               <RewardCard
@@ -420,36 +490,54 @@ export const Rewards: React.FC = () => {
                 whileHover={{ scale: reward.available ? 1.02 : 1 }}
                 $available={reward.available && !reward.claimed}
               >
-                {!reward.available && <UnavailableBadge>Out of Stock</UnavailableBadge>}
-                {reward.claimed && <ClaimedBadge>Claimed</ClaimedBadge>}
-                
-                <RewardImage $bgColor={getRewardBackgroundColor(reward.category)}>
-                  {reward.image}
-                </RewardImage>
-                
-                <RewardInfo>
-                  <RewardName>{reward.name}</RewardName>
-                  <RewardDescription>{reward.description}</RewardDescription>
-                </RewardInfo>
-                
-                <RewardFooter>
-                  <RewardCost>
-                    <Gem size={16} />
-                    <span>{reward.cost}</span>
-                  </RewardCost>
+                <RewardHeroImage $heroImage={reward.heroImage}>
+                  {reward.brand && (
+                    <BrandBadge $brandColor={reward.brandColor}>
+                      {reward.brand}
+                    </BrandBadge>
+                  )}
+                  
+                  <GemCostBadge>
+                    <Gem size={14} />
+                    -{reward.cost}
+                  </GemCostBadge>
+                  
+                  {!reward.heroImage && reward.image}
+                </RewardHeroImage>
+
+                {daysLeft > 0 && (
+                  <CountdownBadge>
+                    <Clock size={16} />
+                    {daysLeft} days left
+                  </CountdownBadge>
+                )}
+
+                <RewardContent>
+                  <RewardInfo>
+                    <RewardName>{reward.name}</RewardName>
+                    <RewardDescription>{reward.description}</RewardDescription>
+                  </RewardInfo>
+                  
+                  {reward.availableCount !== undefined && (
+                    <AvailabilityText>
+                      Available: {reward.availableCount}
+                    </AvailabilityText>
+                  )}
                   
                   <ClaimButton
                     variant="primary"
-                    size="sm"
                     disabled={!canClaim}
                     $canAfford={canAfford}
                     onClick={() => canClaim && handleClaimReward(reward.id, reward.cost)}
                   >
                     {reward.claimed ? 'Claimed' : 
-                     !reward.available ? 'Unavailable' : 
-                     !canAfford ? 'Not Enough Gems' : 'Claim'}
+                     !reward.available ? 'Out of Stock' : 
+                     !canAfford ? 'Not Enough Gems' : 'Get Prize'}
                   </ClaimButton>
-                </RewardFooter>
+                </RewardContent>
+
+                {!reward.available && <UnavailableBadge>Out of Stock</UnavailableBadge>}
+                {reward.claimed && <ClaimedBadge>Claimed</ClaimedBadge>}
               </RewardCard>
             );
           })}

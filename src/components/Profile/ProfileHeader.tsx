@@ -5,7 +5,7 @@ import { Gem, Clock } from 'lucide-react';
 import { theme } from '../../styles/theme';
 import { User } from '../../types';
 
-const HeaderContainer = styled.div`
+const HeaderContainer = styled(motion.div)`
   background: ${theme.colors.gradients.primary};
   border-radius: ${theme.borderRadius.xl};
   padding: ${theme.spacing.lg};
@@ -13,6 +13,13 @@ const HeaderContainer = styled.div`
   color: ${theme.colors.text.inverse};
   position: relative;
   overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  }
 `;
 
 const BackgroundPattern = styled.div`
@@ -34,7 +41,7 @@ const HeaderContent = styled.div`
 
 const TopRow = styled.div`
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: flex-start;
   margin-bottom: ${theme.spacing.md};
 `;
@@ -56,60 +63,40 @@ const Avatar = styled.img`
 const UserDetails = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${theme.spacing.xs};
+  gap: 3px;
 `;
 
 const UserName = styled.h1`
   font-size: ${theme.typography.fontSize['2xl']};
   font-weight: ${theme.typography.fontWeight.bold};
   margin: 0;
+  line-height: 1.2;
 `;
 
 const UserMeta = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 0px;
 `;
 
 const UserLevel = styled.span`
   font-size: ${theme.typography.fontSize.sm};
   opacity: 0.8;
+  line-height: 1.2;
 `;
 
-const UserTeam = styled.span`
-  font-size: ${theme.typography.fontSize.xs};
-  opacity: 0.7;
-  font-weight: ${theme.typography.fontWeight.medium};
-`;
 
-const GemsContainer = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${theme.spacing.xs};
-  background: rgba(255, 255, 255, 0.2);
-  padding: ${theme.spacing.sm} ${theme.spacing.md};
-  border-radius: ${theme.borderRadius.full};
-  backdrop-filter: blur(10px);
-`;
 
-const GemsCount = styled.span`
-  font-weight: ${theme.typography.fontWeight.semibold};
-  font-size: ${theme.typography.fontSize.lg};
-`;
+
 
 const StatsSection = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   margin-top: ${theme.spacing.md};
 `;
 
 const StatsGrid = styled.div`
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: ${theme.spacing.lg};
-  flex: 1;
-  margin-right: ${theme.spacing.md};
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: ${theme.spacing.md};
 `;
 
 const StatItem = styled.div`
@@ -146,26 +133,7 @@ const StatLabel = styled.span`
   opacity: 0.8;
 `;
 
-const ViewMoreButton = styled(motion.button)`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.2);
-  border: none;
-  color: ${theme.colors.text.inverse};
-  padding: ${theme.spacing.sm};
-  border-radius: ${theme.borderRadius.lg};
-  font-size: ${theme.typography.fontSize.xs};
-  font-weight: ${theme.typography.fontWeight.medium};
-  cursor: pointer;
-  backdrop-filter: blur(10px);
-  min-width: auto;
-  white-space: nowrap;
-  
-  &:hover {
-    background: rgba(255, 255, 255, 0.3);
-  }
-`;
+
 
 interface ProfileHeaderProps {
   user: User;
@@ -181,7 +149,11 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, onViewMore }
   };
 
   return (
-    <HeaderContainer>
+    <HeaderContainer 
+      onClick={onViewMore}
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+    >
       <BackgroundPattern />
       <HeaderContent>
         <TopRow>
@@ -190,16 +162,10 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, onViewMore }
             <UserDetails>
               <UserName>{user.name}</UserName>
               <UserMeta>
-                <UserLevel>Level {user.level}</UserLevel>
-                <UserTeam>{user.team}</UserTeam>
+                <UserLevel>Tier: {user.level}</UserLevel>
               </UserMeta>
             </UserDetails>
           </UserInfo>
-          
-          <GemsContainer>
-            <Gem size={20} />
-            <GemsCount>{user.gems}</GemsCount>
-          </GemsContainer>
         </TopRow>
         
         <StatsSection>
@@ -210,7 +176,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, onViewMore }
               </StatIcon>
               <StatInfo>
                 <StatCount>{formatStepCount(user.dailyStepCount)}</StatCount>
-                <StatLabel>steps today</StatLabel>
+                <StatLabel>steps</StatLabel>
               </StatInfo>
             </StatItem>
             
@@ -220,18 +186,20 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, onViewMore }
               </StatIcon>
               <StatInfo>
                 <StatCount>{user.dailyActiveMinutes}</StatCount>
-                <StatLabel>active minutes</StatLabel>
+                <StatLabel>minutes</StatLabel>
+              </StatInfo>
+            </StatItem>
+            
+            <StatItem>
+              <StatIcon>
+                <Gem size={16} />
+              </StatIcon>
+              <StatInfo>
+                <StatCount>{user.gems.toLocaleString()}</StatCount>
+                <StatLabel>gems</StatLabel>
               </StatInfo>
             </StatItem>
           </StatsGrid>
-          
-          <ViewMoreButton
-            onClick={onViewMore}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            Profile
-          </ViewMoreButton>
         </StatsSection>
       </HeaderContent>
     </HeaderContainer>
