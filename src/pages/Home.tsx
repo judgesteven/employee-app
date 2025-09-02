@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Clock, Target, ChevronRight, Gem, Star, Diamond } from 'lucide-react';
+import { Clock, Target, ChevronRight, Gem } from 'lucide-react';
 import { ProfileHeader } from '../components/Profile/ProfileHeader';
 import { QuickStats } from '../components/Profile/QuickStats';
 
@@ -77,7 +77,7 @@ const MissionsList = styled.div`
 `;
 
 const MissionCard = styled(motion.div)`
-  background: ${theme.colors.white};
+  background: ${theme.colors.background};
   border-radius: ${theme.borderRadius.xl};
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -101,7 +101,7 @@ const HeroImageSection = styled.div`
 const HeroImage = styled.div<{ $bgImage?: string }>`
   width: 100%;
   height: 100%;
-  background: ${props => props.$bgImage ? `url(${props.$bgImage})` : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'};
+  background: ${props => props.$bgImage ? `url("${props.$bgImage}")` : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'};
   background-size: cover;
   background-position: center;
   position: relative;
@@ -124,28 +124,39 @@ const RewardBadge = styled.div<{ $type: 'gems' | 'experience' }>`
   background: rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(8px);
   border-radius: ${theme.borderRadius.full};
-  color: ${theme.colors.white};
+  color: ${theme.colors.text.inverse};
   font-size: ${theme.typography.fontSize.sm};
   font-weight: ${theme.typography.fontWeight.semibold};
 `;
 
-const CategoryBadge = styled.div`
+
+
+const TagsOverlay = styled.div`
+  position: absolute;
+  top: ${theme.spacing.md};
+  left: ${theme.spacing.md};
+  display: flex;
+  gap: ${theme.spacing.xs};
+`;
+
+const TimeRemainingOverlay = styled.div`
   position: absolute;
   bottom: ${theme.spacing.md};
-  left: ${theme.spacing.md};
-  padding: ${theme.spacing.sm} ${theme.spacing.md};
-  background: rgba(255, 255, 255, 0.9);
+  right: ${theme.spacing.md};
+  display: flex;
+  align-items: center;
+  gap: ${theme.spacing.xs};
+  padding: ${theme.spacing.xs} ${theme.spacing.sm};
+  background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(8px);
   border-radius: ${theme.borderRadius.full};
-  color: ${theme.colors.primary};
+  color: ${theme.colors.text.inverse};
   font-size: ${theme.typography.fontSize.sm};
-  font-weight: ${theme.typography.fontWeight.bold};
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  font-weight: ${theme.typography.fontWeight.medium};
 `;
 
 const CardContent = styled.div`
-  padding: ${theme.spacing.lg};
+  padding: ${theme.spacing.md} ${theme.spacing.lg} ${theme.spacing.xs};
 `;
 
 const MissionHeader = styled.div`
@@ -179,25 +190,7 @@ const MissionDescription = styled.p`
   margin-bottom: ${theme.spacing.sm};
 `;
 
-const MissionIcon = styled.div`
-  width: 48px;
-  height: 48px;
-  border-radius: ${theme.borderRadius.lg};
-  background: ${theme.colors.gradients.primary};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: ${theme.typography.fontSize.xl};
-  margin-left: ${theme.spacing.md};
-`;
 
-const MissionImage = styled.img`
-  width: 48px;
-  height: 48px;
-  border-radius: ${theme.borderRadius.lg};
-  object-fit: cover;
-  margin-left: ${theme.spacing.md};
-`;
 
 const ProgressSection = styled.div`
   margin-bottom: ${theme.spacing.md};
@@ -205,8 +198,8 @@ const ProgressSection = styled.div`
 
 const ProgressBar = styled.div`
   width: 100%;
-  height: 8px;
-  background: ${theme.colors.surface};
+  height: 12px;
+  background: ${theme.colors.surfaceHover};
   border-radius: ${theme.borderRadius.full};
   overflow: hidden;
   margin-bottom: ${theme.spacing.sm};
@@ -232,80 +225,16 @@ const ProgressCurrent = styled.span`
   font-size: ${theme.typography.fontSize.sm};
 `;
 
-const ProgressTarget = styled.span`
-  color: ${theme.colors.text.secondary};
+const ProgressPercentage = styled.div`
+  text-align: right;
+  margin-top: ${theme.spacing.xs};
   font-size: ${theme.typography.fontSize.sm};
-`;
-
-const MissionFooter = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-`;
-
-const RewardInfo = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${theme.spacing.xs};
-  color: ${theme.colors.accent};
-  font-weight: ${theme.typography.fontWeight.medium};
-`;
-
-const TimeLeft = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${theme.spacing.xs};
   color: ${theme.colors.text.secondary};
-  font-size: ${theme.typography.fontSize.sm};
 `;
 
-const MissionType = styled.div<{ type: string }>`
-  display: inline-block;
-  width: fit-content;
-  padding: ${theme.spacing.xs} ${theme.spacing.sm};
-  border-radius: ${theme.borderRadius.full};
-  font-size: ${theme.typography.fontSize.xs};
-  font-weight: ${theme.typography.fontWeight.medium};
-  text-transform: lowercase;
-  border: 1px solid;
-  
-  ${props => {
-    switch (props.type) {
-      case 'daily':
-        return `
-          background: ${theme.colors.accent}20;
-          color: ${theme.colors.accent};
-          border-color: ${theme.colors.accent}40;
-        `;
-      case 'weekly':
-        return `
-          background: ${theme.colors.primary}20;
-          color: ${theme.colors.primary};
-          border-color: ${theme.colors.primary}40;
-        `;
-      case 'monthly':
-        return `
-          background: ${theme.colors.secondary}20;
-          color: ${theme.colors.secondary};
-          border-color: ${theme.colors.secondary}40;
-        `;
-      default:
-        return `
-          background: ${theme.colors.surface};
-          color: ${theme.colors.text.secondary};
-          border-color: ${theme.colors.border};
-        `;
-    }
-  }}
-`;
 
-const TagsAndCategoryContainer = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: ${theme.spacing.xs};
-  margin-top: ${theme.spacing.sm};
-`;
+
+
 
 const TagBadge = styled.div<{ $tag: string }>`
   display: inline-block;
@@ -319,77 +248,35 @@ const TagBadge = styled.div<{ $tag: string }>`
   ${props => {
     const tag = props.$tag.toLowerCase();
     switch (tag) {
-      case 'fitness':
-      case 'cardio':
-      case 'workout':
+      case 'steps':
         return `
-          background: ${theme.colors.success}20;
-          color: ${theme.colors.success};
-          border-color: ${theme.colors.success}40;
+          background: ${theme.colors.success};
+          color: ${theme.colors.text.inverse};
+          border-color: ${theme.colors.success};
         `;
-      case 'activity':
-      case 'movement':
-      case 'active':
+      case 'minutes':
         return `
-          background: ${theme.colors.primary}20;
-          color: ${theme.colors.primary};
-          border-color: ${theme.colors.primary}40;
+          background: ${theme.colors.primary};
+          color: ${theme.colors.text.inverse};
+          border-color: ${theme.colors.primary};
         `;
-      case 'endurance':
-      case 'marathon':
-      case 'challenge':
-        return `
-          background: ${theme.colors.accent}20;
-          color: ${theme.colors.accent};
-          border-color: ${theme.colors.accent}40;
-        `;
-      case 'habit':
-      case 'streak':
-      case 'consistency':
-        return `
-          background: ${theme.colors.secondary}20;
-          color: ${theme.colors.secondary};
-          border-color: ${theme.colors.secondary}40;
-        `;
-      case 'evening':
-      case 'morning':
-      case 'time':
-        return `
-          background: #8B5CF6;
-          color: #8B5CF6;
-          border-color: #8B5CF640;
-        `;
-      case 'weekend':
-      case 'weekly':
       case 'daily':
         return `
-          background: #F59E0B20;
-          color: #F59E0B;
-          border-color: #F59E0B40;
+          background: ${theme.colors.accent};
+          color: ${theme.colors.text.inverse};
+          border-color: ${theme.colors.accent};
         `;
-      case 'relaxation':
-      case 'calm':
-      case 'wellness':
+      case 'weekly':
         return `
-          background: #10B98120;
-          color: #10B981;
-          border-color: #10B98140;
+          background: ${theme.colors.primary};
+          color: ${theme.colors.text.inverse};
+          border-color: ${theme.colors.primary};
         `;
-      case 'intensive':
-      case 'power':
-      case 'strength':
+      case 'monthly':
         return `
-          background: #EF444420;
-          color: #EF4444;
-          border-color: #EF444440;
-        `;
-      case 'long-term':
-      case 'goal':
-      case 'target':
-        return `
-          background: #6366F120;
-          color: #6366F1;
-          border-color: #6366F140;
+          background: ${theme.colors.secondary};
+          color: ${theme.colors.text.inverse};
+          border-color: ${theme.colors.secondary};
         `;
       default:
         return `
@@ -476,7 +363,7 @@ export const Home: React.FC = () => {
       completed: false,
       icon: '🏃‍♂️',
       imgUrl: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=200&fit=crop',
-      tags: ['fitness', 'cardio'],
+      tags: ['steps'],
     },
     {
       id: '3',
@@ -491,7 +378,7 @@ export const Home: React.FC = () => {
       completed: false,
       icon: '⚡',
       imgUrl: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=200&fit=crop',
-      tags: ['endurance', 'challenge'],
+      tags: ['steps'],
     },
     {
       id: '4',
@@ -501,10 +388,12 @@ export const Home: React.FC = () => {
       targetValue: 7,
       currentProgress: 4,
       reward: 150,
+      experience: 250,
       expiresAt: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
       completed: false,
       icon: '🏆',
-      tags: ['habit', 'streak'],
+      imgUrl: 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=400&h=200&fit=crop',
+      tags: ['minutes'],
     },
   ];
 
@@ -723,18 +612,25 @@ export const Home: React.FC = () => {
                   <HeroImageSection>
                     <HeroImage $bgImage={mission.imgUrl}>
                       <RewardsOverlay>
-                        <RewardBadge $type="experience">
-                          <Star size={16} />
-                          {mission.experience || 250}
-                        </RewardBadge>
                         <RewardBadge $type="gems">
-                          <Diamond size={16} />
+                          <Gem size={16} />
                           {mission.reward}
                         </RewardBadge>
                       </RewardsOverlay>
-                      <CategoryBadge>
-                        {mission.type}
-                      </CategoryBadge>
+                      <TagsOverlay>
+                        <TagBadge $tag={mission.type}>
+                          {mission.type}
+                        </TagBadge>
+                        {mission.tags && mission.tags.slice(0, 2).map((tag, index) => (
+                          <TagBadge key={index} $tag={tag}>
+                            {tag}
+                          </TagBadge>
+                        ))}
+                      </TagsOverlay>
+                      <TimeRemainingOverlay>
+                        <Clock size={14} />
+                        {formatTimeLeft(mission.expiresAt)}
+                      </TimeRemainingOverlay>
                     </HeroImage>
                   </HeroImageSection>
                   
@@ -745,26 +641,7 @@ export const Home: React.FC = () => {
                         <MissionTitle>{mission.title}</MissionTitle>
                       </MissionTitleContainer>
                       <MissionDescription>{mission.description}</MissionDescription>
-                      <TagsAndCategoryContainer>
-                        <MissionType type={mission.type}>
-                          {mission.type}
-                        </MissionType>
-                        {mission.tags && mission.tags.length > 0 && (
-                          <>
-                            {mission.tags.map((tag, index) => (
-                              <TagBadge key={index} $tag={tag}>
-                                {tag}
-                              </TagBadge>
-                            ))}
-                          </>
-                        )}
-                      </TagsAndCategoryContainer>
                     </MissionInfo>
-                    {mission.imgUrl ? (
-                      <MissionImage src={mission.imgUrl} alt={mission.title} />
-                    ) : (
-                      <MissionIcon>{mission.icon}</MissionIcon>
-                    )}
                   </MissionHeader>
 
                   <ProgressSection>
@@ -772,27 +649,18 @@ export const Home: React.FC = () => {
                       <ProgressCurrent>
                         {mission.currentProgress.toLocaleString()} / {mission.targetValue.toLocaleString()}
                       </ProgressCurrent>
-                      <ProgressTarget>
-                        {Math.round(getProgressPercentage(mission.currentProgress, mission.targetValue))}% complete
-                      </ProgressTarget>
                     </ProgressText>
                     <ProgressBar>
                       <ProgressFill
                         $progress={getProgressPercentage(mission.currentProgress, mission.targetValue)}
                       />
                     </ProgressBar>
+                    <ProgressPercentage>
+                      {Math.round(getProgressPercentage(mission.currentProgress, mission.targetValue))}% complete
+                    </ProgressPercentage>
                   </ProgressSection>
 
-                  <MissionFooter>
-                    <RewardInfo>
-                      <Gem size={16} />
-                      <span>{mission.reward} gems</span>
-                    </RewardInfo>
-                    <TimeLeft>
-                      <Clock size={16} />
-                      <span>{formatTimeLeft(mission.expiresAt)}</span>
-                    </TimeLeft>
-                  </MissionFooter>
+
                   </CardContent>
                 </MissionCard>
               ))}
