@@ -319,7 +319,7 @@ const PoweredByText = styled.div`
 export const Home: React.FC = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
-  const [inProgressMissions, setInProgressMissions] = useState<Challenge[]>([]);
+  const [featuredMissions, setFeaturedMissions] = useState<Challenge[]>([]);
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -455,9 +455,9 @@ export const Home: React.FC = () => {
         console.log('Home: Fetched missions from GameLayer API:', missions);
         console.log('Home: Number of missions fetched:', missions?.length || 0);
         
-        // Filter incomplete missions and sort by priority (priority 1 is highest)
+        // Filter for Priority 1 missions only (featured missions)
         missions = missions
-          .filter(mission => !mission.completed)
+          .filter(mission => !mission.completed && mission.priority === 1)
           .sort((a, b) => (a.priority || 999) - (b.priority || 999));
         
         // Log mission data (removed step override logic)
@@ -487,7 +487,7 @@ export const Home: React.FC = () => {
         console.log('Home: Final missions to display:', filteredMissions.slice(0, 3));
 
         setUser(updatedUser);
-        setInProgressMissions(filteredMissions.slice(0, 3)); // Show only first 3 missions on home
+        setFeaturedMissions(filteredMissions.slice(0, 3)); // Show only first 3 featured missions on home
       } catch (err) {
         console.error('Error initializing home:', err);
         setError('Failed to load data. Please try again.');
@@ -499,7 +499,7 @@ export const Home: React.FC = () => {
         };
         
         setUser(fallbackUser);
-        setInProgressMissions([]); // Fallback to mock data
+        setFeaturedMissions([]); // Fallback to empty featured missions
       } finally {
         setLoading(false);
       }
@@ -607,7 +607,7 @@ export const Home: React.FC = () => {
           <SectionHeader>
             <SectionTitle>
               <Target color={theme.colors.primary} size={24} />
-              <SectionTitleText>Active Missions</SectionTitleText>
+              <SectionTitleText>Featured Missions</SectionTitleText>
             </SectionTitle>
             <ViewAllButton
               variant="ghost"
@@ -619,9 +619,9 @@ export const Home: React.FC = () => {
             </ViewAllButton>
           </SectionHeader>
 
-          {inProgressMissions.length > 0 ? (
+          {featuredMissions.length > 0 ? (
             <MissionsList>
-              {inProgressMissions.slice(0, 3).map((mission) => (
+              {featuredMissions.slice(0, 3).map((mission) => (
                 <MissionCard
                   key={mission.id}
                   variants={itemVariants}
@@ -711,7 +711,7 @@ export const Home: React.FC = () => {
           ) : (
             <EmptyState>
               <EmptyStateIcon>🎯</EmptyStateIcon>
-              <EmptyStateText>No active missions right now</EmptyStateText>
+              <EmptyStateText>No featured missions right now</EmptyStateText>
               <ViewAllButton
                 variant="primary"
                 onClick={handleViewAllMissions}
