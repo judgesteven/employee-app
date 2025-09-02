@@ -118,12 +118,11 @@ export const gameLayerApi = {
     }
 
     try {
-      console.log(`🚀 API CALL: GET /achievements`);
-      console.log(`   Player: ${playerId}, Account: ${ACCOUNT_ID}`);
+      console.log(`🚀 API CALL: GET /players/${playerId}/achievements`);
+      console.log(`   Account: ${ACCOUNT_ID}`);
       
-      const response = await api.get('/achievements', {
+      const response = await api.get(`/players/${playerId}/achievements`, {
         params: {
-          player: playerId,
           account: ACCOUNT_ID
         }
       });
