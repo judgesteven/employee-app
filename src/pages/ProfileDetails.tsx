@@ -400,6 +400,8 @@ export const ProfileDetails: React.FC = () => {
     gems: 1247,
     xp: 8450,
     achievements: [], // Will be populated from GameLayer API
+    currentStreak: 7,
+    longestStreak: 23,
   };
 
   const mockCompletedMissions: Challenge[] = [

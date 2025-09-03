@@ -13,6 +13,8 @@ export interface User {
   gems: number;
   xp: number;
   achievements: Achievement[];
+  currentStreak: number;
+  longestStreak: number;
 }
 
 // Achievement types

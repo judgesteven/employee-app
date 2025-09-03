@@ -2,9 +2,13 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Clock, Target, ChevronRight, Gem } from 'lucide-react';
+import { Clock, Target, ChevronRight, Gem, Flame, TrendingUp, Zap } from 'lucide-react';
 import { ProfileHeader } from '../components/Profile/ProfileHeader';
 import { QuickStats } from '../components/Profile/QuickStats';
+import { StreakProgress } from '../components/Profile/StreakProgress';
+import { StreakBar } from '../components/Profile/StreakBar';
+import { Rankings } from '../components/Rankings/Rankings';
+import { TodaysRewards } from '../components/Rewards/TodaysRewards';
 
 
 import { Container, Card, Button } from '../styles/GlobalStyles';
@@ -17,6 +21,7 @@ const HomeContainer = styled(Container)`
   padding-top: ${theme.spacing.lg};
   padding-bottom: calc(80px + ${theme.spacing.lg});
   min-height: 100vh;
+  background: linear-gradient(135deg, rgba(248, 250, 252, 1) 0%, rgba(241, 245, 249, 1) 100%);
 `;
 
 const LoadingContainer = styled.div`
@@ -89,6 +94,70 @@ const MissionCard = styled(motion.div)`
   }
   
   transition: all 0.3s ease;
+`;
+
+const MissionsContainer = styled(motion.div)`
+  background: ${theme.colors.background};
+  border-radius: ${theme.borderRadius.xl};
+  padding: ${theme.spacing.lg};
+  margin-bottom: ${theme.spacing.lg};
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  
+  &:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+  }
+  
+  transition: all 0.3s ease;
+`;
+
+const MissionsHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${theme.spacing.sm};
+  margin-bottom: ${theme.spacing.lg};
+`;
+
+const MissionsTitle = styled.h3`
+  font-size: ${theme.typography.fontSize.lg};
+  font-weight: ${theme.typography.fontWeight.semibold};
+  color: ${theme.colors.text.primary};
+  margin: 0;
+`;
+
+const MissionsIcon = styled.div`
+  color: ${theme.colors.primary};
+  display: flex;
+  align-items: center;
+`;
+
+const MissionSubsection = styled.div`
+  margin-bottom: ${theme.spacing.xl};
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+`;
+
+const SubsectionHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${theme.spacing.xs};
+  margin-bottom: ${theme.spacing.md};
+  padding-left: ${theme.spacing.sm};
+`;
+
+const SubsectionTitle = styled.h4`
+  font-size: ${theme.typography.fontSize.base};
+  font-weight: ${theme.typography.fontWeight.semibold};
+  color: ${theme.colors.text.secondary};
+  margin: 0;
+`;
+
+const SubsectionIcon = styled.div`
+  color: ${theme.colors.text.secondary};
+  display: flex;
+  align-items: center;
 `;
 
 const HeroImageSection = styled.div`
@@ -338,6 +407,8 @@ export const Home: React.FC = () => {
     gems: 1247,
     xp: 8450,
     achievements: [], // Will be populated from GameLayer API
+    currentStreak: 7,
+    longestStreak: 23,
   };
 
 
@@ -515,6 +586,13 @@ export const Home: React.FC = () => {
         <PoweredByText>Powered by GameLayer</PoweredByText>
         <ProfileHeader user={user} onViewMore={handleViewProfile} />
         
+        <StreakBar 
+          currentStreak={user.currentStreak}
+          longestStreak={user.longestStreak}
+        />
+        
+        <Rankings />
+        
         <QuickStats
           dailySteps={user.dailyStepCount}
           weeklySteps={0} // Moved to profile details
@@ -522,25 +600,22 @@ export const Home: React.FC = () => {
           recentAchievements={achievements}
         />
 
-        <Section>
-          <SectionHeader>
-            <SectionTitle>
-              <Target color={theme.colors.primary} size={24} />
-              <SectionTitleText>Featured Missions</SectionTitleText>
-            </SectionTitle>
-            <ViewAllButton
-              variant="ghost"
-              size="sm"
-              onClick={handleViewAllMissions}
-            >
-              View All
-              <ChevronRight size={16} />
-            </ViewAllButton>
-          </SectionHeader>
+        <MissionsContainer
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          whileHover={{ scale: 1.01 }}
+        >
+          <MissionsHeader>
+            <MissionsIcon>
+              <Target size={24} />
+            </MissionsIcon>
+            <MissionsTitle>Today's Challenges</MissionsTitle>
+          </MissionsHeader>
 
           {featuredMissions.length > 0 ? (
             <MissionsList>
-              {featuredMissions.slice(0, 3).map((mission) => (
+              {featuredMissions.slice(0, 1).map((mission) => (
                 <MissionCard
                   key={mission.id}
                   variants={itemVariants}
@@ -626,6 +701,92 @@ export const Home: React.FC = () => {
                   </CardContent>
                 </MissionCard>
               ))}
+              
+              {featuredMissions.length > 1 && (
+                <>
+                  {featuredMissions.slice(1, 3).map((mission) => (
+                      <MissionCard
+                        key={mission.id}
+                        variants={itemVariants}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        <HeroImageSection>
+                          <HeroImage $bgImage={mission.imgUrl}>
+                            <RewardsOverlay>
+                              <RewardBadge $type="gems">
+                                <Gem size={16} />
+                                {mission.reward}
+                              </RewardBadge>
+                            </RewardsOverlay>
+                            <TagsOverlay>
+                              <TagBadge $tag={mission.type}>
+                                {mission.type}
+                              </TagBadge>
+                              {mission.tags && mission.tags.slice(0, 2).map((tag, index) => (
+                                <TagBadge key={index} $tag={tag}>
+                                  {tag}
+                                </TagBadge>
+                              ))}
+                            </TagsOverlay>
+                          </HeroImage>
+                        </HeroImageSection>
+                        
+                        <CardContent>
+                          <MissionHeader>
+                          <MissionInfo>
+                            <MissionTitleContainer>
+                              <MissionTitle>{mission.title}</MissionTitle>
+                            </MissionTitleContainer>
+                            <MissionDescription>{mission.description}</MissionDescription>
+                          </MissionInfo>
+                        </MissionHeader>
+
+                        <ProgressSection>
+                          {mission.objectives && mission.objectives.length > 1 ? (
+                            // Multiple objectives - show each one
+                            mission.objectives.map((objective, index) => (
+                              <div key={objective.id} style={{ marginBottom: index < mission.objectives!.length - 1 ? '16px' : '0' }}>
+                                <ProgressText>
+                                  <ProgressCurrent>
+                                    {objective.currentProgress.toLocaleString()} / {objective.targetValue.toLocaleString()}
+                                  </ProgressCurrent>
+                                </ProgressText>
+                                <ProgressBar>
+                                  <ProgressFill
+                                    $progress={getProgressPercentage(objective.currentProgress, objective.targetValue)}
+                                  />
+                                </ProgressBar>
+                                <ProgressPercentage>
+                                  {Math.round(getProgressPercentage(objective.currentProgress, objective.targetValue))}% complete
+                                </ProgressPercentage>
+                              </div>
+                            ))
+                          ) : (
+                            // Single objective
+                            <>
+                              <ProgressText>
+                                <ProgressCurrent>
+                                  {mission.currentProgress?.toLocaleString() || 0} / {mission.targetValue?.toLocaleString() || 0}
+                                </ProgressCurrent>
+                              </ProgressText>
+                              <ProgressBar>
+                                <ProgressFill
+                                  $progress={getProgressPercentage(mission.currentProgress || 0, mission.targetValue || 1)}
+                                />
+                              </ProgressBar>
+                              <ProgressPercentage>
+                                {Math.round(getProgressPercentage(mission.currentProgress || 0, mission.targetValue || 1))}% complete
+                              </ProgressPercentage>
+                            </>
+                          )}
+                        </ProgressSection>
+
+                        </CardContent>
+                      </MissionCard>
+                    ))}
+                </>
+              )}
             </MissionsList>
           ) : (
             <EmptyState>
@@ -639,7 +800,9 @@ export const Home: React.FC = () => {
               </ViewAllButton>
             </EmptyState>
           )}
-        </Section>
+        </MissionsContainer>
+
+        <TodaysRewards />
 
         {error && (
           <motion.div

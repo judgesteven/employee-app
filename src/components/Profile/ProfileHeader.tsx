@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { Gem, Clock } from 'lucide-react';
+import { Gem, Footprints } from 'lucide-react';
 import { theme } from '../../styles/theme';
 import { User } from '../../types';
 
@@ -24,8 +24,8 @@ const getLevelBadgeColor = (levelName: string) => {
 
 const HeaderContainer = styled(motion.div)`
   background: ${theme.colors.gradients.primary};
-  border-radius: ${theme.borderRadius.xl};
-  padding: ${theme.spacing.lg};
+  border-radius: ${theme.borderRadius.lg};
+  padding: ${theme.spacing.md} ${theme.spacing.lg};
   margin-bottom: ${theme.spacing.lg};
   color: ${theme.colors.text.inverse};
   position: relative;
@@ -58,117 +58,77 @@ const HeaderContent = styled.div`
 
 const TopRow = styled.div`
   display: flex;
-  justify-content: flex-start;
-  align-items: flex-start;
-  margin-bottom: ${theme.spacing.md};
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
 `;
 
 const UserInfo = styled.div`
   display: flex;
   align-items: center;
-  gap: ${theme.spacing.md};
+  gap: ${theme.spacing.sm};
 `;
 
 const Avatar = styled.img`
-  width: 60px;
-  height: 60px;
+  width: 40px;
+  height: 40px;
   border-radius: ${theme.borderRadius.full};
-  border: 3px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.3);
   object-fit: cover;
 `;
 
 const UserDetails = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 1px;
 `;
 
 const UserName = styled.h1`
-  font-size: ${theme.typography.fontSize['2xl']};
+  font-size: ${theme.typography.fontSize.lg};
   font-weight: ${theme.typography.fontWeight.bold};
   margin: 0;
   line-height: 1.2;
 `;
 
-const UserMeta = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0px;
-`;
-
-const UserLevel = styled.span`
+const TeamName = styled.span`
   font-size: ${theme.typography.fontSize.sm};
   opacity: 0.8;
   line-height: 1.2;
 `;
 
-const LevelBadge = styled.span<{ levelName: string }>`
-  display: inline-block;
-  padding: ${theme.spacing.xs} ${theme.spacing.sm};
-  border-radius: ${theme.borderRadius.full};
-  font-size: ${theme.typography.fontSize.xs};
-  font-weight: ${theme.typography.fontWeight.semibold};
-  color: white;
-  background: ${({ levelName }) => getLevelBadgeColor(levelName)};
-  width: fit-content;
-  white-space: nowrap;
-`;
-
-
-
-
-
 const StatsSection = styled.div`
-  margin-top: ${theme.spacing.md};
-`;
-
-const StatsGrid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
+  display: flex;
+  flex-direction: column;
   gap: ${theme.spacing.xs};
+  align-items: flex-end;
 `;
 
 const StatItem = styled.div`
   display: flex;
   align-items: center;
-  gap: ${theme.spacing.xs};
-  min-width: 0; /* Allow shrinking */
+  font-size: ${theme.typography.fontSize.sm};
+  font-weight: ${theme.typography.fontWeight.semibold};
+  color: white;
+  min-width: 80px;
+  justify-content: flex-end;
 `;
 
 const StatIcon = styled.div`
+  width: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: ${theme.borderRadius.lg};
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
-  flex-shrink: 0;
+  margin-right: ${theme.spacing.xs};
 `;
 
-const StatInfo = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0; /* Allow shrinking */
+const StatValue = styled.div`
+  flex: 1;
+  text-align: right;
 `;
 
-const StatCount = styled.div`
-  font-size: ${theme.typography.fontSize.base};
-  font-weight: ${theme.typography.fontWeight.bold};
-  line-height: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-`;
 
-const StatLabel = styled.div`
-  font-size: ${theme.typography.fontSize.xs};
-  opacity: 0.8;
-  font-weight: ${theme.typography.fontWeight.medium};
-  line-height: 1;
-`;
+
+
 
 
 
@@ -198,60 +158,20 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, onViewMore }
             <Avatar src={user.avatar} alt={user.name} />
             <UserDetails>
               <UserName>{user.name}</UserName>
-              <UserMeta>
-                {user.levelName ? (
-                  <LevelBadge levelName={user.levelName}>{user.levelName}</LevelBadge>
-                ) : (
-                  <UserLevel>Tier: {user.level}</UserLevel>
-                )}
-              </UserMeta>
+              <TeamName>{user.team}</TeamName>
             </UserDetails>
           </UserInfo>
+          <StatsSection>
+            <StatItem>
+              <StatIcon><Footprints size={16} /></StatIcon>
+              <StatValue>{formatStepCount(user.dailyStepCount)}</StatValue>
+            </StatItem>
+            <StatItem>
+              <StatIcon><Gem size={16} /></StatIcon>
+              <StatValue>{user.gems.toLocaleString()}</StatValue>
+            </StatItem>
+          </StatsSection>
         </TopRow>
-        
-        <StatsSection>
-          <StatsGrid>
-            <StatItem>
-              <StatIcon>
-                👟
-              </StatIcon>
-              <StatInfo>
-                <StatCount>{formatStepCount(user.dailyStepCount)}</StatCount>
-                <StatLabel>Steps</StatLabel>
-              </StatInfo>
-            </StatItem>
-            
-            <StatItem>
-              <StatIcon>
-                <Clock size={16} />
-              </StatIcon>
-              <StatInfo>
-                <StatCount>{user.dailyActiveMinutes}</StatCount>
-                <StatLabel>Minutes</StatLabel>
-              </StatInfo>
-            </StatItem>
-            
-            <StatItem>
-              <StatIcon>
-                <Gem size={16} />
-              </StatIcon>
-              <StatInfo>
-                <StatCount>{user.gems.toLocaleString()}</StatCount>
-                <StatLabel>Gems</StatLabel>
-              </StatInfo>
-            </StatItem>
-            
-            <StatItem>
-              <StatIcon>
-                ⚡
-              </StatIcon>
-              <StatInfo>
-                <StatCount>{user.xp.toLocaleString()}</StatCount>
-                <StatLabel>XP</StatLabel>
-              </StatInfo>
-            </StatItem>
-          </StatsGrid>
-        </StatsSection>
       </HeaderContent>
     </HeaderContainer>
   );
