@@ -191,7 +191,7 @@ export const HealthProviderToggle: React.FC<HealthProviderToggleProps> = ({ onPr
       </ToggleHeader>
 
       <ToggleDescription>
-        Connect with Apple Health (iOS) or Google Fit to automatically track your steps and sync with your fitness data. All health data is sent securely to GameLayer for processing.
+        Connect with Apple Health (iOS) or Google Fit to automatically track your steps. Data is sent securely to GameLayer and used soley for updating this application with your step count information.
       </ToggleDescription>
 
       <ProviderOptions>
