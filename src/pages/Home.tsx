@@ -329,7 +329,7 @@ const PoweredByContainer = styled.div`
   align-items: center;
   justify-content: center;
   gap: 6px;
-  margin-bottom: ${theme.spacing.sm};
+  margin-bottom: ${theme.spacing.lg};
 `;
 
 const PoweredByLogo = styled.img`

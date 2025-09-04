@@ -23,6 +23,7 @@ body {
   color: #111827;
   line-height: 1.6;
   overflow-x: hidden;
+  font-size: 14px; /* Mobile-first: start with mobile font size */
   
   /* Mobile viewport fixes */
   -webkit-touch-callout: none;
@@ -37,10 +38,10 @@ p, span, div[contenteditable], input, textarea {
   user-select: text;
 }
 
-/* Mobile-specific optimizations */
-@media (max-width: 768px) {
+/* Mobile-first responsive design - scale UP for larger screens */
+@media (min-width: 768px) {
   body {
-    font-size: 14px;
+    font-size: 16px; /* Scale up font size for larger screens */
   }
 }
 

@@ -49,7 +49,7 @@ const PoweredByContainer = styled.div`
   align-items: center;
   justify-content: center;
   gap: 6px;
-  margin-bottom: ${theme.spacing.sm};
+  margin-bottom: ${theme.spacing.lg};
 `;
 
 const PoweredByLogo = styled.img`
@@ -67,7 +67,7 @@ const PoweredByText = styled.div`
 `;
 
 const StatsCard = styled.div`
-  background: ${theme.colors.surface};
+  background: ${theme.colors.background};
   border-radius: ${theme.borderRadius.xl};
   padding: ${theme.spacing.lg};
   margin-bottom: ${theme.spacing.lg};
@@ -116,22 +116,28 @@ const ViewAllButton = styled(Button)`
 
 const StatsGrid = styled.div`
   display: flex;
-  gap: ${theme.spacing.sm};
+  gap: ${theme.spacing.xs}; /* Mobile-first: start with smaller gap */
   
-  @media (max-width: 480px) {
-    gap: ${theme.spacing.xs};
+  @media (min-width: ${theme.breakpoints.sm}) {
+    gap: ${theme.spacing.sm}; /* Scale up gap for larger screens */
   }
 `;
 
 const StatCard = styled.div`
   flex: 1;
-  background: rgba(99, 102, 241, 0.08);
-  border: 1px solid rgba(99, 102, 241, 0.15);
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 215, 0, 0.05) 100%); /* Yellow background like rankings */
+  border: 1px solid rgba(255, 215, 0, 0.2);
   border-radius: ${theme.borderRadius.lg};
-  padding: ${theme.spacing.md};
+  padding: ${theme.spacing.md}; /* Mobile-first: start with medium padding */
+  box-shadow: ${theme.shadows.md};
+  min-height: 80px; /* Increased height */
+  display: flex;
+  align-items: center;
+  justify-content: center;
   
-  @media (max-width: 480px) {
-    padding: ${theme.spacing.sm};
+  @media (min-width: ${theme.breakpoints.sm}) {
+    padding: ${theme.spacing.lg}; /* Scale up padding for larger screens */
+    min-height: 100px; /* Even taller on larger screens */
   }
 `;
 
@@ -140,27 +146,27 @@ const SingleStatContent = styled.div`
 `;
 
 const StatValue = styled.div`
-  font-size: ${theme.typography.fontSize.xl};
+  font-size: ${theme.typography.fontSize.lg}; /* Mobile-first: start with smaller font */
   font-weight: ${theme.typography.fontWeight.bold};
   color: ${theme.colors.text.primary};
   
-  @media (max-width: 480px) {
-    font-size: ${theme.typography.fontSize.lg};
+  @media (min-width: ${theme.breakpoints.sm}) {
+    font-size: ${theme.typography.fontSize.xl}; /* Scale up font for larger screens */
   }
 `;
 
 const StatLabel = styled.div`
-  font-size: ${theme.typography.fontSize.sm};
+  font-size: ${theme.typography.fontSize.xs}; /* Mobile-first: start with smaller font */
   color: ${theme.colors.text.secondary};
   text-transform: capitalize;
   
-  @media (max-width: 480px) {
-    font-size: ${theme.typography.fontSize.xs};
+  @media (min-width: ${theme.breakpoints.sm}) {
+    font-size: ${theme.typography.fontSize.sm}; /* Scale up font for larger screens */
   }
 `;
 
 const RedeemedPrizesCard = styled.div`
-  background: ${theme.colors.surface};
+  background: ${theme.colors.background};
   border-radius: ${theme.borderRadius.xl};
   padding: ${theme.spacing.lg};
   margin-bottom: ${theme.spacing.lg};
@@ -178,10 +184,11 @@ const PrizesGrid = styled.div`
 `;
 
 const PrizeCard = styled(motion.div)`
-  background: ${theme.colors.surfaceHover};
+  background: ${theme.colors.background};
   border-radius: ${theme.borderRadius.lg};
   padding: ${theme.spacing.md};
   border: 1px solid ${theme.colors.border};
+  box-shadow: ${theme.shadows.md};
   cursor: pointer;
   transition: all 0.2s ease-in-out;
 

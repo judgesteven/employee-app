@@ -16,7 +16,7 @@ export const GlobalStyles = createGlobalStyle`
 
   body {
     font-family: ${theme.typography.fontFamily.primary};
-    font-size: ${theme.typography.fontSize.base};
+    font-size: ${theme.typography.fontSize.sm}; /* Mobile-first: start with smaller font */
     line-height: 1.6;
     color: ${theme.colors.text.primary};
     background-color: ${theme.colors.background};
@@ -25,10 +25,10 @@ export const GlobalStyles = createGlobalStyle`
     overflow-x: hidden;
   }
 
-  /* Mobile-first responsive design */
-  @media (max-width: 768px) {
+  /* Mobile-first responsive design - scale UP for larger screens */
+  @media (min-width: ${theme.breakpoints.md}) {
     body {
-      font-size: ${theme.typography.fontSize.sm};
+      font-size: ${theme.typography.fontSize.base};
     }
   }
 
@@ -153,10 +153,11 @@ export const Container = styled.div`
   width: 100%;
   max-width: 428px; /* iPhone 14 Pro Max width */
   margin: 0 auto;
-  padding: 0 ${theme.spacing.md};
+  padding: 0 ${theme.spacing.sm}; /* Mobile-first: start with smaller padding */
   
   @media (min-width: ${theme.breakpoints.md}) {
     max-width: 480px;
+    padding: 0 ${theme.spacing.md}; /* Scale up padding for larger screens */
   }
 `;
 
