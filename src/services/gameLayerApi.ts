@@ -146,6 +146,16 @@ export const gameLayerApi = {
     return response.data;
   },
 
+  async getPlayerPrizes(playerId: string = PLAYER_ID): Promise<GameLayerPrize[]> {
+    const response = await api.get(`/players/${playerId}/prizes`, {
+      params: {
+        account: ACCOUNT_ID
+      }
+    });
+    
+    return response.data;
+  },
+
   // User management
   async getUser(userId: string): Promise<User> {
     const response = await api.get<ApiResponse<User>>(`/users/${userId}`);

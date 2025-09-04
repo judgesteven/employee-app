@@ -324,11 +324,24 @@ const EmptyStateText = styled.p`
   margin-bottom: ${theme.spacing.md};
 `;
 
+const PoweredByContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: ${theme.spacing.sm};
+`;
+
+const PoweredByLogo = styled.img`
+  width: 12px;
+  height: 12px;
+  opacity: 0.7;
+`;
+
+
 const PoweredByText = styled.div`
-  text-align: center;
   color: ${theme.colors.text.tertiary};
   font-size: ${theme.typography.fontSize.xs};
-  margin-bottom: ${theme.spacing.sm};
   font-weight: ${theme.typography.fontWeight.medium};
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -562,7 +575,10 @@ export const Home: React.FC = () => {
         initial="hidden"
         animate="visible"
       >
-        <PoweredByText>Powered by GameLayer</PoweredByText>
+        <PoweredByContainer>
+          <PoweredByLogo src="/B&W_Logo_0.5.png" alt="GameLayer" />
+          <PoweredByText>Powered by GameLayer</PoweredByText>
+        </PoweredByContainer>
         <ProfileHeader user={user} onViewMore={handleViewProfile} />
         
         <StreakBar 

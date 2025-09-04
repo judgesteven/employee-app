@@ -11,6 +11,7 @@ const ToggleContainer = styled.div`
   border-radius: ${theme.borderRadius.xl};
   padding: ${theme.spacing.lg};
   margin-bottom: ${theme.spacing.lg};
+  box-shadow: ${theme.shadows.md};
 `;
 
 const ToggleHeader = styled.div`

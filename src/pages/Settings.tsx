@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Settings as SettingsIcon } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Button } from '../styles/GlobalStyles';
 import { theme } from '../styles/theme';
@@ -12,6 +12,7 @@ const SettingsContainer = styled(Container)`
   padding-top: ${theme.spacing.lg};
   padding-bottom: calc(80px + ${theme.spacing.lg});
   min-height: 100vh;
+  background: linear-gradient(135deg, rgba(248, 250, 252, 1) 0%, rgba(241, 245, 249, 1) 100%);
 `;
 
 const Header = styled.div`
@@ -39,15 +40,7 @@ const Section = styled.div`
   margin-bottom: ${theme.spacing.xl};
 `;
 
-const SectionTitle = styled.h2`
-  font-size: ${theme.typography.fontSize.xl};
-  font-weight: ${theme.typography.fontWeight.semibold};
-  color: ${theme.colors.text.primary};
-  margin-bottom: ${theme.spacing.lg};
-  display: flex;
-  align-items: center;
-  gap: ${theme.spacing.sm};
-`;
+
 
 export const Settings: React.FC = () => {
   const navigate = useNavigate();
@@ -88,11 +81,6 @@ export const Settings: React.FC = () => {
         </Header>
 
         <Section>
-          <SectionTitle>
-            <SettingsIcon size={24} color={theme.colors.primary} />
-            Health Integration
-          </SectionTitle>
-          
           <motion.div variants={itemVariants}>
             <HealthProviderToggle onProviderChange={(provider) => {
               console.log(`Settings: Health provider changed to ${provider}`);
@@ -105,24 +93,6 @@ export const Settings: React.FC = () => {
             }} />
           </motion.div>
         </Section>
-
-        {/* Future sections can be added here */}
-        {/* 
-        <Section>
-          <SectionTitle>Account Settings</SectionTitle>
-          // Account-related settings
-        </Section>
-
-        <Section>
-          <SectionTitle>Notifications</SectionTitle>
-          // Notification preferences
-        </Section>
-
-        <Section>
-          <SectionTitle>Privacy</SectionTitle>
-          // Privacy settings
-        </Section>
-        */}
       </motion.div>
     </SettingsContainer>
   );

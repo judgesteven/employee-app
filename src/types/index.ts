@@ -58,6 +58,7 @@ export interface Challenge {
   imgUrl?: string; // Mission image URL from GameLayer API
   tags?: string[]; // Tags from GameLayer API
   priority?: number; // Priority for ordering missions
+  category?: string; // Category from GameLayer API (e.g., 'Hidden')
 }
 
 // Leaderboard types
