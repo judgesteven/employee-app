@@ -474,6 +474,16 @@ export const Profile: React.FC = () => {
           }
         }
         
+        // Get step count from daily-step-tracker mission
+        let stepCountFromMission = 0;
+        try {
+          const dailyStepMission = await gameLayerApi.getPlayerMission(undefined, 'daily-step-tracker');
+          stepCountFromMission = dailyStepMission?.objectives?.events?.count ?? 0;
+        } catch (error) {
+          // Fallback to points from API if mission call fails
+          stepCountFromMission = gameLayerPlayer.points ?? 0;
+        }
+        
         // Update user data with real GameLayer name, avatar, level, credits, team, and step count
         const updatedUser = {
           ...mockUser,
@@ -483,8 +493,8 @@ export const Profile: React.FC = () => {
           levelName: gameLayerPlayer.level?.name, // Use level name from GameLayer API
           team: teamName, // Use resolved team name
           gems: gameLayerPlayer.credits ?? 0, // Use credits from GameLayer API, default to 0 if not available
-          dailyStepCount: gameLayerPlayer.points ?? 0, // Use points from GameLayer API as step count, default to 0 if not available
-          allTimeStepCount: gameLayerPlayer.points ?? mockUser.allTimeStepCount, // Use points as lifetime steps or fallback to mock
+          dailyStepCount: stepCountFromMission, // Use step count from daily-step-tracker mission
+          allTimeStepCount: stepCountFromMission, // Use step count from daily-step-tracker mission
         };
 
         setUser(updatedUser);

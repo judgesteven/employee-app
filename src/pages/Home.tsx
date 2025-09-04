@@ -391,8 +391,17 @@ export const Home: React.FC = () => {
         // Use API achievements only
         const finalAchievements = apiAchievements;
         
+        // Get step count from daily-step-tracker mission
+        let stepCountFromMission = 0;
+        try {
+          const dailyStepMission = await gameLayerApi.getPlayerMission(undefined, 'daily-step-tracker');
+          stepCountFromMission = dailyStepMission?.objectives?.events?.count ?? 0;
+        } catch (error) {
+          // Fallback to points from API if mission call fails
+          stepCountFromMission = gameLayerPlayer.points ?? 0;
+        }
+
         // Update user data with real GameLayer API data
-        const pointsFromAPI = gameLayerPlayer.points ?? 0;
         const creditsFromAPI = gameLayerPlayer.credits ?? 0;
         
         
@@ -404,7 +413,7 @@ export const Home: React.FC = () => {
           levelName: gameLayerPlayer.level?.name, // Use level name from GameLayer API
           team: teamName, // Use resolved team name
           gems: creditsFromAPI, // Use credits from GameLayer API, default to 0 if not available
-          dailyStepCount: pointsFromAPI, // Use points from GameLayer API as step count, default to 0 if not available
+          dailyStepCount: stepCountFromMission, // Use step count from daily-step-tracker mission
           achievements: finalAchievements,
           currentStreak: 8, // Use mock streak data
           longestStreak: 23, // Use mock streak data
@@ -417,9 +426,13 @@ export const Home: React.FC = () => {
         const playerMissionsResponse = await gameLayerApi.getPlayerMissionProgress();
         const missions = await gameLayerApi.getMissions();
         
-        // Filter for Priority 1 missions and merge with progress
+        // Filter for Priority 1 missions, exclude Hidden category, and merge with progress
         const updatedMissions = missions
-          .filter(mission => !mission.completed && mission.priority === 1)
+          .filter(mission => 
+            !mission.completed && 
+            mission.priority === 1 && 
+            mission.category?.toLowerCase() !== 'hidden'
+          )
           .map(mission => {
             const progress = playerMissionsResponse[mission.id];
             return progress ? { ...mission, ...progress } : mission;
