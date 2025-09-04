@@ -470,13 +470,28 @@ export const Profile: React.FC = () => {
         // Get player data from GameLayer API
         const gameLayerPlayer = await gameLayerApi.getPlayer();
         
-        // Update user data with real GameLayer name, avatar, and level
+        // Get team name if team ID is available
+        let teamName = mockUser.team;
+        if (gameLayerPlayer.team) {
+          try {
+            const teamData = await gameLayerApi.getTeam(gameLayerPlayer.team);
+            teamName = teamData.team?.name || gameLayerPlayer.team; // Use team name from nested structure or fallback to team ID
+          } catch (error) {
+            teamName = gameLayerPlayer.team; // Fallback to team ID if API call fails
+          }
+        }
+        
+        // Update user data with real GameLayer name, avatar, level, credits, team, and step count
         const updatedUser = {
           ...mockUser,
           name: gameLayerPlayer.name, // Use name from GameLayer API
           avatar: gameLayerPlayer.imgUrl || mockUser.avatar, // Use avatar from GameLayer API or fallback to mock
           level: gameLayerPlayer.level?.number || mockUser.level, // Use level number from GameLayer API
           levelName: gameLayerPlayer.level?.name, // Use level name from GameLayer API
+          team: teamName, // Use resolved team name
+          gems: gameLayerPlayer.credits ?? 0, // Use credits from GameLayer API, default to 0 if not available
+          dailyStepCount: gameLayerPlayer.points ?? 0, // Use points from GameLayer API as step count, default to 0 if not available
+          allTimeStepCount: gameLayerPlayer.points ?? mockUser.allTimeStepCount, // Use points as lifetime steps or fallback to mock
         };
 
         setUser(updatedUser);

@@ -84,7 +84,7 @@ const TeamName = styled.span`
 const StatsSection = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 5px;
   align-items: flex-end;
 `;
 

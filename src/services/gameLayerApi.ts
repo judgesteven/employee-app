@@ -26,8 +26,10 @@ const mockDelay = (ms: number = 100) => new Promise(resolve => setTimeout(resolv
 interface GameLayerPlayer {
   id: string;
   name: string;
-  points?: number; // Points represent step count in GameLayer
   imgUrl?: string; // Player avatar image URL from GameLayer API
+  points?: number; // Points represent step count in GameLayer (top level)
+  credits?: number; // Credits represent gems/currency in GameLayer (top level)
+  team?: string; // Team ID from GameLayer API
   level?: {
     name: string;
     number: number;
@@ -35,21 +37,100 @@ interface GameLayerPlayer {
   // Add other fields as needed based on actual API response
 }
 
+// GameLayer Team API response type
+interface GameLayerTeam {
+  team: {
+    id: string;
+    name: string;
+    description?: string;
+    imgUrl?: string;
+    account?: string;
+    category?: string;
+    createdOn?: string;
+    credits?: number;
+    isAvailable?: boolean;
+    level?: {
+      id: string;
+      name: string;
+      description: string;
+      imgUrl: string;
+      ordinal: number;
+    };
+    points?: number;
+    tags?: string[];
+  };
+  players?: Array<any>;
+  // Add other fields as needed based on actual API response
+}
+
+// GameLayer Raffle API response type
+interface GameLayerRaffle {
+  id: string;
+  name: string;
+  description?: string;
+  imgUrl?: string;
+  cost?: number;
+  category?: string;
+  isAvailable?: boolean;
+  tags?: string[];
+  // Add other fields as needed based on actual API response
+}
+
+// GameLayer Prize API response type
+interface GameLayerPrize {
+  id: string;
+  name: string;
+  description?: string;
+  imgUrl?: string;
+  cost?: number;
+  category?: string;
+  isAvailable?: boolean;
+  tags?: string[];
+  // Add other fields as needed based on actual API response
+}
+
 // User API calls
 export const gameLayerApi = {
   // GameLayer specific player fetch
   async getPlayer(playerId: string = PLAYER_ID): Promise<GameLayerPlayer> {
-    console.log(`🚀 API CALL: GET /players/${playerId}`);
-    console.log(`   Account: ${ACCOUNT_ID}`);
-    
     const response = await api.get(`/players/${playerId}`, {
       params: {
         account: ACCOUNT_ID
       }
     });
     
-    console.log(`✅ API RESPONSE: ${response.status}`);
-    console.log('📋 Player Data:', response.data);
+    return response.data;
+  },
+
+  // GameLayer specific team fetch
+  async getTeam(teamId: string): Promise<GameLayerTeam> {
+    const response = await api.get(`/teams/${teamId}`, {
+      params: {
+        account: ACCOUNT_ID
+      }
+    });
+    
+    return response.data;
+  },
+
+  // GameLayer specific raffles fetch
+  async getRaffles(): Promise<GameLayerRaffle[]> {
+    const response = await api.get('/raffles', {
+      params: {
+        account: ACCOUNT_ID
+      }
+    });
+    
+    return response.data;
+  },
+
+  // GameLayer specific prizes fetch
+  async getPrizes(): Promise<GameLayerPrize[]> {
+    const response = await api.get('/prizes', {
+      params: {
+        account: ACCOUNT_ID
+      }
+    });
     
     return response.data;
   },
@@ -118,25 +199,17 @@ export const gameLayerApi = {
     }
 
     try {
-      console.log(`🚀 API CALL: GET /players/${playerId}/achievements`);
-      console.log(`   Account: ${ACCOUNT_ID}`);
-      
       const response = await api.get(`/players/${playerId}/achievements`, {
         params: {
           account: ACCOUNT_ID
         }
       });
       
-      console.log(`✅ API RESPONSE: ${response.status}`);
-      console.log('📋 Raw Achievements:', response.data);
-      
       // Transform GameLayer achievement data to Achievement interface
       const responseData = response.data;
-      console.log('📋 Raw API Response Structure:', responseData);
       
       // Extract achievements from nested structure
       const achievementData = responseData.achievements || responseData;
-      console.log('📋 Achievement Data Structure:', achievementData);
       
       let allAchievements: any[] = [];
       
@@ -149,7 +222,6 @@ export const gameLayerApi = {
             status: 'completed'
           }));
           allAchievements = allAchievements.concat(completedWithStatus);
-          console.log(`📋 Found ${achievementData.completed.length} completed achievements`);
         }
         
         // Add started achievements
@@ -159,11 +231,9 @@ export const gameLayerApi = {
             status: 'started'
           }));
           allAchievements = allAchievements.concat(startedWithStatus);
-          console.log(`📋 Found ${achievementData.started.length} started achievements`);
         }
       }
       
-      console.log(`📊 Processing ${allAchievements.length} achievements from API`);
       
       if (allAchievements.length > 0) {
         const transformedAchievements = allAchievements.map((achievement: any) => {
@@ -186,8 +256,6 @@ export const gameLayerApi = {
         const completedCount = transformedAchievements.filter(a => a.status === 'completed').length;
         const startedCount = transformedAchievements.filter(a => a.status === 'started').length;
         
-        console.log(`📈 Achievement Summary: ${transformedAchievements.length} total`);
-        console.log(`   ✅ Completed: ${completedCount} | 🔄 Started: ${startedCount}`);
         
         return transformedAchievements;
       }

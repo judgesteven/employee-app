@@ -14,7 +14,6 @@ import { TodaysRewards } from '../components/Rewards/TodaysRewards';
 import { Container, Card, Button } from '../styles/GlobalStyles';
 import { theme } from '../styles/theme';
 import { User, Challenge, Achievement } from '../types';
-import { healthDataService } from '../services/healthData';
 import { gameLayerApi } from '../services/gameLayerApi';
 
 const HomeContainer = styled(Container)`
@@ -345,21 +344,21 @@ export const Home: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Mock user data
-  const mockUser: User = {
+  // Fallback user data for when API fails
+  const fallbackUser: User = {
     id: '1',
-    name: 'Alex Johnson',
+    name: 'Player',
     avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
-    level: 12,
-    team: 'Marketing Team',
+    level: 1,
+    team: 'Team',
     dailyStepCount: 0,
-    allTimeStepCount: 2847392,
-    dailyActiveMinutes: 78,
-    allTimeActiveMinutes: 156420,
-    gems: 1247,
-    xp: 8450,
-    achievements: [], // Will be populated from GameLayer API
-    currentStreak: 7,
+    allTimeStepCount: 0,
+    dailyActiveMinutes: 0,
+    allTimeActiveMinutes: 0,
+    gems: 0,
+    xp: 0,
+    achievements: [],
+    currentStreak: 8, // Mock streak data set to 8
     longestStreak: 23,
   };
 
@@ -374,8 +373,16 @@ export const Home: React.FC = () => {
         // Get player data from GameLayer API
         const gameLayerPlayer = await gameLayerApi.getPlayer();
         
-        // Get current step count from health service
-        const currentSteps = await healthDataService.getCurrentStepCount();
+        // Get team name if team ID is available
+        let teamName = fallbackUser.team;
+        if (gameLayerPlayer.team) {
+          try {
+            const teamData = await gameLayerApi.getTeam(gameLayerPlayer.team);
+            teamName = teamData.team?.name || gameLayerPlayer.team; // Use team name from nested structure or fallback to team ID
+          } catch (error) {
+            teamName = gameLayerPlayer.team; // Fallback to team ID if API call fails
+          }
+        }
         
         // Get achievements from GameLayer API
         const apiAchievements = await gameLayerApi.getAchievements();
@@ -384,16 +391,25 @@ export const Home: React.FC = () => {
         // Use API achievements only
         const finalAchievements = apiAchievements;
         
-        // Update user data with real GameLayer name, avatar, level, and step count
+        // Update user data with real GameLayer API data
+        const pointsFromAPI = gameLayerPlayer.points ?? 0;
+        const creditsFromAPI = gameLayerPlayer.credits ?? 0;
+        
+        
         const updatedUser = {
-          ...mockUser,
-          name: gameLayerPlayer.name, // Use name from GameLayer API
-          avatar: gameLayerPlayer.imgUrl || mockUser.avatar, // Use avatar from GameLayer API or fallback to mock
-          level: gameLayerPlayer.level?.number || mockUser.level, // Use level number from GameLayer API
+          ...fallbackUser,
+          name: gameLayerPlayer.name || fallbackUser.name, // Use name from GameLayer API
+          avatar: gameLayerPlayer.imgUrl || fallbackUser.avatar, // Use avatar from GameLayer API or fallback
+          level: gameLayerPlayer.level?.number || fallbackUser.level, // Use level number from GameLayer API
           levelName: gameLayerPlayer.level?.name, // Use level name from GameLayer API
-          dailyStepCount: currentSteps,
+          team: teamName, // Use resolved team name
+          gems: creditsFromAPI, // Use credits from GameLayer API, default to 0 if not available
+          dailyStepCount: pointsFromAPI, // Use points from GameLayer API as step count, default to 0 if not available
           achievements: finalAchievements,
+          currentStreak: 8, // Use mock streak data
+          longestStreak: 23, // Use mock streak data
         };
+        
         
         setAchievements(finalAchievements);
 
@@ -431,12 +447,6 @@ export const Home: React.FC = () => {
         console.error('Error initializing home:', err);
         setError('Failed to load data. Please try again.');
         // Set fallback data without missions
-        const currentSteps = await healthDataService.getCurrentStepCount();
-        const fallbackUser = {
-          ...mockUser,
-          dailyStepCount: currentSteps,
-        };
-        
         setUser(fallbackUser);
         setFeaturedMissions([]); // Fallback to empty featured missions
       } finally {
@@ -446,7 +456,7 @@ export const Home: React.FC = () => {
 
     initializeHome();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // mockUser and mockInProgressMissions are static data
+  }, []); // fallbackUser is static data
 
   const handleViewProfile = () => {
     navigate('/profile');
@@ -531,8 +541,6 @@ export const Home: React.FC = () => {
     );
   }
 
-  console.log('🏠 Home: Rendering with achievements:', achievements);
-  console.log('🏠 Home: Achievement count before render:', achievements.length);
 
   return (
     <HomeContainer>
