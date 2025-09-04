@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { User, Trophy, Target, Gift } from 'lucide-react';
+import { Home, User } from 'lucide-react';
 import { theme } from '../../styles/theme';
 
 const NavContainer = styled.nav`
@@ -83,22 +83,12 @@ const navigationItems = [
   {
     path: '/',
     label: 'Home',
+    icon: Home,
+  },
+  {
+    path: '/profile',
+    label: 'Profile',
     icon: User,
-  },
-  {
-    path: '/challenges',
-    label: 'Challenges',
-    icon: Target,
-  },
-  {
-    path: '/competition',
-    label: 'Rankings',
-    icon: Trophy,
-  },
-  {
-    path: '/rewards',
-    label: 'Rewards',
-    icon: Gift,
   },
 ];
 

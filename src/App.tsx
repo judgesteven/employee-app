@@ -6,11 +6,7 @@ import { theme } from './styles/theme';
 import { BottomNavigation } from './components/Navigation/BottomNavigation';
 import { Home } from './pages/Home';
 import { Profile } from './pages/Profile';
-import { ProfileDetails } from './pages/ProfileDetails';
 import { Settings } from './pages/Settings';
-import { Challenges } from './pages/Challenges';
-import { Competition } from './pages/Competition';
-import { Rewards } from './pages/Rewards';
 import { Achievements } from './pages/Achievements';
 
 function App() {
@@ -22,12 +18,8 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/profile" element={<Profile />} />
-            <Route path="/profile/details" element={<ProfileDetails />} />
             <Route path="/achievements" element={<Achievements />} />
             <Route path="/settings" element={<Settings />} />
-            <Route path="/challenges" element={<Challenges />} />
-            <Route path="/competition" element={<Competition />} />
-            <Route path="/rewards" element={<Rewards />} />
           </Routes>
           <BottomNavigation />
         </div>

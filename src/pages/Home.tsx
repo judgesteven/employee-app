@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Clock, Target, ChevronRight, Gem, Flame, TrendingUp, Zap } from 'lucide-react';
+import { Clock, Target, Gem } from 'lucide-react';
 import { ProfileHeader } from '../components/Profile/ProfileHeader';
 import { QuickStats } from '../components/Profile/QuickStats';
-import { StreakProgress } from '../components/Profile/StreakProgress';
+
 import { StreakBar } from '../components/Profile/StreakBar';
 import { Rankings } from '../components/Rankings/Rankings';
 import { TodaysRewards } from '../components/Rewards/TodaysRewards';
@@ -47,28 +47,7 @@ const LoadingText = styled.p`
   font-size: ${theme.typography.fontSize.base};
 `;
 
-const Section = styled.div`
-  margin-bottom: ${theme.spacing.xl};
-`;
 
-const SectionHeader = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: ${theme.spacing.lg};
-`;
-
-const SectionTitle = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${theme.spacing.sm};
-`;
-
-const SectionTitleText = styled.h2`
-  font-size: ${theme.typography.fontSize.xl};
-  font-weight: ${theme.typography.fontWeight.semibold};
-  color: ${theme.colors.text.primary};
-`;
 
 const ViewAllButton = styled(Button)`
   padding: ${theme.spacing.sm} ${theme.spacing.md};
@@ -131,34 +110,7 @@ const MissionsIcon = styled.div`
   align-items: center;
 `;
 
-const MissionSubsection = styled.div`
-  margin-bottom: ${theme.spacing.xl};
-  
-  &:last-child {
-    margin-bottom: 0;
-  }
-`;
 
-const SubsectionHeader = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${theme.spacing.xs};
-  margin-bottom: ${theme.spacing.md};
-  padding-left: ${theme.spacing.sm};
-`;
-
-const SubsectionTitle = styled.h4`
-  font-size: ${theme.typography.fontSize.base};
-  font-weight: ${theme.typography.fontWeight.semibold};
-  color: ${theme.colors.text.secondary};
-  margin: 0;
-`;
-
-const SubsectionIcon = styled.div`
-  color: ${theme.colors.text.secondary};
-  display: flex;
-  align-items: center;
-`;
 
 const HeroImageSection = styled.div`
   position: relative;
@@ -500,13 +452,19 @@ export const Home: React.FC = () => {
     navigate('/profile');
   };
 
-  const handleViewAllMissions = () => {
-    navigate('/challenges');
-  };
-
-  const formatTimeLeft = (expiresAt: Date): string => {
+  const formatTimeLeft = (expiresAt: Date, refreshPeriod?: string): string => {
     const now = new Date();
-    const diff = expiresAt.getTime() - now.getTime();
+    let targetTime: Date;
+    
+    // For daily missions, calculate time until midnight
+    if (refreshPeriod === 'daily') {
+      targetTime = new Date();
+      targetTime.setHours(23, 59, 59, 999); // End of today
+    } else {
+      targetTime = expiresAt;
+    }
+    
+    const diff = targetTime.getTime() - now.getTime();
     
     if (diff <= 0) return 'Expired';
     
@@ -588,7 +546,6 @@ export const Home: React.FC = () => {
         
         <StreakBar 
           currentStreak={user.currentStreak}
-          longestStreak={user.longestStreak}
         />
         
         <Rankings />
@@ -610,7 +567,7 @@ export const Home: React.FC = () => {
             <MissionsIcon>
               <Target size={24} />
             </MissionsIcon>
-            <MissionsTitle>Today's Challenges</MissionsTitle>
+            <MissionsTitle>{featuredMissions.length > 0 ? featuredMissions[0].title : "Today's Challenges"}</MissionsTitle>
           </MissionsHeader>
 
           {featuredMissions.length > 0 ? (
@@ -631,9 +588,12 @@ export const Home: React.FC = () => {
                         </RewardBadge>
                       </RewardsOverlay>
                       <TagsOverlay>
-                        <TagBadge $tag={mission.type}>
-                          {mission.type}
-                        </TagBadge>
+                        {/* Show objective badge if no category/tags */}
+                        {(!mission.tags || mission.tags.length === 0) && mission.targetValue && (
+                          <TagBadge $tag="steps">
+                            {mission.targetValue.toLocaleString()}
+                          </TagBadge>
+                        )}
                         {mission.tags && mission.tags.slice(0, 2).map((tag, index) => (
                           <TagBadge key={index} $tag={tag}>
                             {tag}
@@ -642,7 +602,7 @@ export const Home: React.FC = () => {
                       </TagsOverlay>
                       <TimeRemainingOverlay>
                         <Clock size={14} />
-                        {formatTimeLeft(mission.expiresAt)}
+                        {formatTimeLeft(mission.expiresAt, mission.type)}
                       </TimeRemainingOverlay>
                     </HeroImage>
                   </HeroImageSection>
@@ -650,9 +610,6 @@ export const Home: React.FC = () => {
                   <CardContent>
                     <MissionHeader>
                     <MissionInfo>
-                      <MissionTitleContainer>
-                        <MissionTitle>{mission.title}</MissionTitle>
-                      </MissionTitleContainer>
                       <MissionDescription>{mission.description}</MissionDescription>
                     </MissionInfo>
                   </MissionHeader>
@@ -794,9 +751,9 @@ export const Home: React.FC = () => {
               <EmptyStateText>No featured missions right now</EmptyStateText>
               <ViewAllButton
                 variant="primary"
-                onClick={handleViewAllMissions}
+                onClick={() => {}}
               >
-                Browse Missions
+                No Missions Available
               </ViewAllButton>
             </EmptyState>
           )}

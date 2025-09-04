@@ -102,35 +102,15 @@ const RankingRow = styled(motion.div)<{ $rank: number }>`
   }
 `;
 
-const RankBadge = styled.div<{ $rank: number }>`
-  width: 32px;
-  height: 32px;
-  border-radius: ${theme.borderRadius.full};
+const RankNumber = styled.div`
+  width: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: ${theme.typography.fontWeight.bold};
-  font-size: ${theme.typography.fontSize.sm};
+  font-size: ${theme.typography.fontSize.base};
   margin-right: ${theme.spacing.md};
-  
-  ${props => {
-    if (props.$rank === 1) return `
-      background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-      color: white;
-    `;
-    if (props.$rank === 2) return `
-      background: linear-gradient(135deg, #C0C0C0 0%, #A8A8A8 100%);
-      color: white;
-    `;
-    if (props.$rank === 3) return `
-      background: linear-gradient(135deg, #CD7F32 0%, #B8860B 100%);
-      color: white;
-    `;
-    return `
-      background: ${theme.colors.surface};
-      color: ${theme.colors.text.secondary};
-    `;
-  }}
+  color: ${theme.colors.text.secondary};
 `;
 
 const PlayerInfo = styled.div`
@@ -181,6 +161,7 @@ interface Team {
   name: string;
   score: number;
   memberCount: number;
+  image: string;
 }
 
 interface RankingsProps {}
@@ -228,31 +209,36 @@ const mockTvTData: Team[] = [
     id: '1',
     name: 'Engineering',
     score: 45620,
-    memberCount: 12
+    memberCount: 12,
+    image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=150&h=150&fit=crop&crop=center'
   },
   {
     id: '2',
     name: 'Marketing Team',
     score: 42890,
-    memberCount: 8
+    memberCount: 8,
+    image: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=150&h=150&fit=crop&crop=center'
   },
   {
     id: '3',
     name: 'Design Team',
     score: 38750,
-    memberCount: 6
+    memberCount: 6,
+    image: 'https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?w=150&h=150&fit=crop&crop=center'
   },
   {
     id: '4',
     name: 'Sales',
     score: 35280,
-    memberCount: 10
+    memberCount: 10,
+    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=center'
   },
   {
     id: '5',
     name: 'HR',
     score: 28420,
-    memberCount: 5
+    memberCount: 5,
+    image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&h=150&fit=crop&crop=center'
   }
 ];
 
@@ -302,9 +288,9 @@ export const Rankings: React.FC<RankingsProps> = () => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3, delay: index * 0.1 }}
             >
-              <RankBadge $rank={index + 1}>
+              <RankNumber>
                 {index + 1}
-              </RankBadge>
+              </RankNumber>
               
               <PlayerInfo>
                 <Avatar src={player.avatar} alt={player.name} />
@@ -327,11 +313,12 @@ export const Rankings: React.FC<RankingsProps> = () => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3, delay: index * 0.1 }}
             >
-              <RankBadge $rank={index + 1}>
+              <RankNumber>
                 {index + 1}
-              </RankBadge>
+              </RankNumber>
               
               <PlayerInfo>
+                <Avatar src={team.image} alt={team.name} />
                 <PlayerDetails>
                   <PlayerName>{team.name}</PlayerName>
                 </PlayerDetails>

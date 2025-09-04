@@ -115,10 +115,9 @@ src/
 │   └── Profile/         # Profile-related components
 ├── pages/               # Main application pages
 │   ├── Home.tsx         # Landing page with active missions
-│   ├── ProfileDetails.tsx # Complete user profile
-│   ├── Challenges.tsx   # Available missions
-│   ├── Competition.tsx  # Rankings and leaderboards
-│   └── Rewards.tsx      # Rewards marketplace
+│   ├── Profile.tsx      # Complete user profile
+│   ├── Achievements.tsx # Achievement gallery
+│   └── Settings.tsx     # App settings
 ├── services/            # API and external integrations
 │   ├── gameLayerApi.ts  # GameLayer API client
 │   └── healthData.ts    # Health data service

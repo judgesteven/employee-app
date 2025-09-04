@@ -5,26 +5,11 @@ import { Gem, Footprints } from 'lucide-react';
 import { theme } from '../../styles/theme';
 import { User } from '../../types';
 
-// Level badge color helper
-const getLevelBadgeColor = (levelName: string) => {
-  const name = levelName.toLowerCase();
-  
-  if (name.includes('bronze')) {
-    return '#CD7F32';
-  } else if (name.includes('silver')) {
-    return '#C0C0C0';
-  } else if (name.includes('gold')) {
-    return '#FFD700';
-  } else if (name.includes('diamond')) {
-    return '#00BFFF';
-  } else {
-    return '#6B73FF'; // Default fallback
-  }
-};
+
 
 const HeaderContainer = styled(motion.div)`
   background: ${theme.colors.gradients.primary};
-  border-radius: ${theme.borderRadius.lg};
+  border-radius: ${theme.borderRadius.xl};
   padding: ${theme.spacing.md} ${theme.spacing.lg};
   margin-bottom: ${theme.spacing.lg};
   color: ${theme.colors.text.inverse};
@@ -70,28 +55,28 @@ const UserInfo = styled.div`
 `;
 
 const Avatar = styled.img`
-  width: 40px;
-  height: 40px;
+  width: 50px;
+  height: 50px;
   border-radius: ${theme.borderRadius.full};
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2.5px solid rgba(255, 255, 255, 0.3);
   object-fit: cover;
 `;
 
 const UserDetails = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 1.25px;
 `;
 
 const UserName = styled.h1`
-  font-size: ${theme.typography.fontSize.lg};
+  font-size: 1.375rem;
   font-weight: ${theme.typography.fontWeight.bold};
   margin: 0;
   line-height: 1.2;
 `;
 
 const TeamName = styled.span`
-  font-size: ${theme.typography.fontSize.sm};
+  font-size: 1rem;
   opacity: 0.8;
   line-height: 1.2;
 `;
@@ -99,26 +84,26 @@ const TeamName = styled.span`
 const StatsSection = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${theme.spacing.xs};
+  gap: 10px;
   align-items: flex-end;
 `;
 
 const StatItem = styled.div`
   display: flex;
   align-items: center;
-  font-size: ${theme.typography.fontSize.sm};
+  font-size: 1rem;
   font-weight: ${theme.typography.fontWeight.semibold};
   color: white;
-  min-width: 80px;
+  min-width: 100px;
   justify-content: flex-end;
 `;
 
 const StatIcon = styled.div`
-  width: 20px;
+  width: 25px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: ${theme.spacing.xs};
+  margin-right: 10px;
 `;
 
 const StatValue = styled.div`
@@ -163,11 +148,11 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, onViewMore }
           </UserInfo>
           <StatsSection>
             <StatItem>
-              <StatIcon><Footprints size={16} /></StatIcon>
+              <StatIcon><Footprints size={20} /></StatIcon>
               <StatValue>{formatStepCount(user.dailyStepCount)}</StatValue>
             </StatItem>
             <StatItem>
-              <StatIcon><Gem size={16} /></StatIcon>
+              <StatIcon><Gem size={20} /></StatIcon>
               <StatValue>{user.gems.toLocaleString()}</StatValue>
             </StatItem>
           </StatsSection>
