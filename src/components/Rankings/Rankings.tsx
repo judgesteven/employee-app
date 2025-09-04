@@ -356,15 +356,13 @@ export const Rankings: React.FC<RankingsProps> = () => {
               $active={activeTab === 'pvp'} 
               onClick={() => handleTabChange('pvp')}
             >
-              <Users size={16} />
               PvP
             </Tab>
             <Tab 
               $active={activeTab === 'tvt'} 
               onClick={() => handleTabChange('tvt')}
             >
-              <Users size={16} />
-              TvT
+              Teams
             </Tab>
           </TabsContainer>
         </HeaderControls>
