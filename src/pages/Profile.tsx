@@ -67,7 +67,7 @@ const PoweredByText = styled.div`
 `;
 
 const StatsCard = styled.div`
-  background: ${theme.colors.surface.primary};
+  background: ${theme.colors.surface};
   border-radius: ${theme.borderRadius.xl};
   padding: ${theme.spacing.lg};
   margin-bottom: ${theme.spacing.lg};
@@ -148,7 +148,7 @@ const StatLabel = styled.div`
 `;
 
 const RedeemedPrizesCard = styled.div`
-  background: ${theme.colors.surface.primary};
+  background: ${theme.colors.surface};
   border-radius: ${theme.borderRadius.xl};
   padding: ${theme.spacing.lg};
   margin-bottom: ${theme.spacing.lg};
@@ -166,7 +166,7 @@ const PrizesGrid = styled.div`
 `;
 
 const PrizeCard = styled(motion.div)`
-  background: ${theme.colors.surface.secondary};
+  background: ${theme.colors.surfaceHover};
   border-radius: ${theme.borderRadius.lg};
   padding: ${theme.spacing.md};
   border: 1px solid ${theme.colors.border};
@@ -286,7 +286,7 @@ export const Profile: React.FC = () => {
         }
 
         const updatedUser: User = {
-          id: gameLayerPlayer.player || 'unknown',
+          id: gameLayerPlayer.id || 'unknown',
           name: gameLayerPlayer.name || 'Unknown User',
           avatar: gameLayerPlayer.imgUrl || '/default-avatar.png',
           level: 0,
