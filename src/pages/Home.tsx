@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Clock, Target, Gem } from 'lucide-react';
+import gameLayerLogo from '../assets/gamelayer-logo.png';
 import { ProfileHeader } from '../components/Profile/ProfileHeader';
 import { QuickStats } from '../components/Profile/QuickStats';
 
@@ -578,7 +579,7 @@ export const Home: React.FC = () => {
       >
         <PoweredByContainer>
           <PoweredByLogo 
-            src="/gamelayer-logo.png" 
+            src={gameLayerLogo}
             alt="GameLayer" 
             onError={(e) => console.log('Logo failed to load:', e)}
             onLoad={() => console.log('Logo loaded successfully')}

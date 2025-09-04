@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Trophy, Gift, ChevronRight } from 'lucide-react';
+import gameLayerLogo from '../assets/gamelayer-logo.png';
 
 import { useNavigate } from 'react-router-dom';
 import { Container, Button } from '../styles/GlobalStyles';
@@ -394,7 +395,12 @@ export const Profile: React.FC = () => {
         </Header>
 
         <PoweredByContainer>
-          <PoweredByLogo src="/gamelayer-logo.png" alt="GameLayer" />
+          <PoweredByLogo 
+            src={gameLayerLogo}
+            alt="GameLayer" 
+            onError={(e) => console.log('Profile logo failed to load:', e)}
+            onLoad={() => console.log('Profile logo loaded successfully')}
+          />
           <PoweredByText>Powered by GameLayer</PoweredByText>
         </PoweredByContainer>
         
