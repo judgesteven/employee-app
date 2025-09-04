@@ -53,9 +53,9 @@ const PoweredByContainer = styled.div`
 `;
 
 const PoweredByLogo = styled.img`
-  width: 12px;
-  height: 12px;
-  opacity: 0.7;
+  width: 16px;
+  height: 16px;
+  opacity: 0.8;
 `;
 
 const PoweredByText = styled.div`

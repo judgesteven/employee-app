@@ -333,10 +333,11 @@ const PoweredByContainer = styled.div`
 `;
 
 const PoweredByLogo = styled.img`
-  width: 12px;
-  height: 12px;
-  opacity: 0.7;
+  width: 16px;
+  height: 16px;
+  opacity: 0.8;
 `;
+
 
 
 const PoweredByText = styled.div`
@@ -576,7 +577,12 @@ export const Home: React.FC = () => {
         animate="visible"
       >
         <PoweredByContainer>
-          <PoweredByLogo src="/gamelayer-logo.png" alt="GameLayer" />
+          <PoweredByLogo 
+            src="/gamelayer-logo.png" 
+            alt="GameLayer" 
+            onError={(e) => console.log('Logo failed to load:', e)}
+            onLoad={() => console.log('Logo loaded successfully')}
+          />
           <PoweredByText>Powered by GameLayer</PoweredByText>
         </PoweredByContainer>
         <ProfileHeader user={user} onViewMore={handleViewProfile} />
