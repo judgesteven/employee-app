@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { Users, TrendingUp } from 'lucide-react';
 import { theme } from '../../styles/theme';
+import { gameLayerApi } from '../../services/gameLayerApi';
 
 const RankingsContainer = styled(motion.div)`
   background: ${theme.colors.background};
@@ -148,102 +149,59 @@ const Score = styled.div`
   color: ${theme.colors.primary};
 `;
 
-interface Player {
-  id: string;
-  name: string;
-  avatar: string;
-  team: string;
+interface LeaderboardEntry {
+  player?: {
+    id: string;
+    name: string;
+    imgUrl?: string;
+  };
+  team?: {
+    id: string;
+    name: string;
+    imgUrl?: string;
+  };
   score: number;
-}
-
-interface Team {
-  id: string;
-  name: string;
-  score: number;
-  memberCount: number;
-  image: string;
+  rank: number;
 }
 
 interface RankingsProps {}
 
-const mockPvPData: Player[] = [
-  {
-    id: '1',
-    name: 'Sarah Chen',
-    avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face',
-    team: 'Marketing Team',
-    score: 15420
-  },
-  {
-    id: '2',
-    name: 'Mike Johnson',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
-    team: 'Engineering',
-    score: 14890
-  },
-  {
-    id: '3',
-    name: 'Emma Davis',
-    avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face',
-    team: 'Design Team',
-    score: 14250
-  },
-  {
-    id: '4',
-    name: 'Alex Rodriguez',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
-    team: 'Sales',
-    score: 13780
-  },
-  {
-    id: '5',
-    name: 'Lisa Wong',
-    avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face',
-    team: 'HR',
-    score: 13420
-  }
-];
-
-const mockTvTData: Team[] = [
-  {
-    id: '1',
-    name: 'Engineering',
-    score: 45620,
-    memberCount: 12,
-    image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=150&h=150&fit=crop&crop=center'
-  },
-  {
-    id: '2',
-    name: 'Marketing Team',
-    score: 42890,
-    memberCount: 8,
-    image: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=150&h=150&fit=crop&crop=center'
-  },
-  {
-    id: '3',
-    name: 'Design Team',
-    score: 38750,
-    memberCount: 6,
-    image: 'https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?w=150&h=150&fit=crop&crop=center'
-  },
-  {
-    id: '4',
-    name: 'Sales',
-    score: 35280,
-    memberCount: 10,
-    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=center'
-  },
-  {
-    id: '5',
-    name: 'HR',
-    score: 28420,
-    memberCount: 5,
-    image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&h=150&fit=crop&crop=center'
-  }
-];
-
 export const Rankings: React.FC<RankingsProps> = () => {
   const [activeTab, setActiveTab] = useState<'pvp' | 'tvt'>('pvp');
+  const [pvpData, setPvpData] = useState<LeaderboardEntry[]>([]);
+  const [tvtData, setTvtData] = useState<LeaderboardEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchLeaderboards = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Fetch both leaderboards in parallel
+        const [pvpResponse, tvtResponse] = await Promise.all([
+          gameLayerApi.getLeaderboard('pvp'),
+          gameLayerApi.getLeaderboard('tvt')
+        ]);
+
+        // Ensure we always have arrays
+        setPvpData(Array.isArray(pvpResponse) ? pvpResponse : []);
+        setTvtData(Array.isArray(tvtResponse) ? tvtResponse : []);
+      } catch (err) {
+        console.error('Error fetching leaderboards:', err);
+        setError('Failed to load leaderboard data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLeaderboards();
+  }, []);
+
+  const handleTabChange = (tab: 'pvp' | 'tvt') => {
+    setActiveTab(tab);
+  };
 
   return (
     <RankingsContainer
@@ -263,14 +221,14 @@ export const Rankings: React.FC<RankingsProps> = () => {
         <TabsContainer>
           <Tab 
             $active={activeTab === 'pvp'} 
-            onClick={() => setActiveTab('pvp')}
+            onClick={() => handleTabChange('pvp')}
           >
             <Users size={16} />
             PvP
           </Tab>
           <Tab 
             $active={activeTab === 'tvt'} 
-            onClick={() => setActiveTab('tvt')}
+            onClick={() => handleTabChange('tvt')}
           >
             <Users size={16} />
             TvT
@@ -279,56 +237,50 @@ export const Rankings: React.FC<RankingsProps> = () => {
       </RankingsHeader>
 
       <RankingsTable>
-        {activeTab === 'pvp' ? (
-          mockPvPData.map((player, index) => (
-            <RankingRow
-              key={player.id}
-              $rank={index + 1}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.3, delay: index * 0.1 }}
-            >
-              <RankNumber>
-                {index + 1}
-              </RankNumber>
-              
-              <PlayerInfo>
-                <Avatar src={player.avatar} alt={player.name} />
-                <PlayerDetails>
-                  <PlayerName>{player.name}</PlayerName>
-                </PlayerDetails>
-              </PlayerInfo>
-              
-              <ScoreInfo>
-                <Score>{player.score.toLocaleString()}</Score>
-              </ScoreInfo>
-            </RankingRow>
-          ))
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: theme.spacing.xl, color: theme.colors.text.secondary }}>
+            Loading leaderboard data...
+          </div>
+        ) : error ? (
+          <div style={{ textAlign: 'center', padding: theme.spacing.xl, color: theme.colors.error }}>
+            {error}
+          </div>
         ) : (
-          mockTvTData.map((team, index) => (
-            <RankingRow
-              key={team.id}
-              $rank={index + 1}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.3, delay: index * 0.1 }}
-            >
-              <RankNumber>
-                {index + 1}
-              </RankNumber>
-              
-              <PlayerInfo>
-                <Avatar src={team.image} alt={team.name} />
-                <PlayerDetails>
-                  <PlayerName>{team.name}</PlayerName>
-                </PlayerDetails>
-              </PlayerInfo>
-              
-              <ScoreInfo>
-                <Score>{team.score.toLocaleString()}</Score>
-              </ScoreInfo>
-            </RankingRow>
-          ))
+          (activeTab === 'pvp' ? pvpData : tvtData).filter(Boolean).map((entry, index) => {
+            // Determine if this is a player or team entry
+            const isPlayer = !!entry.player;
+            const name = isPlayer ? entry.player!.name : entry.team!.name;
+            const avatar = isPlayer ? entry.player!.imgUrl : entry.team!.imgUrl;
+            const id = isPlayer ? entry.player!.id : entry.team!.id;
+            
+            return (
+              <RankingRow
+                key={id}
+                $rank={entry.rank || index + 1}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.1 }}
+              >
+                <RankNumber>
+                  {entry.rank || index + 1}
+                </RankNumber>
+                
+                <PlayerInfo>
+                  <Avatar 
+                    src={avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'} 
+                    alt={name} 
+                  />
+                  <PlayerDetails>
+                    <PlayerName>{name}</PlayerName>
+                  </PlayerDetails>
+                </PlayerInfo>
+                
+                <ScoreInfo>
+                  <Score>{entry.score.toLocaleString()}</Score>
+                </ScoreInfo>
+              </RankingRow>
+            );
+          })
         )}
       </RankingsTable>
     </RankingsContainer>
