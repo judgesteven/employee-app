@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Home, User } from 'lucide-react';
+import { Home, User, Settings } from 'lucide-react';
 import { theme } from '../../styles/theme';
 
 const NavContainer = styled.nav`
@@ -89,6 +89,11 @@ const navigationItems = [
     path: '/profile',
     label: 'Profile',
     icon: User,
+  },
+  {
+    path: '/settings',
+    label: 'Settings',
+    icon: Settings,
   },
 ];
 

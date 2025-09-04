@@ -435,9 +435,9 @@ export const TodaysRewards: React.FC<TodaysRewardsProps> = () => {
           </ItemDetails>
         </ItemInfo>
         
-        {/* GET button */}
+        {/* GET/ENTER button */}
         <GetButton>
-          GET
+          {type === 'raffle' ? 'ENTER' : 'GET'}
           {item.credits && (
             <GemBadge>
               <Gem size={14} />

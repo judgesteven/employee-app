@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Award, Trophy, Gift, Gem, ChevronRight, Settings as SettingsIcon, Clock, Zap } from 'lucide-react';
+import { ArrowLeft, Award, Trophy, Gift, Gem, ChevronRight, Clock, Zap } from 'lucide-react';
 
 import { useNavigate } from 'react-router-dom';
 import { Container, Button } from '../styles/GlobalStyles';
@@ -59,13 +59,6 @@ const Title = styled.h1`
   color: ${theme.colors.text.primary};
 `;
 
-const SettingsButton = styled(Button)`
-  padding: ${theme.spacing.sm};
-  min-height: auto;
-  width: 44px;
-  height: 44px;
-  border-radius: ${theme.borderRadius.full};
-`;
 
 const ProfileSummary = styled.div`
   text-align: center;
@@ -611,10 +604,6 @@ export const Profile: React.FC = () => {
             </BackButton>
             <Title>Profile</Title>
           </HeaderLeft>
-          
-          <SettingsButton variant="ghost" onClick={() => navigate('/settings')}>
-            <SettingsIcon size={20} />
-          </SettingsButton>
         </Header>
 
         <ProfileSummary>
