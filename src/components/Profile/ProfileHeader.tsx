@@ -103,11 +103,10 @@ const StatIcon = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 10px;
+  margin-left: 10px;
 `;
 
 const StatValue = styled.div`
-  flex: 1;
   text-align: right;
 `;
 
@@ -148,12 +147,12 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, onViewMore }
           </UserInfo>
           <StatsSection>
             <StatItem>
-              <StatIcon><Footprints size={20} /></StatIcon>
               <StatValue>{formatStepCount(user.dailyStepCount)}</StatValue>
+              <StatIcon><Footprints size={20} /></StatIcon>
             </StatItem>
             <StatItem>
-              <StatIcon><Gem size={20} /></StatIcon>
               <StatValue>{user.gems.toLocaleString()}</StatValue>
+              <StatIcon><Gem size={20} /></StatIcon>
             </StatItem>
           </StatsSection>
         </TopRow>
