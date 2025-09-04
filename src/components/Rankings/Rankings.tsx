@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { Users, TrendingUp, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react';
+import { TrendingUp, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react';
 import { theme } from '../../styles/theme';
 import { gameLayerApi } from '../../services/gameLayerApi';
 
