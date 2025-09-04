@@ -116,10 +116,10 @@ const ViewAllButton = styled(Button)`
 
 const StatsGrid = styled.div`
   display: flex;
-  gap: ${theme.spacing.md};
+  gap: ${theme.spacing.sm};
   
   @media (max-width: 480px) {
-    flex-direction: column;
+    gap: ${theme.spacing.xs};
   }
 `;
 
@@ -129,6 +129,10 @@ const StatCard = styled.div`
   border: 1px solid rgba(99, 102, 241, 0.15);
   border-radius: ${theme.borderRadius.lg};
   padding: ${theme.spacing.md};
+  
+  @media (max-width: 480px) {
+    padding: ${theme.spacing.sm};
+  }
 `;
 
 const SingleStatContent = styled.div`
@@ -139,12 +143,20 @@ const StatValue = styled.div`
   font-size: ${theme.typography.fontSize.xl};
   font-weight: ${theme.typography.fontWeight.bold};
   color: ${theme.colors.text.primary};
+  
+  @media (max-width: 480px) {
+    font-size: ${theme.typography.fontSize.lg};
+  }
 `;
 
 const StatLabel = styled.div`
   font-size: ${theme.typography.fontSize.sm};
   color: ${theme.colors.text.secondary};
   text-transform: capitalize;
+  
+  @media (max-width: 480px) {
+    font-size: ${theme.typography.fontSize.xs};
+  }
 `;
 
 const RedeemedPrizesCard = styled.div`
