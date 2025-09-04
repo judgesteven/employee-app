@@ -576,7 +576,7 @@ export const Home: React.FC = () => {
         animate="visible"
       >
         <PoweredByContainer>
-          <PoweredByLogo src="/B&W_Logo_0.5.png" alt="GameLayer" />
+          <PoweredByLogo src="/gamelayer-logo.png" alt="GameLayer" />
           <PoweredByText>Powered by GameLayer</PoweredByText>
         </PoweredByContainer>
         <ProfileHeader user={user} onViewMore={handleViewProfile} />
