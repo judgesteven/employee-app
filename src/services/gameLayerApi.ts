@@ -253,10 +253,6 @@ export const gameLayerApi = {
           return transformed;
         });
         
-        const completedCount = transformedAchievements.filter(a => a.status === 'completed').length;
-        const startedCount = transformedAchievements.filter(a => a.status === 'started').length;
-        
-        
         return transformedAchievements;
       }
       
