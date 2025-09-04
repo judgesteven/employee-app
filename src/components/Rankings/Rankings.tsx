@@ -317,7 +317,7 @@ export const Rankings: React.FC<RankingsProps> = () => {
   // Initial load - fetch current tab data
   useEffect(() => {
     fetchLeaderboardData(activeTab);
-  }, [fetchLeaderboardData]); // Only depend on the memoized function
+  }, [activeTab, fetchLeaderboardData]); // Depend on activeTab and the memoized function
 
   // Handle tab change with fresh data fetch
   const handleTabChange = (tab: 'pvp' | 'tvt') => {
