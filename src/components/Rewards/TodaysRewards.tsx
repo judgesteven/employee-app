@@ -460,7 +460,7 @@ export const TodaysRewards: React.FC<TodaysRewardsProps> = () => {
           <RewardsIcon>
             <Gift size={24} />
           </RewardsIcon>
-          <RewardsTitle>Rewards</RewardsTitle>
+          <RewardsTitle>Goodies for You</RewardsTitle>
         </RewardsHeader>
         <LoadingContainer>Loading rewards...</LoadingContainer>
       </RewardsCard>
@@ -482,7 +482,7 @@ export const TodaysRewards: React.FC<TodaysRewardsProps> = () => {
           <RewardsIcon>
             <Gift size={24} />
           </RewardsIcon>
-          <RewardsTitle>Rewards</RewardsTitle>
+          <RewardsTitle>Goodies for You</RewardsTitle>
         </RewardsHeader>
         <EmptyState>No rewards available at the moment.</EmptyState>
       </RewardsCard>
@@ -500,7 +500,7 @@ export const TodaysRewards: React.FC<TodaysRewardsProps> = () => {
         <RewardsIcon>
           <Gift size={24} />
         </RewardsIcon>
-        <RewardsTitle>Rewards</RewardsTitle>
+        <RewardsTitle>Goodies for You</RewardsTitle>
       </RewardsHeader>
 
       <RewardsContent>

@@ -339,7 +339,7 @@ export const Rankings: React.FC<RankingsProps> = () => {
           <RankingsIcon>
             <TrendingUp size={24} />
           </RankingsIcon>
-          <RankingsTitle>Rankings</RankingsTitle>
+          <RankingsTitle>Prove Yourself!</RankingsTitle>
         </TitleSection>
         
         <HeaderControls>

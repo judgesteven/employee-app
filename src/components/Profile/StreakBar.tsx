@@ -145,7 +145,7 @@ export const StreakBar: React.FC<StreakBarProps> = ({ currentStreak }) => {
           <Flame size={getIconSize(currentStreak)} />
         </StreakIcon>
         
-        <StreakLabel>Streak</StreakLabel>
+        <StreakLabel>Streak Bonus</StreakLabel>
         
         <StreakValue>{currentStreak}</StreakValue>
         

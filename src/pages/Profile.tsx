@@ -407,7 +407,7 @@ export const Profile: React.FC = () => {
           <CardHeader>
             <CardTitleArea>
               <Trophy color={theme.colors.primary} size={20} />
-              <CardTitle>Stats</CardTitle>
+              <CardTitle>Your Stats</CardTitle>
             </CardTitleArea>
           </CardHeader>
           <StatsGrid>
@@ -436,7 +436,7 @@ export const Profile: React.FC = () => {
           <CardHeader>
             <CardTitleArea>
               <Gift color={theme.colors.primary} size={20} />
-              <CardTitle>Redeemed Prizes</CardTitle>
+              <CardTitle>Your Rewards</CardTitle>
               {redeemedPrizes.length > 0 && <CardCount>{redeemedPrizes.length}</CardCount>}
             </CardTitleArea>
             {redeemedPrizes.length > 3 && (
@@ -474,7 +474,7 @@ export const Profile: React.FC = () => {
               </PrizesGrid>
             ) : (
               <EmptyState>
-                <EmptyStateText>no prizes redeemed yet</EmptyStateText>
+                <EmptyStateText>no rewards redeemed yet</EmptyStateText>
               </EmptyState>
             )}
           </CardContent>
