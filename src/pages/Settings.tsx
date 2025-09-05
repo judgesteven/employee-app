@@ -7,6 +7,7 @@ import { Container, Button } from '../styles/GlobalStyles';
 import { theme } from '../styles/theme';
 import { StepTracker } from '../components/HealthTracking/StepTracker';
 import { HealthProviderToggle } from '../components/HealthTracking/HealthProviderToggle';
+import { GoogleFitConnection } from '../components/HealthTracking/GoogleFitConnection';
 
 const SettingsContainer = styled(Container)`
   padding-top: ${theme.spacing.lg};
@@ -81,6 +82,12 @@ export const Settings: React.FC = () => {
         </Header>
 
         <Section>
+          <motion.div variants={itemVariants}>
+            <GoogleFitConnection onStatusChange={(status) => {
+              console.log('Google Fit status changed:', status);
+            }} />
+          </motion.div>
+
           <motion.div variants={itemVariants}>
             <HealthProviderToggle onProviderChange={(provider) => {
               console.log(`Settings: Health provider changed to ${provider}`);

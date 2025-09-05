@@ -1,4 +1,5 @@
 import { gameLayerApi } from './gameLayerApi';
+import { Health } from 'capacitor-health';
 
 // Interface for Apple Health step data
 interface AppleHealthStepData {
@@ -55,20 +56,28 @@ class AppleHealthIntegrationService {
         return false;
       }
 
-      // In a native iOS app, this would use the HealthKit framework
-      // For now, we'll simulate the permission request
       console.log('Requesting Apple Health permissions...');
       
-      // Simulate permission dialog
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          // In a real iOS app, this would use HealthKit's authorization request
-          // For web simulation, we'll automatically grant permissions for testing
-          const granted = true; // Simulate user granting permissions
-          console.log('Health permissions:', granted ? 'granted' : 'denied');
-          resolve(granted);
-        }, 1000);
-      });
+      try {
+        // Request permissions from HealthKit via Capacitor plugin
+        const result = await Health.requestHealthPermissions({
+          permissions: ['READ_STEPS']
+        });
+        
+        const granted = result.permissions?.[0]?.['READ_STEPS'] || false;
+        console.log('Health permissions:', granted ? 'granted' : 'denied');
+        return granted;
+      } catch (error) {
+        console.warn('Native Health API not available, using fallback:', error);
+        // Fallback for web testing
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            const granted = true; // Simulate user granting permissions
+            console.log('Health permissions (fallback):', granted ? 'granted' : 'denied');
+            resolve(granted);
+          }, 1000);
+        });
+      }
     } catch (error) {
       console.error('Error requesting health permissions:', error);
       return false;
@@ -133,37 +142,81 @@ class AppleHealthIntegrationService {
     this.isTracking = false;
   }
 
-  // Simulate real-time step tracking for testing - increment every 30 seconds
+  // Real-time step tracking with device polling every 10-15 seconds
   private simulateRealTimeStepTracking(): void {
-    const trackingInterval = setInterval(() => {
+    let lastStepCount = 0;
+    
+    // Get initial step count
+    this.getCurrentStepCount().then(initialCount => {
+      lastStepCount = initialCount;
+      this.lastProcessedStepCount = initialCount;
+      console.log(`Apple Health: Initial step count: ${initialCount}`);
+    }).catch(error => {
+      console.error('Error getting initial step count:', error);
+    });
+    
+    const trackingInterval = setInterval(async () => {
       if (!this.isTracking) {
         clearInterval(trackingInterval);
         return;
       }
 
-      // Simulate step increment every 30 seconds
-      this.handleStepIncrement();
-    }, 30000); // Check every 30 seconds
+      // Poll device for real step count
+      await this.handleStepPolling(lastStepCount, (newCount) => {
+        lastStepCount = newCount;
+      });
+    }, 15000); // Poll every 15 seconds (within 10-15 second range)
   }
 
-  // Handle step increment - send delta to GameLayer
-  private async handleStepIncrement(): Promise<void> {
+  // Handle step polling - get real step count and send delta to GameLayer
+  private async handleStepPolling(lastStepCount: number, updateLastCount: (count: number) => void): Promise<void> {
     try {
-      // Generate a random step increment (10-100 steps every 30 seconds)
-      const stepDelta = Math.floor(Math.random() * 91) + 10; // 10-100 steps
+      // Get current step count from HealthKit
+      const currentStepCount = await this.getCurrentStepCount();
       
-      console.log(`Apple Health: ${stepDelta} new steps detected! Sending delta to GameLayer...`);
+      // Calculate delta (new steps since last check)
+      const stepDelta = Math.max(0, currentStepCount - lastStepCount);
       
-      // Send the step delta to GameLayer
-      await gameLayerApi.trackSteps(undefined, stepDelta);
+      if (stepDelta > 0) {
+        console.log(`Apple Health: ${stepDelta} new steps detected! Total: ${currentStepCount}. Sending to GameLayer...`);
+        
+        // Send the step delta to GameLayer via POST /events/step-tracker/complete
+        await gameLayerApi.trackSteps(undefined, stepDelta);
+        
+        console.log(`Apple Health: ${stepDelta} steps sent to GameLayer successfully.`);
+        updateLastCount(currentStepCount);
+        this.lastProcessedStepCount = currentStepCount;
+      }
       
-      this.lastProcessedStepCount += stepDelta;
-      console.log(`Apple Health: ${stepDelta} steps tracked successfully. Total session: ${this.lastProcessedStepCount}`);
-      
-      // Notify UI with the total session count
+      // Notify UI with current total
       this.notifyStepTracked();
     } catch (error) {
-      console.error('Error tracking step increment to GameLayer:', error);
+      console.error('Error polling step count from Apple Health:', error);
+    }
+  }
+
+  // Get current step count from HealthKit
+  async getCurrentStepCount(): Promise<number> {
+    try {
+      // Query real step count from HealthKit using aggregated data
+      const startOfDay = new Date(new Date().setHours(0, 0, 0, 0));
+      const now = new Date();
+      
+      const result = await Health.queryAggregated({
+        dataType: 'steps',
+        startDate: startOfDay.toISOString(),
+        endDate: now.toISOString(),
+        bucket: 'day'
+      });
+      
+      const stepCount = result.aggregatedData?.[0]?.value || 0;
+      console.log(`Apple Health: Retrieved ${stepCount} steps for today`);
+      return stepCount;
+    } catch (error) {
+      console.warn('Native Health API not available, using fallback:', error);
+      // Fallback for web simulation - increment gradually
+      this.lastProcessedStepCount += Math.floor(Math.random() * 50) + 10;
+      return this.lastProcessedStepCount;
     }
   }
 
@@ -186,12 +239,6 @@ class AppleHealthIntegrationService {
     };
   }
 
-  // Interface compatibility methods for unified health integration
-  async getCurrentStepCount(): Promise<number> {
-    // In a native iOS app, this would query HealthKit for current steps
-    // For web simulation, we'll return a mock value
-    return Math.floor(Math.random() * 10000);
-  }
 
   async startTrackingSteps(onStepTracked: (stepCount: number) => void): Promise<() => void> {
     console.log('Starting Apple Health step tracking simulation...');

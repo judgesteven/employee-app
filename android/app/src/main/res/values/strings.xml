@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Employee Wellness App</string>
+    <string name="title_activity_main">Employee Wellness App</string>
+    <string name="package_name">com.yourcompany.employeeapp</string>
+    <string name="custom_url_scheme">com.yourcompany.employeeapp</string>
+</resources>

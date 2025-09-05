@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Trophy, Gift, ChevronRight } from 'lucide-react';
-import gameLayerLogo from '../assets/gamelayer-logo.png';
 
 import { useNavigate } from 'react-router-dom';
 import { Container, Button } from '../styles/GlobalStyles';
@@ -45,27 +44,6 @@ const Title = styled.h1`
   color: ${theme.colors.text.primary};
 `;
 
-const PoweredByContainer = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  margin-bottom: ${theme.spacing.lg};
-`;
-
-const PoweredByLogo = styled.img`
-  width: 16px;
-  height: 16px;
-  opacity: 0.8;
-`;
-
-const PoweredByText = styled.div`
-  color: ${theme.colors.text.tertiary};
-  font-size: ${theme.typography.fontSize.xs};
-  font-weight: ${theme.typography.fontWeight.medium};
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-`;
 
 const StatsCard = styled.div`
   background: ${theme.colors.background};
@@ -394,15 +372,6 @@ export const Profile: React.FC = () => {
           </HeaderLeft>
         </Header>
 
-        <PoweredByContainer>
-          <PoweredByLogo 
-            src={gameLayerLogo}
-            alt="GameLayer" 
-            onError={(e) => console.log('Profile logo failed to load:', e)}
-            onLoad={() => console.log('Profile logo loaded successfully')}
-          />
-          <PoweredByText>Powered by GameLayer</PoweredByText>
-        </PoweredByContainer>
         
         <ProfileHeader 
           user={user} 
