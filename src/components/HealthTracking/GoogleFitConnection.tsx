@@ -268,9 +268,25 @@ export const GoogleFitConnection: React.FC<GoogleFitConnectionProps> = ({ onStat
   const handleManualSync = async () => {
     setIsLoading(true);
     try {
+      console.log('🔄 Manual sync requested from UI...');
       await googleFitWebServiceGIS.manualSync();
+      console.log('✅ Manual sync completed from UI');
     } catch (error) {
-      console.error('Error during manual sync:', error);
+      console.error('❌ Error during manual sync from UI:', error);
+    } finally {
+      setIsLoading(false);
+      updateStatus();
+    }
+  };
+
+  const handleRefreshToken = async () => {
+    setIsLoading(true);
+    try {
+      console.log('🔄 Token refresh requested from UI...');
+      await googleFitWebServiceGIS.refreshToken();
+      console.log('✅ Token refresh completed from UI');
+    } catch (error) {
+      console.error('❌ Error during token refresh from UI:', error);
     } finally {
       setIsLoading(false);
       updateStatus();
@@ -285,7 +301,7 @@ export const GoogleFitConnection: React.FC<GoogleFitConnectionProps> = ({ onStat
       </ConnectionHeader>
 
       <ConnectionDescription>
-        Connect to Google Fit using Google Identity Services (GIS) to automatically track your steps in real-time. Step data is sent securely to GameLayer every 10 seconds.
+        Connect to Google Fit using Google Identity Services (GIS) to automatically track your steps in real-time. Step data is sent securely to GameLayer every 5 seconds.
       </ConnectionDescription>
 
       {errorMessage && (
@@ -376,7 +392,18 @@ export const GoogleFitConnection: React.FC<GoogleFitConnectionProps> = ({ onStat
               whileTap={{ scale: 0.98 }}
             >
               {isLoading ? <RefreshCw size={16} className="animate-spin" /> : <RefreshCw size={16} />}
-              Sync Now
+              Sync Now (Check Console)
+            </ControlButton>
+
+            <ControlButton
+              $variant="secondary"
+              onClick={handleRefreshToken}
+              disabled={isLoading}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              {isLoading ? <RefreshCw size={16} className="animate-spin" /> : <RefreshCw size={16} />}
+              Refresh Token
             </ControlButton>
 
             <ControlButton

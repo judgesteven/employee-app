@@ -205,13 +205,36 @@ class GoogleFitWebServiceGIS {
 
       console.log('🔐 Starting sign in process...');
       
-      // Request access token using GIS
-      this.tokenClient.requestAccessToken({ prompt: 'consent' });
+      // Request access token using GIS with fresh consent
+      this.tokenClient.requestAccessToken({ 
+        prompt: 'consent',
+        hint: 'Select the account you want to use for fitness tracking'
+      });
       
       // The callback will handle the token response
       return true;
     } catch (error) {
       console.error('❌ Error during sign in:', error);
+      return false;
+    }
+  }
+
+  // Force refresh token
+  async refreshToken(): Promise<boolean> {
+    try {
+      if (!this.isInitialized || !this.tokenClient) {
+        console.error('❌ Cannot refresh token: not initialized');
+        return false;
+      }
+
+      console.log('🔄 Refreshing Google Fit access token...');
+      
+      // Request new token
+      this.tokenClient.requestAccessToken({ prompt: '' });
+      
+      return true;
+    } catch (error) {
+      console.error('❌ Error refreshing token:', error);
       return false;
     }
   }
@@ -244,8 +267,25 @@ class GoogleFitWebServiceGIS {
   // Get current daily steps from Google Fit
   async getCurrentDailySteps(): Promise<number> {
     try {
+      console.log('🔍 Attempting to fetch Google Fit step data...');
+      console.log('🔍 Auth status:', {
+        isAuthorized: this.isAuthorized,
+        hasAccessToken: !!this.accessToken,
+        isInitialized: this.isInitialized,
+        hasGapi: !!this.gapi
+      });
+
       if (!this.isAuthorized || !this.accessToken) {
         console.warn('⚠️ Not authorized to access Google Fit data');
+        console.warn('⚠️ Auth details:', {
+          isAuthorized: this.isAuthorized,
+          hasToken: !!this.accessToken
+        });
+        return 0;
+      }
+
+      if (!this.gapi || !this.gapi.client || !this.gapi.client.fitness) {
+        console.error('❌ Google API client not properly initialized');
         return 0;
       }
 
@@ -254,6 +294,11 @@ class GoogleFitWebServiceGIS {
       startOfDay.setHours(0, 0, 0, 0);
       const endOfDay = new Date(today);
       endOfDay.setHours(23, 59, 59, 999);
+
+      console.log('📅 Fetching steps for date range:', {
+        start: startOfDay.toISOString(),
+        end: endOfDay.toISOString()
+      });
 
       // Set the access token for GAPI requests
       this.gapi.client.setToken({ access_token: this.accessToken });
@@ -268,28 +313,45 @@ class GoogleFitWebServiceGIS {
         endTimeMillis: endOfDay.getTime()
       };
 
+      console.log('📋 Google Fit API request:', request);
+
       const response = await this.gapi.client.fitness.users.dataset.aggregate({
         userId: 'me',
         resource: request
       });
 
+      console.log('📦 Google Fit API response:', response);
+
       let totalSteps = 0;
       if (response.result.bucket) {
+        console.log('📊 Processing buckets:', response.result.bucket.length);
         for (const bucket of response.result.bucket) {
+          console.log('🪣 Bucket data:', bucket);
           if (bucket.dataset && bucket.dataset[0] && bucket.dataset[0].point) {
+            console.log('📍 Points found:', bucket.dataset[0].point.length);
             for (const point of bucket.dataset[0].point) {
               if (point.value && point.value[0] && point.value[0].intVal) {
-                totalSteps += point.value[0].intVal;
+                const steps = point.value[0].intVal;
+                console.log('👟 Steps in point:', steps);
+                totalSteps += steps;
               }
             }
           }
         }
+      } else {
+        console.log('📊 No buckets found in response');
       }
 
-      console.log(`📊 Current daily steps: ${totalSteps}`);
+      console.log(`📊 Total daily steps calculated: ${totalSteps}`);
       return totalSteps;
     } catch (error) {
       console.error('❌ Error fetching step data:', error);
+      if (error instanceof Error) {
+        console.error('❌ Error details:', {
+          message: error.message,
+          stack: error.stack
+        });
+      }
       return 0;
     }
   }
@@ -324,6 +386,8 @@ class GoogleFitWebServiceGIS {
       // Start polling every 5 seconds for more responsive updates
       this.pollingInterval = setInterval(async () => {
         try {
+          console.log('🔄 Automatic step tracking poll...');
+          
           // Re-check authorization status
           if (!this.isAuthorized || !this.accessToken) {
             console.warn('⚠️ Google Fit authorization lost during tracking');
@@ -331,8 +395,10 @@ class GoogleFitWebServiceGIS {
             return;
           }
 
+          console.log('🔄 Fetching steps for automatic tracking...');
           const currentSteps = await this.getCurrentDailySteps();
           const stepDelta = currentSteps - this.lastStepCount;
+          console.log(`🔄 Auto tracking: Current: ${currentSteps}, Last: ${this.lastStepCount}, Delta: ${stepDelta}`);
 
           if (stepDelta > 0) {
             console.log(`👟 Step delta detected: +${stepDelta} steps (Total: ${currentSteps})`);
@@ -433,26 +499,60 @@ class GoogleFitWebServiceGIS {
 
   // Manual sync
   async manualSync(): Promise<void> {
-    if (!this.isAuthorized || !this.isTracking) {
-      console.warn('⚠️ Cannot sync: not authorized or not tracking');
+    console.log('🔄 Manual sync requested...');
+    console.log('🔄 Current state:', {
+      isAuthorized: this.isAuthorized,
+      isTracking: this.isTracking,
+      lastStepCount: this.lastStepCount,
+      hasAccessToken: !!this.accessToken
+    });
+
+    if (!this.isAuthorized) {
+      console.warn('⚠️ Cannot sync: not authorized');
+      console.warn('⚠️ Please connect to Google Fit first');
+      return;
+    }
+
+    if (!this.isTracking) {
+      console.warn('⚠️ Cannot sync: tracking not started');
+      console.warn('⚠️ Please start step tracking first');
       return;
     }
 
     try {
+      console.log('🔄 Fetching current step count from Google Fit...');
       const currentSteps = await this.getCurrentDailySteps();
+      console.log(`🔄 Current steps: ${currentSteps}, Last count: ${this.lastStepCount}`);
+      
       const stepDelta = currentSteps - this.lastStepCount;
+      console.log(`🔄 Step delta: ${stepDelta}`);
 
       if (stepDelta > 0) {
-        console.log(`🔄 Manual sync: +${stepDelta} steps`);
-        await gameLayerApi.trackSteps(undefined, stepDelta);
-        this.lastStepCount = currentSteps;
-        this.notifyStepTracked(currentSteps);
-        console.log('✅ Manual sync completed');
+        console.log(`🔄 Manual sync: +${stepDelta} steps (${this.lastStepCount} → ${currentSteps})`);
+        
+        try {
+          await gameLayerApi.trackSteps(undefined, stepDelta);
+          console.log(`✅ Successfully sent ${stepDelta} steps to GameLayer`);
+          
+          this.lastStepCount = currentSteps;
+          this.saveState();
+          this.notifyStepTracked(currentSteps);
+          console.log('✅ Manual sync completed successfully');
+        } catch (apiError) {
+          console.error('❌ Failed to send steps to GameLayer:', apiError);
+          throw apiError;
+        }
+      } else if (stepDelta === 0) {
+        console.log('ℹ️ No new steps to sync - step count unchanged');
       } else {
-        console.log('ℹ️ No new steps to sync');
+        console.log(`ℹ️ Step delta is negative (${stepDelta}) - possible data reset or error`);
+        // Reset our counter to match Google Fit
+        this.lastStepCount = currentSteps;
+        this.saveState();
       }
     } catch (error) {
       console.error('❌ Error during manual sync:', error);
+      console.error('❌ Manual sync failed completely');
     }
   }
 
