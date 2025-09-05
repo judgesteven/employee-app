@@ -73,6 +73,13 @@ class GoogleFitWebService {
         scope: GOOGLE_FIT_CONFIG.SCOPE
       }).catch((initError: any) => {
         console.error('❌ Google API client initialization failed:', initError);
+        
+        if (initError.error === 'idpiframe_initialization_failed') {
+          const errorMessage = `Google OAuth domain not authorized. Please add '${window.location.origin}' to your Google Cloud Console OAuth settings under 'Authorized JavaScript origins'.`;
+          console.error('🔧 Fix:', errorMessage);
+          throw new Error(errorMessage);
+        }
+        
         throw new Error(`Google API client init failed: ${initError.error || initError.message || 'Unknown error'}`);
       });
 
