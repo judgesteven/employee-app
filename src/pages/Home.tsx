@@ -507,7 +507,16 @@ export const Home: React.FC = () => {
           setFeaturedMissions(updatedMissions.slice(0, 3));
         };
         
+        // Set up reward polling for TodaysRewards component
+        const handleRewardUpdate = (rewards: any[]) => {
+          console.log('🏆 Updating rewards from GameLayer polling on Home...');
+          // Rewards will be handled by TodaysRewards component via event system
+          const event = new CustomEvent('rewardsUpdated', { detail: rewards });
+          window.dispatchEvent(event);
+        };
+        
         playerDataPollingService.addMissionListener(handleMissionUpdate);
+        playerDataPollingService.addRewardListener(handleRewardUpdate);
         playerDataPollingService.startPolling(gameLayerPlayer.id);
         
       } catch (err) {

@@ -320,6 +320,21 @@ export const Profile: React.FC = () => {
 
         // Start polling for player data updates
         playerDataPollingService.addListener(handlePlayerDataUpdate);
+        
+        // Set up reward polling
+        const handleRewardUpdate = (rewards: any[]) => {
+          console.log('🏆 Updating rewards from GameLayer polling...');
+          // Rewards are handled by the Rewards page components directly
+        };
+        
+        // Set up prize polling
+        const handlePrizeUpdate = (prizes: any[]) => {
+          console.log('🎁 Updating redeemed prizes from GameLayer polling...');
+          setRedeemedPrizes(Array.isArray(prizes) ? prizes : []);
+        };
+        
+        playerDataPollingService.addRewardListener(handleRewardUpdate);
+        playerDataPollingService.addPrizeListener(handlePrizeUpdate);
         playerDataPollingService.startPolling(gameLayerPlayer.id);
 
         // Fetch redeemed prizes

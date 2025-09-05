@@ -318,6 +318,27 @@ export const TodaysRewards: React.FC<TodaysRewardsProps> = () => {
     };
 
     fetchRewardsData();
+    
+    // Listen for reward updates from polling service
+    const handleRewardUpdates = (event: CustomEvent) => {
+      console.log('🏆 TodaysRewards received update from polling service');
+      const updatedRewards = event.detail;
+      
+      if (Array.isArray(updatedRewards)) {
+        // Separate raffles and prizes
+        const raffleData = updatedRewards.filter(reward => reward.category?.toLowerCase() === 'raffle');
+        const prizeData = updatedRewards.filter(reward => reward.category?.toLowerCase() !== 'raffle');
+        
+        setRaffles(raffleData);
+        setPrizes(prizeData);
+      }
+    };
+    
+    window.addEventListener('rewardsUpdated', handleRewardUpdates as EventListener);
+    
+    return () => {
+      window.removeEventListener('rewardsUpdated', handleRewardUpdates as EventListener);
+    };
   }, []);
 
   const formatTimeRemaining = (expiresAt?: string) => {

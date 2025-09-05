@@ -149,7 +149,10 @@ class GoogleFitWebServiceGIS {
       // Resume tracking if it was previously active
       if (this.isAuthorized && this.isTracking && !this.pollingInterval) {
         console.log('🔄 Resuming step tracking from previous session...');
-        this.startTracking();
+        // Use setTimeout to ensure initialization is complete
+        setTimeout(() => {
+          this.startTracking();
+        }, 1000);
       }
       
       return true;
@@ -318,24 +321,45 @@ class GoogleFitWebServiceGIS {
         console.log('🌅 Midnight reset detected, resetting step count');
       }
 
-      // Start polling every 10 seconds
+      // Start polling every 5 seconds for more responsive updates
       this.pollingInterval = setInterval(async () => {
         try {
+          // Re-check authorization status
+          if (!this.isAuthorized || !this.accessToken) {
+            console.warn('⚠️ Google Fit authorization lost during tracking');
+            this.stopTracking();
+            return;
+          }
+
           const currentSteps = await this.getCurrentDailySteps();
           const stepDelta = currentSteps - this.lastStepCount;
 
           if (stepDelta > 0) {
-            console.log(`👟 Step delta detected: +${stepDelta} steps`);
+            console.log(`👟 Step delta detected: +${stepDelta} steps (Total: ${currentSteps})`);
             
-            // Send to GameLayer
-            try {
-              await gameLayerApi.trackSteps(undefined, stepDelta);
-              console.log(`✅ Sent ${stepDelta} steps to GameLayer`);
-            } catch (apiError) {
-              console.error('❌ Failed to send steps to GameLayer:', apiError);
+            // Send to GameLayer with retry logic
+            let retryCount = 0;
+            const maxRetries = 3;
+            
+            while (retryCount < maxRetries) {
+              try {
+                await gameLayerApi.trackSteps(undefined, stepDelta);
+                console.log(`✅ Sent ${stepDelta} steps to GameLayer (attempt ${retryCount + 1})`);
+                break;
+              } catch (apiError) {
+                retryCount++;
+                console.error(`❌ Failed to send steps to GameLayer (attempt ${retryCount}):`, apiError);
+                if (retryCount >= maxRetries) {
+                  console.error('❌ Max retries reached, step data may be lost');
+                } else {
+                  // Wait before retry
+                  await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
+                }
+              }
             }
 
             this.lastStepCount = currentSteps;
+            this.saveState(); // Save updated step count
             
             // Dispatch custom event
             this.notifyStepTracked(currentSteps);
@@ -346,12 +370,22 @@ class GoogleFitWebServiceGIS {
           if (this.lastResetDate !== currentDate) {
             this.lastResetDate = currentDate;
             this.lastStepCount = 0;
+            this.saveState();
             console.log('🌅 Midnight reset detected, resetting step count');
           }
         } catch (error) {
           console.error('❌ Error during step tracking poll:', error);
+          
+          // If we get auth errors, try to re-initialize
+          if (error instanceof Error && error.message && error.message.includes('auth')) {
+            console.log('🔄 Attempting to re-initialize Google Fit due to auth error...');
+            this.isInitialized = false;
+            this.initialize().catch(initError => {
+              console.error('❌ Failed to re-initialize Google Fit:', initError);
+            });
+          }
         }
-      }, 10000); // Poll every 10 seconds
+      }, 5000); // Poll every 5 seconds for faster updates
 
       console.log('✅ Step tracking started');
       this.saveState();

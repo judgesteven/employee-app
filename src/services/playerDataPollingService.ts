@@ -21,6 +21,8 @@ class PlayerDataPollingService {
   private currentPlayerId: string | null = null;
   private listeners: Set<(playerData: GameLayerPlayer & { dailyStepCount?: number }) => void> = new Set();
   private missionListeners: Set<(missions: any[]) => void> = new Set();
+  private rewardListeners: Set<(rewards: any[]) => void> = new Set();
+  private prizeListeners: Set<(prizes: any[]) => void> = new Set();
 
   static getInstance(): PlayerDataPollingService {
     if (!PlayerDataPollingService.instance) {
@@ -61,6 +63,8 @@ class PlayerDataPollingService {
     // Clear all listeners when stopping
     this.listeners.clear();
     this.missionListeners.clear();
+    this.rewardListeners.clear();
+    this.prizeListeners.clear();
     
     console.log('⏹️ Player data polling stopped');
   }
@@ -83,6 +87,26 @@ class PlayerDataPollingService {
   // Remove mission listener
   removeMissionListener(callback: (missions: any[]) => void): void {
     this.missionListeners.delete(callback);
+  }
+
+  // Add listener for reward updates
+  addRewardListener(callback: (rewards: any[]) => void): void {
+    this.rewardListeners.add(callback);
+  }
+
+  // Remove reward listener
+  removeRewardListener(callback: (rewards: any[]) => void): void {
+    this.rewardListeners.delete(callback);
+  }
+
+  // Add listener for prize updates
+  addPrizeListener(callback: (prizes: any[]) => void): void {
+    this.prizeListeners.add(callback);
+  }
+
+  // Remove prize listener
+  removePrizeListener(callback: (prizes: any[]) => void): void {
+    this.prizeListeners.delete(callback);
   }
 
   // Fetch player data from GameLayer
@@ -117,8 +141,12 @@ class PlayerDataPollingService {
         });
       }
 
-      // Fetch and notify mission progress updates
-      await this.fetchMissionProgress();
+      // Fetch and notify all data updates
+      await Promise.all([
+        this.fetchMissionProgress(),
+        this.fetchRewards(),
+        this.fetchPlayerPrizes()
+      ]);
     } catch (error) {
       console.error('❌ Error fetching player data:', error);
     }
@@ -146,6 +174,54 @@ class PlayerDataPollingService {
       }
     } catch (error) {
       console.error('❌ Error fetching mission progress:', error);
+    }
+  }
+
+  // Fetch available rewards from GameLayer
+  private async fetchRewards(): Promise<void> {
+    try {
+      const rewards = await gameLayerApi.getPrizes();
+      
+      if (rewards && Array.isArray(rewards)) {
+        console.log('🏆 Updated rewards from GameLayer:', {
+          rewardCount: rewards.length
+        });
+
+        // Notify all reward listeners
+        this.rewardListeners.forEach(callback => {
+          try {
+            callback(rewards);
+          } catch (error) {
+            console.error('Error in reward listener:', error);
+          }
+        });
+      }
+    } catch (error) {
+      console.error('❌ Error fetching rewards:', error);
+    }
+  }
+
+  // Fetch player's redeemed prizes from GameLayer
+  private async fetchPlayerPrizes(): Promise<void> {
+    try {
+      const prizes = await gameLayerApi.getPlayerPrizes(this.currentPlayerId || undefined);
+      
+      if (prizes && Array.isArray(prizes)) {
+        console.log('🎁 Updated player prizes from GameLayer:', {
+          prizeCount: prizes.length
+        });
+
+        // Notify all prize listeners
+        this.prizeListeners.forEach(callback => {
+          try {
+            callback(prizes);
+          } catch (error) {
+            console.error('Error in prize listener:', error);
+          }
+        });
+      }
+    } catch (error) {
+      console.error('❌ Error fetching player prizes:', error);
     }
   }
 
