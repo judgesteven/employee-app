@@ -2,7 +2,7 @@ import { gameLayerApi } from './gameLayerApi';
 
 // Google Fit Web API configuration
 const GOOGLE_FIT_CONFIG = {
-  CLIENT_ID: process.env.REACT_APP_GOOGLE_CLIENT_ID || 'your-google-client-id',
+  CLIENT_ID: process.env.REACT_APP_GOOGLE_CLIENT_ID || '698221276290-ocvlgt13mj6oegq4lt8ij5btld052l7c.apps.googleusercontent.com',
   SCOPE: 'https://www.googleapis.com/auth/fitness.activity.read',
   DISCOVERY_DOC: 'https://www.googleapis.com/discovery/v1/apis/fitness/v1/rest'
 };
@@ -39,7 +39,9 @@ class GoogleFitWebService {
       console.log('📋 Configuration:', {
         clientId: GOOGLE_FIT_CONFIG.CLIENT_ID,
         scope: GOOGLE_FIT_CONFIG.SCOPE,
-        hasClientId: !!GOOGLE_FIT_CONFIG.CLIENT_ID && GOOGLE_FIT_CONFIG.CLIENT_ID !== 'your-google-client-id'
+        hasClientId: !!GOOGLE_FIT_CONFIG.CLIENT_ID && GOOGLE_FIT_CONFIG.CLIENT_ID !== 'your-google-client-id',
+        environment: process.env.NODE_ENV,
+        location: window.location.origin
       });
 
       // Check if Client ID is configured
@@ -69,6 +71,9 @@ class GoogleFitWebService {
         discoveryDocs: [GOOGLE_FIT_CONFIG.DISCOVERY_DOC],
         clientId: GOOGLE_FIT_CONFIG.CLIENT_ID,
         scope: GOOGLE_FIT_CONFIG.SCOPE
+      }).catch((initError: any) => {
+        console.error('❌ Google API client initialization failed:', initError);
+        throw new Error(`Google API client init failed: ${initError.error || initError.message || 'Unknown error'}`);
       });
 
       this.gapi = window.gapi;
