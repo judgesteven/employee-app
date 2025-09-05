@@ -344,8 +344,28 @@ class GoogleFitWebServiceGIS {
 
       console.log(`📊 Total daily steps calculated: ${totalSteps}`);
       return totalSteps;
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Error fetching step data:', error);
+      
+      // Check if it's an authentication error
+      if (error.status === 401 || (error.result && error.result.error && error.result.error.code === 401)) {
+        console.error('🔑 Authentication expired - token needs refresh');
+        console.log('🔄 Attempting to refresh token...');
+        
+        // Mark as unauthorized and try to refresh
+        this.isAuthorized = false;
+        this.accessToken = null;
+        this.saveState();
+        
+        // Try to refresh token
+        try {
+          await this.refreshToken();
+          console.log('✅ Token refresh initiated - please re-authorize');
+        } catch (refreshError) {
+          console.error('❌ Failed to refresh token:', refreshError);
+        }
+      }
+      
       if (error instanceof Error) {
         console.error('❌ Error details:', {
           message: error.message,
