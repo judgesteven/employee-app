@@ -7,6 +7,21 @@ const GOOGLE_FIT_CONFIG = {
   DISCOVERY_DOC: 'https://www.googleapis.com/discovery/v1/apis/fitness/v1/rest'
 };
 
+// Extend window interface for Google Identity Services
+declare global {
+  interface Window {
+    google: {
+      accounts: {
+        oauth2: {
+          initTokenClient: (config: any) => any;
+          hasGrantedAllScopes: (tokenResponse: any, ...scopes: string[]) => boolean;
+        };
+      };
+    };
+    gapi: any;
+  }
+}
+
 // Interface for step count data (for future use)
 // interface StepCountData {
 //   totalSteps: number;
@@ -16,6 +31,8 @@ const GOOGLE_FIT_CONFIG = {
 class GoogleFitWebService {
   private static instance: GoogleFitWebService;
   private gapi: any = null;
+  private tokenClient: any = null;
+  private accessToken: string | null = null;
   private isInitialized = false;
   private isAuthorized = false;
   private isTracking = false;

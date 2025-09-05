@@ -3,6 +3,14 @@
 declare global {
   interface Window {
     gapi: any;
+    google: {
+      accounts: {
+        oauth2: {
+          initTokenClient: (config: any) => any;
+          hasGrantedAllScopes: (tokenResponse: any, ...scopes: string[]) => boolean;
+        };
+      };
+    };
   }
 }
 

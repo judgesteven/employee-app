@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { Activity, Play, Square, RefreshCw, CheckCircle, AlertCircle } from 'lucide-react';
 import { theme } from '../../styles/theme';
-import { googleFitWebService } from '../../services/googleFitWebIntegration';
+import { googleFitWebServiceGIS } from '../../services/googleFitWebIntegrationGIS';
 
 const ConnectionContainer = styled.div`
   background: ${theme.colors.background};
@@ -176,7 +176,7 @@ export const GoogleFitConnection: React.FC<GoogleFitConnectionProps> = ({ onStat
   const [errorMessage, setErrorMessage] = useState<string>('');
 
   const updateStatus = React.useCallback(() => {
-    const newStatus = googleFitWebService.getTrackingStatus();
+    const newStatus = googleFitWebServiceGIS.getTrackingStatus();
     setStatus(newStatus);
     setCurrentStepCount(newStatus.lastStepCount);
     onStatusChange?.(newStatus);
@@ -187,7 +187,7 @@ export const GoogleFitConnection: React.FC<GoogleFitConnectionProps> = ({ onStat
     const initializeService = async () => {
       try {
         setErrorMessage('');
-        const success = await googleFitWebService.initialize();
+        const success = await googleFitWebServiceGIS.initialize();
         if (!success) {
           setErrorMessage('Failed to initialize Google Fit API. Check console for details.');
         }
@@ -220,7 +220,7 @@ export const GoogleFitConnection: React.FC<GoogleFitConnectionProps> = ({ onStat
   const handleConnect = async () => {
     setIsLoading(true);
     try {
-      const success = await googleFitWebService.signIn();
+      const success = await googleFitWebServiceGIS.signIn();
       if (success) {
         console.log('Successfully connected to Google Fit');
       }
@@ -235,7 +235,7 @@ export const GoogleFitConnection: React.FC<GoogleFitConnectionProps> = ({ onStat
   const handleDisconnect = async () => {
     setIsLoading(true);
     try {
-      await googleFitWebService.signOut();
+      await googleFitWebServiceGIS.signOut();
       setCurrentStepCount(0);
     } catch (error) {
       console.error('Error disconnecting from Google Fit:', error);
@@ -248,7 +248,7 @@ export const GoogleFitConnection: React.FC<GoogleFitConnectionProps> = ({ onStat
   const handleStartTracking = async () => {
     setIsLoading(true);
     try {
-      const success = await googleFitWebService.startTracking();
+      const success = await googleFitWebServiceGIS.startTracking();
       if (success) {
         console.log('Step tracking started');
       }
@@ -261,14 +261,14 @@ export const GoogleFitConnection: React.FC<GoogleFitConnectionProps> = ({ onStat
   };
 
   const handleStopTracking = () => {
-    googleFitWebService.stopTracking();
+    googleFitWebServiceGIS.stopTracking();
     updateStatus();
   };
 
   const handleManualSync = async () => {
     setIsLoading(true);
     try {
-      await googleFitWebService.manualSync();
+      await googleFitWebServiceGIS.manualSync();
     } catch (error) {
       console.error('Error during manual sync:', error);
     } finally {
@@ -285,7 +285,7 @@ export const GoogleFitConnection: React.FC<GoogleFitConnectionProps> = ({ onStat
       </ConnectionHeader>
 
       <ConnectionDescription>
-        Connect to Google Fit to automatically track your steps in real-time. Step data is sent securely to GameLayer every 10 seconds.
+        Connect to Google Fit using Google Identity Services (GIS) to automatically track your steps in real-time. Step data is sent securely to GameLayer every 10 seconds.
       </ConnectionDescription>
 
       {errorMessage && (
