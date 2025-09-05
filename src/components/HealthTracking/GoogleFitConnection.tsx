@@ -173,6 +173,7 @@ export const GoogleFitConnection: React.FC<GoogleFitConnectionProps> = ({ onStat
   });
   const [isLoading, setIsLoading] = useState(false);
   const [currentStepCount, setCurrentStepCount] = useState(0);
+  const [errorMessage, setErrorMessage] = useState<string>('');
 
   const updateStatus = React.useCallback(() => {
     const newStatus = googleFitWebService.getTrackingStatus();
@@ -184,7 +185,16 @@ export const GoogleFitConnection: React.FC<GoogleFitConnectionProps> = ({ onStat
   useEffect(() => {
     // Initialize Google Fit service
     const initializeService = async () => {
-      await googleFitWebService.initialize();
+      try {
+        setErrorMessage('');
+        const success = await googleFitWebService.initialize();
+        if (!success) {
+          setErrorMessage('Failed to initialize Google Fit API. Check console for details.');
+        }
+      } catch (error: any) {
+        setErrorMessage(error.message || 'Failed to initialize Google Fit API');
+        console.error('Initialization error:', error);
+      }
       updateStatus();
     };
 
@@ -277,6 +287,15 @@ export const GoogleFitConnection: React.FC<GoogleFitConnectionProps> = ({ onStat
       <ConnectionDescription>
         Connect to Google Fit to automatically track your steps in real-time. Step data is sent securely to GameLayer every 10 seconds.
       </ConnectionDescription>
+
+      {errorMessage && (
+        <StatusItem $status="error">
+          <StatusIcon $status="error">
+            <AlertCircle size={16} />
+          </StatusIcon>
+          <StatusText style={{ color: '#ef4444' }}>{errorMessage}</StatusText>
+        </StatusItem>
+      )}
 
       <StatusSection>
         <StatusItem $status={status.isInitialized ? 'success' : 'error'}>

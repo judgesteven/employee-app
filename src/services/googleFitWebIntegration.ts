@@ -35,15 +35,36 @@ class GoogleFitWebService {
     try {
       if (this.isInitialized) return true;
 
-      // Load Google API script if not already loaded
-      if (!window.gapi) {
-        await this.loadGoogleAPIScript();
-      }
-
-      await new Promise((resolve) => {
-        window.gapi.load('auth2:client', resolve);
+      console.log('🔄 Initializing Google Fit Web API...');
+      console.log('📋 Configuration:', {
+        clientId: GOOGLE_FIT_CONFIG.CLIENT_ID,
+        scope: GOOGLE_FIT_CONFIG.SCOPE,
+        hasClientId: !!GOOGLE_FIT_CONFIG.CLIENT_ID && GOOGLE_FIT_CONFIG.CLIENT_ID !== 'your-google-client-id'
       });
 
+      // Check if Client ID is configured
+      if (!GOOGLE_FIT_CONFIG.CLIENT_ID || GOOGLE_FIT_CONFIG.CLIENT_ID === 'your-google-client-id') {
+        console.error('❌ Google Client ID not configured. Please set REACT_APP_GOOGLE_CLIENT_ID in your .env file');
+        throw new Error('Google Client ID not configured. Please set REACT_APP_GOOGLE_CLIENT_ID in your .env file');
+      }
+
+      // Load Google API script if not already loaded
+      if (!window.gapi) {
+        console.log('📦 Loading Google API script...');
+        await this.loadGoogleAPIScript();
+        console.log('✅ Google API script loaded');
+      }
+
+      console.log('🔧 Loading Google API modules...');
+      await new Promise((resolve, reject) => {
+        window.gapi.load('auth2:client', {
+          callback: resolve,
+          onerror: reject
+        });
+      });
+      console.log('✅ Google API modules loaded');
+
+      console.log('🔑 Initializing Google API client...');
       await window.gapi.client.init({
         discoveryDocs: [GOOGLE_FIT_CONFIG.DISCOVERY_DOC],
         clientId: GOOGLE_FIT_CONFIG.CLIENT_ID,
@@ -52,10 +73,11 @@ class GoogleFitWebService {
 
       this.gapi = window.gapi;
       this.isInitialized = true;
-      console.log('Google Fit Web API initialized successfully');
+      console.log('✅ Google Fit Web API initialized successfully');
       return true;
     } catch (error) {
-      console.error('Error initializing Google Fit Web API:', error);
+      console.error('❌ Error initializing Google Fit Web API:', error);
+      this.isInitialized = false;
       return false;
     }
   }
