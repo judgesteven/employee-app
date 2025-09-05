@@ -338,24 +338,30 @@ class GoogleFitWebServiceGIS {
             console.log(`👟 Step delta detected: +${stepDelta} steps (Total: ${currentSteps})`);
             
             // Send to GameLayer with retry logic
-            let retryCount = 0;
-            const maxRetries = 3;
-            
-            while (retryCount < maxRetries) {
-              try {
-                await gameLayerApi.trackSteps(undefined, stepDelta);
-                console.log(`✅ Sent ${stepDelta} steps to GameLayer (attempt ${retryCount + 1})`);
-                break;
-              } catch (apiError) {
-                retryCount++;
-                console.error(`❌ Failed to send steps to GameLayer (attempt ${retryCount}):`, apiError);
-                if (retryCount >= maxRetries) {
-                  console.error('❌ Max retries reached, step data may be lost');
-                } else {
-                  // Wait before retry
-                  await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
+            const sendStepsWithRetry = async (steps: number, maxRetries: number = 3): Promise<void> => {
+              for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                try {
+                  await gameLayerApi.trackSteps(undefined, steps);
+                  console.log(`✅ Sent ${steps} steps to GameLayer (attempt ${attempt})`);
+                  return;
+                } catch (apiError) {
+                  console.error(`❌ Failed to send steps to GameLayer (attempt ${attempt}):`, apiError);
+                  if (attempt >= maxRetries) {
+                    console.error('❌ Max retries reached, step data may be lost');
+                    throw apiError;
+                  } else {
+                    // Wait before retry with exponential backoff
+                    await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+                  }
                 }
               }
+            };
+
+            try {
+              await sendStepsWithRetry(stepDelta);
+            } catch (error) {
+              // Log final failure but don't break the polling loop
+              console.error('❌ Failed to send steps after all retries');
             }
 
             this.lastStepCount = currentSteps;
