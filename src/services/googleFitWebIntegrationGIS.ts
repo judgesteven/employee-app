@@ -20,11 +20,65 @@ class GoogleFitWebServiceGIS {
   private pollingInterval: NodeJS.Timeout | null = null;
   private lastResetDate = '';
 
+  // Storage keys for persistence
+  private readonly STORAGE_KEYS = {
+    ACCESS_TOKEN: 'googleFit_accessToken',
+    IS_AUTHORIZED: 'googleFit_isAuthorized',
+    IS_TRACKING: 'googleFit_isTracking',
+    LAST_STEP_COUNT: 'googleFit_lastStepCount',
+    LAST_RESET_DATE: 'googleFit_lastResetDate'
+  };
+
   static getInstance(): GoogleFitWebServiceGIS {
     if (!GoogleFitWebServiceGIS.instance) {
       GoogleFitWebServiceGIS.instance = new GoogleFitWebServiceGIS();
     }
     return GoogleFitWebServiceGIS.instance;
+  }
+
+  constructor() {
+    // Load persisted state on initialization
+    this.loadState();
+  }
+
+  // Save state to localStorage
+  private saveState(): void {
+    try {
+      localStorage.setItem(this.STORAGE_KEYS.ACCESS_TOKEN, this.accessToken || '');
+      localStorage.setItem(this.STORAGE_KEYS.IS_AUTHORIZED, this.isAuthorized.toString());
+      localStorage.setItem(this.STORAGE_KEYS.IS_TRACKING, this.isTracking.toString());
+      localStorage.setItem(this.STORAGE_KEYS.LAST_STEP_COUNT, this.lastStepCount.toString());
+      localStorage.setItem(this.STORAGE_KEYS.LAST_RESET_DATE, this.lastResetDate);
+    } catch (error) {
+      console.warn('Failed to save Google Fit state to localStorage:', error);
+    }
+  }
+
+  // Load state from localStorage
+  private loadState(): void {
+    try {
+      const accessToken = localStorage.getItem(this.STORAGE_KEYS.ACCESS_TOKEN);
+      const isAuthorized = localStorage.getItem(this.STORAGE_KEYS.IS_AUTHORIZED) === 'true';
+      const isTracking = localStorage.getItem(this.STORAGE_KEYS.IS_TRACKING) === 'true';
+      const lastStepCount = parseInt(localStorage.getItem(this.STORAGE_KEYS.LAST_STEP_COUNT) || '0');
+      const lastResetDate = localStorage.getItem(this.STORAGE_KEYS.LAST_RESET_DATE) || '';
+
+      if (accessToken) {
+        this.accessToken = accessToken;
+        this.isAuthorized = isAuthorized;
+        this.isTracking = isTracking;
+        this.lastStepCount = lastStepCount;
+        this.lastResetDate = lastResetDate;
+        
+        console.log('🔄 Loaded Google Fit state from localStorage:', {
+          isAuthorized: this.isAuthorized,
+          isTracking: this.isTracking,
+          lastStepCount: this.lastStepCount
+        });
+      }
+    } catch (error) {
+      console.warn('Failed to load Google Fit state from localStorage:', error);
+    }
   }
 
   // Initialize Google API with Google Identity Services (GIS)
@@ -83,6 +137,7 @@ class GoogleFitWebServiceGIS {
           console.log('✅ Token received:', tokenResponse);
           this.accessToken = tokenResponse.access_token;
           this.isAuthorized = true;
+          this.saveState();
           this.notifyStatusChange();
         },
       });
@@ -90,6 +145,13 @@ class GoogleFitWebServiceGIS {
       this.gapi = window.gapi;
       this.isInitialized = true;
       console.log('✅ Google Fit Web API initialized successfully with GIS');
+      
+      // Resume tracking if it was previously active
+      if (this.isAuthorized && this.isTracking && !this.pollingInterval) {
+        console.log('🔄 Resuming step tracking from previous session...');
+        this.startTracking();
+      }
+      
       return true;
     } catch (error: any) {
       console.error('❌ Error initializing Google Fit Web API:', error);
@@ -158,6 +220,7 @@ class GoogleFitWebServiceGIS {
       this.accessToken = null;
       this.isAuthorized = false;
       this.stopTracking();
+      this.saveState();
       console.log('✅ Signed out successfully');
       this.notifyStatusChange();
     } catch (error) {
@@ -291,6 +354,7 @@ class GoogleFitWebServiceGIS {
       }, 10000); // Poll every 10 seconds
 
       console.log('✅ Step tracking started');
+      this.saveState();
       this.notifyStatusChange();
       return true;
     } catch (error) {
@@ -307,6 +371,7 @@ class GoogleFitWebServiceGIS {
       this.pollingInterval = null;
     }
     this.isTracking = false;
+    this.saveState();
     console.log('⏹️ Step tracking stopped');
     this.notifyStatusChange();
   }

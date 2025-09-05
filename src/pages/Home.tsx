@@ -16,6 +16,7 @@ import { Container, Card, Button } from '../styles/GlobalStyles';
 import { theme } from '../styles/theme';
 import { User, Challenge, Achievement } from '../types';
 import { gameLayerApi } from '../services/gameLayerApi';
+import { playerDataPollingService } from '../services/playerDataPollingService';
 
 const HomeContainer = styled(Container)`
   padding-top: ${theme.spacing.lg};
@@ -471,6 +472,26 @@ export const Home: React.FC = () => {
 
         setUser(updatedUser);
         setFeaturedMissions(filteredMissions.slice(0, 3)); // Show only first 3 featured missions on home
+        
+        // Set up player data polling to keep UI updated
+        const handlePlayerDataUpdate = (playerData: any) => {
+          console.log('🔄 Updating user data from GameLayer polling...');
+          setUser(prevUser => {
+            if (!prevUser) return prevUser;
+            
+            // Update user with fresh data from GameLayer
+            return {
+              ...prevUser,
+              gems: playerData.credits || prevUser.gems,
+              dailyStepCount: playerData.dailyStepCount || prevUser.dailyStepCount,
+            };
+          });
+        };
+
+        // Start polling for player data updates
+        playerDataPollingService.addListener(handlePlayerDataUpdate);
+        playerDataPollingService.startPolling(gameLayerPlayer.id);
+        
       } catch (err) {
         console.error('Error initializing home:', err);
         setError('Failed to load data. Please try again.');
@@ -483,6 +504,11 @@ export const Home: React.FC = () => {
     };
 
     initializeHome();
+    
+    // Cleanup polling service on unmount
+    return () => {
+      playerDataPollingService.stopPolling();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // fallbackUser is static data
 

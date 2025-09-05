@@ -8,6 +8,7 @@ import { Container, Button } from '../styles/GlobalStyles';
 import { theme } from '../styles/theme';
 import { User } from '../types';
 import { gameLayerApi } from '../services/gameLayerApi';
+import { playerDataPollingService } from '../services/playerDataPollingService';
 import { ProfileHeader } from '../components/Profile/ProfileHeader';
 
 const ProfileContainer = styled(Container)`
@@ -302,6 +303,25 @@ export const Profile: React.FC = () => {
 
         setUser(updatedUser);
 
+        // Set up player data polling to keep UI updated
+        const handlePlayerDataUpdate = (playerData: any) => {
+          console.log('🔄 Updating profile data from GameLayer polling...');
+          setUser(prevUser => {
+            if (!prevUser) return prevUser;
+            
+            // Update user with fresh data from GameLayer
+            return {
+              ...prevUser,
+              gems: playerData.credits || prevUser.gems,
+              dailyStepCount: playerData.dailyStepCount || prevUser.dailyStepCount,
+            };
+          });
+        };
+
+        // Start polling for player data updates
+        playerDataPollingService.addListener(handlePlayerDataUpdate);
+        playerDataPollingService.startPolling(gameLayerPlayer.id);
+
         // Fetch redeemed prizes
         try {
           const prizes = await gameLayerApi.getPlayerPrizes();
@@ -334,6 +354,11 @@ export const Profile: React.FC = () => {
     };
 
     fetchUserData();
+    
+    // Cleanup polling service on unmount
+    return () => {
+      playerDataPollingService.stopPolling();
+    };
   }, []);
 
   const handleViewAllRewards = () => {
