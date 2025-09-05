@@ -20,6 +20,7 @@ class PlayerDataPollingService {
   private isPolling = false;
   private currentPlayerId: string | null = null;
   private listeners: Set<(playerData: GameLayerPlayer & { dailyStepCount?: number }) => void> = new Set();
+  private missionListeners: Set<(missions: any[]) => void> = new Set();
 
   static getInstance(): PlayerDataPollingService {
     if (!PlayerDataPollingService.instance) {
@@ -56,6 +57,11 @@ class PlayerDataPollingService {
       this.pollingInterval = null;
     }
     this.isPolling = false;
+    
+    // Clear all listeners when stopping
+    this.listeners.clear();
+    this.missionListeners.clear();
+    
     console.log('⏹️ Player data polling stopped');
   }
 
@@ -67,6 +73,16 @@ class PlayerDataPollingService {
   // Remove listener
   removeListener(callback: (playerData: GameLayerPlayer & { dailyStepCount?: number }) => void): void {
     this.listeners.delete(callback);
+  }
+
+  // Add listener for mission updates
+  addMissionListener(callback: (missions: any[]) => void): void {
+    this.missionListeners.add(callback);
+  }
+
+  // Remove mission listener
+  removeMissionListener(callback: (missions: any[]) => void): void {
+    this.missionListeners.delete(callback);
   }
 
   // Fetch player data from GameLayer
@@ -100,8 +116,36 @@ class PlayerDataPollingService {
           }
         });
       }
+
+      // Fetch and notify mission progress updates
+      await this.fetchMissionProgress();
     } catch (error) {
       console.error('❌ Error fetching player data:', error);
+    }
+  }
+
+  // Fetch mission progress from GameLayer
+  private async fetchMissionProgress(): Promise<void> {
+    try {
+      const missions = await gameLayerApi.getPlayerMissions(this.currentPlayerId || undefined);
+      
+      if (missions && Array.isArray(missions)) {
+        console.log('🎯 Updated mission progress from GameLayer:', {
+          missionCount: missions.length,
+          activeMissions: missions.filter(m => !m.completed).length
+        });
+
+        // Notify all mission listeners
+        this.missionListeners.forEach(callback => {
+          try {
+            callback(missions);
+          } catch (error) {
+            console.error('Error in mission listener:', error);
+          }
+        });
+      }
+    } catch (error) {
+      console.error('❌ Error fetching mission progress:', error);
     }
   }
 

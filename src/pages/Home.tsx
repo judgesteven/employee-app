@@ -490,6 +490,24 @@ export const Home: React.FC = () => {
 
         // Start polling for player data updates
         playerDataPollingService.addListener(handlePlayerDataUpdate);
+        
+        // Set up mission progress polling
+        const handleMissionUpdate = (missions: any[]) => {
+          console.log('🎯 Updating missions from GameLayer polling...');
+          
+          // Filter for Priority 1 missions, exclude Hidden category
+          const updatedMissions = missions
+            .filter(mission => 
+              !mission.completed && 
+              mission.priority === 1 && 
+              mission.category?.toLowerCase() !== 'hidden'
+            )
+            .sort((a, b) => (a.priority || 999) - (b.priority || 999));
+
+          setFeaturedMissions(updatedMissions.slice(0, 3));
+        };
+        
+        playerDataPollingService.addMissionListener(handleMissionUpdate);
         playerDataPollingService.startPolling(gameLayerPlayer.id);
         
       } catch (err) {
@@ -508,6 +526,7 @@ export const Home: React.FC = () => {
     // Cleanup polling service on unmount
     return () => {
       playerDataPollingService.stopPolling();
+      // Note: listeners are automatically cleaned up when polling stops
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // fallbackUser is static data

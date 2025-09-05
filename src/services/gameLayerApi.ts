@@ -152,6 +152,17 @@ export const gameLayerApi = {
     return response.data;
   },
 
+  // Get all missions for a player
+  async getPlayerMissions(playerId: string = PLAYER_ID): Promise<any[]> {
+    const response = await api.get(`/players/${playerId}/missions`, {
+      params: {
+        account: ACCOUNT_ID
+      }
+    });
+    
+    return response.data;
+  },
+
   // Get specific mission progress for a player
   async getPlayerMission(playerId: string = PLAYER_ID, missionId: string): Promise<any> {
     const response = await api.get(`/players/${playerId}/missions/${missionId}`, {
