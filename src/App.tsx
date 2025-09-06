@@ -4,6 +4,7 @@ import { ThemeProvider } from 'styled-components';
 import { GlobalStyles } from './styles/GlobalStyles';
 import { theme } from './styles/theme';
 import { BottomNavigation } from './components/Navigation/BottomNavigation';
+import { InstallPrompt } from './components/InstallPrompt';
 import { Home } from './pages/Home';
 import { Profile } from './pages/Profile';
 import { Settings } from './pages/Settings';
@@ -13,6 +14,7 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <GlobalStyles />
+      <InstallPrompt />
       <Router>
         <div className="App">
           <Routes>
