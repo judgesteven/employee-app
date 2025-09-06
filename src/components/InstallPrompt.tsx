@@ -69,8 +69,24 @@ interface BeforeInstallPromptEvent extends Event {
 export const InstallPrompt: React.FC = () => {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showPrompt, setShowPrompt] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(false);
 
   useEffect(() => {
+    // Check if it's iOS
+    const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    setIsIOS(iOS);
+    
+    // Check if already installed (standalone mode)
+    const standalone = window.matchMedia('(display-mode: standalone)').matches;
+    setIsStandalone(standalone);
+    
+    // For iOS, show manual install instructions
+    if (iOS && !standalone) {
+      // Show iOS install prompt after a delay
+      setTimeout(() => setShowPrompt(true), 3000);
+    }
+
     const handleBeforeInstallPrompt = (e: Event) => {
       console.log('📱 PWA install prompt available');
       e.preventDefault();
@@ -103,19 +119,26 @@ export const InstallPrompt: React.FC = () => {
     setDeferredPrompt(null);
   };
 
-  if (!showPrompt) return null;
+  if (!showPrompt || isStandalone) return null;
 
   return (
     <InstallBanner>
       <InstallContent>
         <Download size={20} />
-        <InstallText>Install Employee Step-Up for quick access!</InstallText>
+        <InstallText>
+          {isIOS 
+            ? 'Add to Home Screen: Tap Share → Add to Home Screen' 
+            : 'Install Employee Step-Up for quick access!'
+          }
+        </InstallText>
       </InstallContent>
       <div style={{ display: 'flex', gap: theme.spacing.sm, alignItems: 'center' }}>
-        <InstallButton onClick={handleInstall}>
-          <Download size={16} />
-          Install
-        </InstallButton>
+        {!isIOS && (
+          <InstallButton onClick={handleInstall}>
+            <Download size={16} />
+            Install
+          </InstallButton>
+        )}
         <CloseButton onClick={handleClose}>
           <X size={16} />
         </CloseButton>
