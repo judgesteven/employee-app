@@ -356,7 +356,7 @@ export const Rankings: React.FC<RankingsProps> = () => {
         
         <HeaderControls>
           <RefreshButton 
-            onClick={() => fetchLeaderboardData(activeTab)}
+            onClick={() => fetchAllLeaderboards()}
             disabled={loading}
             title="Refresh leaderboard data"
           >
