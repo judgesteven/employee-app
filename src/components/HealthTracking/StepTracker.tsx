@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { Play, Square, Activity, Plus, Minus } from 'lucide-react';
 import { theme } from '../../styles/theme';
 import { Button } from '../../styles/GlobalStyles';
+import { stepTrackingService } from '../../services/stepTrackingService';
 
 const TrackerContainer = styled.div`
   background: ${theme.colors.background};
@@ -106,43 +107,58 @@ interface StepTrackerProps {
 
 export const StepTracker: React.FC<StepTrackerProps> = ({ onStepTracked }) => {
   const [isTracking, setIsTracking] = useState(false);
-  const [stepsTracked, setStepsTracked] = useState(0);
-  const [dailySteps, setDailySteps] = useState(0);
+  const [currentSteps, setCurrentSteps] = useState(0);
+
+  useEffect(() => {
+    // Load initial state from service
+    const state = stepTrackingService.getState();
+    setIsTracking(state.isTracking);
+    setCurrentSteps(state.currentSteps);
+
+    // Listen for step updates
+    const handleStepUpdate = (steps: number) => {
+      setCurrentSteps(steps);
+      onStepTracked?.(steps);
+    };
+
+    stepTrackingService.addListener(handleStepUpdate);
+
+    return () => {
+      stepTrackingService.removeListener(handleStepUpdate);
+    };
+  }, [onStepTracked]);
 
   const handleStartTracking = () => {
-    setIsTracking(true);
+    const success = stepTrackingService.startTracking();
+    if (success) {
+      setIsTracking(true);
+    }
   };
 
   const handleStopTracking = () => {
+    stepTrackingService.stopTracking();
     setIsTracking(false);
   };
 
   const handleAddSteps = () => {
-    const newSteps = dailySteps + 100;
-    setDailySteps(newSteps);
-    if (isTracking) {
-      const newTrackedSteps = stepsTracked + 100;
-      setStepsTracked(newTrackedSteps);
-      onStepTracked?.(newTrackedSteps);
-    }
+    stepTrackingService.addSteps(100);
   };
 
   const handleSubtractSteps = () => {
-    const newSteps = Math.max(0, dailySteps - 100);
-    setDailySteps(newSteps);
-    if (isTracking) {
-      const newTrackedSteps = Math.max(0, stepsTracked - 100);
-      setStepsTracked(newTrackedSteps);
-      onStepTracked?.(newTrackedSteps);
-    }
+    stepTrackingService.removeSteps(100);
   };
 
   const handleStepsInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value) || 0;
-    setDailySteps(value);
-    if (isTracking) {
-      setStepsTracked(value);
-      onStepTracked?.(value);
+    stepTrackingService.setSteps(value);
+  };
+
+  const handleSyncToGameLayer = async () => {
+    const success = await stepTrackingService.syncToGameLayer();
+    if (success) {
+      console.log('✅ Steps synced to GameLayer successfully');
+    } else {
+      console.error('❌ Failed to sync steps to GameLayer');
     }
   };
 
@@ -153,15 +169,15 @@ export const StepTracker: React.FC<StepTrackerProps> = ({ onStepTracked }) => {
         <TrackerTitle>Manual Step Tracking</TrackerTitle>
       </TrackerHeader>
 
-      {/* Display session steps if tracking */}
-      {stepsTracked > 0 && (
+      {/* Display current steps */}
+      {currentSteps > 0 && (
         <StepCounter
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.3 }}
         >
-          <StepCount>{stepsTracked}</StepCount>
-          <StepLabel>steps tracked to GameLayer</StepLabel>
+          <StepCount>{currentSteps.toLocaleString()}</StepCount>
+          <StepLabel>{isTracking ? 'steps being tracked' : 'total steps today'}</StepLabel>
         </StepCounter>
       )}
 
@@ -176,7 +192,7 @@ export const StepTracker: React.FC<StepTrackerProps> = ({ onStepTracked }) => {
           
           <StepInput
             type="number"
-            value={dailySteps}
+            value={currentSteps}
             onChange={handleStepsInputChange}
             placeholder="0"
             min="0"
@@ -200,7 +216,7 @@ export const StepTracker: React.FC<StepTrackerProps> = ({ onStepTracked }) => {
               fullWidth
             >
               <Play size={16} />
-              Start Tracking
+              Start 24/7 Tracking
             </Button>
           ) : (
             <Button
@@ -213,6 +229,18 @@ export const StepTracker: React.FC<StepTrackerProps> = ({ onStepTracked }) => {
             </Button>
           )}
         </SingleButtonRow>
+        
+        {currentSteps > 0 && (
+          <SingleButtonRow>
+            <Button
+              variant="ghost"
+              onClick={handleSyncToGameLayer}
+              fullWidth
+            >
+              🎯 Sync to GameLayer
+            </Button>
+          </SingleButtonRow>
+        )}
       </ControlsSection>
     </TrackerContainer>
   );

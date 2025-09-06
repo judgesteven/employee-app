@@ -44,3 +44,32 @@ self.addEventListener('activate', (event) => {
     })
   );
 });
+
+// Background sync for step tracking
+self.addEventListener('sync', (event) => {
+  if (event.tag === 'step-sync') {
+    event.waitUntil(syncStepsInBackground());
+  }
+});
+
+// Background step sync function
+async function syncStepsInBackground() {
+  try {
+    console.log('🔄 Background step sync triggered');
+    
+    // Get step tracking state from IndexedDB or localStorage
+    // This would sync steps to your backend API
+    
+    // For now, just log that background sync happened
+    console.log('✅ Background step sync completed');
+  } catch (error) {
+    console.error('❌ Background step sync failed:', error);
+  }
+}
+
+// Periodic background sync (if supported)
+self.addEventListener('periodicsync', (event) => {
+  if (event.tag === 'step-tracking') {
+    event.waitUntil(syncStepsInBackground());
+  }
+});
