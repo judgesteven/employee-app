@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { Play, Square, Activity, Smartphone, CheckCircle } from 'lucide-react';
+import { Play, Square, Activity, Plus, Minus } from 'lucide-react';
 import { theme } from '../../styles/theme';
 import { Button } from '../../styles/GlobalStyles';
-import { unifiedHealthService, HealthProvider } from '../../services/unifiedHealthService';
 
 const TrackerContainer = styled.div`
   background: ${theme.colors.background};
@@ -29,40 +28,44 @@ const TrackerTitle = styled.h3`
   margin: 0;
 `;
 
-const StatusSection = styled.div`
+const ManualInputSection = styled.div`
   display: flex;
   flex-direction: column;
   gap: ${theme.spacing.md};
   margin-bottom: ${theme.spacing.lg};
 `;
 
-const StatusItem = styled.div<{ $active?: boolean }>`
+const StepInputRow = styled.div`
   display: flex;
   align-items: center;
-  gap: ${theme.spacing.sm};
+  gap: ${theme.spacing.md};
   padding: ${theme.spacing.md};
-  background: ${props => props.$active ? theme.colors.success + '20' : theme.colors.surface};
+  background: ${theme.colors.surface};
   border-radius: ${theme.borderRadius.lg};
-  border: 1px solid ${props => props.$active ? theme.colors.success : theme.colors.border};
+  border: 1px solid ${theme.colors.border};
 `;
 
-const StatusIcon = styled.div<{ $active?: boolean }>`
-  color: ${props => props.$active ? theme.colors.success : theme.colors.text.secondary};
+const StepInputButton = styled(Button)`
+  min-width: 44px;
+  height: 44px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
-const StatusText = styled.div`
+const StepInput = styled.input`
   flex: 1;
-`;
-
-const StatusLabel = styled.div`
-  font-weight: ${theme.typography.fontWeight.medium};
+  text-align: center;
+  font-size: ${theme.typography.fontSize.lg};
+  font-weight: ${theme.typography.fontWeight.semibold};
+  border: none;
+  background: transparent;
   color: ${theme.colors.text.primary};
-  margin-bottom: 2px;
-`;
-
-const StatusDescription = styled.div`
-  font-size: ${theme.typography.fontSize.sm};
-  color: ${theme.colors.text.secondary};
+  
+  &:focus {
+    outline: none;
+  }
 `;
 
 const ControlsSection = styled.div`
@@ -104,99 +107,50 @@ interface StepTrackerProps {
 export const StepTracker: React.FC<StepTrackerProps> = ({ onStepTracked }) => {
   const [isTracking, setIsTracking] = useState(false);
   const [stepsTracked, setStepsTracked] = useState(0);
+  const [dailySteps, setDailySteps] = useState(0);
 
-  const [currentProvider, setCurrentProvider] = useState<HealthProvider>('apple_health');
-  const [isProviderAvailable, setIsProviderAvailable] = useState(false);
-  const [permissionsGranted, setPermissionsGranted] = useState(false);
-
-
-
-  useEffect(() => {
-    // Get initial status
-    const updateStatus = () => {
-      const status = unifiedHealthService.getStatus();
-      setCurrentProvider(status.provider);
-      setIsProviderAvailable(status.isAvailable);
-      setIsTracking(status.isTracking);
-      setStepsTracked(status.stepsTracked);
-      setPermissionsGranted(status.permissionsGranted);
-    };
-
-    updateStatus();
-
-    // Listen for unified step tracking events
-    const handleStepTracked = (event: CustomEvent) => {
-      const { stepCount } = event.detail;
-      setStepsTracked(stepCount);
-      onStepTracked?.(stepCount);
-    };
-
-    // Listen for provider changes
-    const handleProviderChanged = () => {
-      updateStatus();
-    };
-
-    window.addEventListener('unifiedStepTracked', handleStepTracked as EventListener);
-    window.addEventListener('healthProviderChanged', handleProviderChanged as EventListener);
-
-    return () => {
-      window.removeEventListener('unifiedStepTracked', handleStepTracked as EventListener);
-      window.removeEventListener('healthProviderChanged', handleProviderChanged as EventListener);
-    };
-  }, [onStepTracked]);
-
-  const handleStartTracking = async () => {
-    const success = await unifiedHealthService.startTracking();
-    if (success) {
-      setIsTracking(true);
-      setPermissionsGranted(true);
-    }
+  const handleStartTracking = () => {
+    setIsTracking(true);
   };
 
-  const handleStopTracking = async () => {
-    await unifiedHealthService.stopTracking();
+  const handleStopTracking = () => {
     setIsTracking(false);
   };
 
-  const handleRequestPermissions = async () => {
-    const granted = await unifiedHealthService.requestPermissions();
-    setPermissionsGranted(granted);
-  };
-
-  const getProviderDisplayName = () => {
-    return unifiedHealthService.getProviderDisplayName(currentProvider);
-  };
-
-  const getProviderIcon = () => {
-    switch (currentProvider) {
-      case 'apple_health':
-        return <Smartphone size={20} />;
-      case 'google_fit':
-        return <Activity size={20} />;
-      default:
-        return <Activity size={20} />;
+  const handleAddSteps = () => {
+    const newSteps = dailySteps + 100;
+    setDailySteps(newSteps);
+    if (isTracking) {
+      const newTrackedSteps = stepsTracked + 100;
+      setStepsTracked(newTrackedSteps);
+      onStepTracked?.(newTrackedSteps);
     }
   };
 
-  const getAvailabilityDescription = () => {
-    if (!isProviderAvailable) {
-      switch (currentProvider) {
-        case 'apple_health':
-          return 'Not available (requires iOS device)';
-        case 'google_fit':
-          return 'Not available on this device';
-        default:
-          return 'Not available';
-      }
+  const handleSubtractSteps = () => {
+    const newSteps = Math.max(0, dailySteps - 100);
+    setDailySteps(newSteps);
+    if (isTracking) {
+      const newTrackedSteps = Math.max(0, stepsTracked - 100);
+      setStepsTracked(newTrackedSteps);
+      onStepTracked?.(newTrackedSteps);
     }
-    return `Available on this device`;
+  };
+
+  const handleStepsInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value) || 0;
+    setDailySteps(value);
+    if (isTracking) {
+      setStepsTracked(value);
+      onStepTracked?.(value);
+    }
   };
 
   return (
     <TrackerContainer>
       <TrackerHeader>
         <Activity color={theme.colors.primary} size={24} />
-        <TrackerTitle>{getProviderDisplayName()} Step Tracking</TrackerTitle>
+        <TrackerTitle>Manual Step Tracking</TrackerTitle>
       </TrackerHeader>
 
       {/* Display session steps if tracking */}
@@ -211,61 +165,38 @@ export const StepTracker: React.FC<StepTrackerProps> = ({ onStepTracked }) => {
         </StepCounter>
       )}
 
-      <StatusSection>
-        <StatusItem $active={isProviderAvailable}>
-          <StatusIcon $active={isProviderAvailable}>
-            {getProviderIcon()}
-          </StatusIcon>
-          <StatusText>
-            <StatusLabel>{getProviderDisplayName()} Availability</StatusLabel>
-            <StatusDescription>
-              {getAvailabilityDescription()}
-            </StatusDescription>
-          </StatusText>
-        </StatusItem>
-
-        <StatusItem $active={permissionsGranted}>
-          <StatusIcon $active={permissionsGranted}>
-            <CheckCircle size={20} />
-          </StatusIcon>
-          <StatusText>
-            <StatusLabel>Health Permissions</StatusLabel>
-            <StatusDescription>
-              {permissionsGranted ? 'Granted - can access step data' : 'Permissions required for step tracking'}
-            </StatusDescription>
-          </StatusText>
-        </StatusItem>
-
-        <StatusItem $active={isTracking}>
-          <StatusIcon $active={isTracking}>
-            <Activity size={20} />
-          </StatusIcon>
-          <StatusText>
-            <StatusLabel>Real-time Tracking</StatusLabel>
-            <StatusDescription>
-              {isTracking ? 'Active - sending steps to GameLayer' : 'Inactive - not tracking steps'}
-            </StatusDescription>
-          </StatusText>
-        </StatusItem>
-      </StatusSection>
+      <ManualInputSection>
+        <StepInputRow>
+          <StepInputButton
+            variant="secondary"
+            onClick={handleSubtractSteps}
+          >
+            <Minus size={20} />
+          </StepInputButton>
+          
+          <StepInput
+            type="number"
+            value={dailySteps}
+            onChange={handleStepsInputChange}
+            placeholder="0"
+            min="0"
+          />
+          
+          <StepInputButton
+            variant="secondary"
+            onClick={handleAddSteps}
+          >
+            <Plus size={20} />
+          </StepInputButton>
+        </StepInputRow>
+      </ManualInputSection>
 
       <ControlsSection>
-        {!permissionsGranted && isProviderAvailable && (
-          <Button
-            variant="primary"
-            onClick={handleRequestPermissions}
-            fullWidth
-          >
-            Request Health Permissions
-          </Button>
-        )}
-
         <SingleButtonRow>
           {!isTracking ? (
             <Button
               variant="primary"
               onClick={handleStartTracking}
-              disabled={!isProviderAvailable || !permissionsGranted}
               fullWidth
             >
               <Play size={16} />

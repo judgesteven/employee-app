@@ -215,7 +215,13 @@ export const gameLayerApi = {
 
   // Leaderboards
   async getLeaderboards(): Promise<Leaderboard[]> {
-    const response = await api.get<ApiResponse<Leaderboard[]>>('/leaderboards');
+    console.log(`🏆 API CALL: GET /leaderboards`);
+    const response = await api.get<ApiResponse<Leaderboard[]>>('/leaderboards', {
+      params: {
+        account: ACCOUNT_ID
+      }
+    });
+    console.log(`✅ API RESPONSE: leaderboards - Status: ${response.status}, Count: ${response.data.data?.length || 0}`);
     return response.data.data;
   },
 
@@ -227,7 +233,7 @@ export const gameLayerApi = {
     }
 
     try {
-      console.log(`🏆 Fetching ${leaderboardId.toUpperCase()} leaderboard data...`);
+      console.log(`🏆 API CALL: GET /leaderboards/${leaderboardId}`);
       
       const response = await api.get(`/leaderboards/${leaderboardId}`, {
         params: {
@@ -235,7 +241,7 @@ export const gameLayerApi = {
         }
       });
       
-      console.log(`✅ ${leaderboardId.toUpperCase()} leaderboard response:`, response.data);
+      console.log(`✅ API RESPONSE: ${leaderboardId} - Status: ${response.status}, Entries: ${response.data?.scores?.data?.length || 0}`);
       
       // Handle the actual GameLayer leaderboard response structure
       let entries: GameLayerLeaderboardEntry[] = [];
@@ -342,12 +348,10 @@ export const gameLayerApi = {
         entries = [];
       }
       
-      console.log(`✅ Parsed ${entries.length} entries for ${leaderboardId}`);
       return entries;
     } catch (error) {
-      console.error(`Error fetching ${leaderboardId} leaderboard:`, error);
-      
-      // Always return empty array - NO MOCK DATA, GameLayer API only
+      const axiosError = error as any;
+      console.error(`❌ API ERROR: GET /leaderboards/${leaderboardId} - Status: ${axiosError.response?.status || 'Network Error'}`);
       return [];
     }
   },
@@ -681,13 +685,18 @@ export const gameLayerApi = {
     }
 
     try {
+      console.log(`🎯 API CALL: GET /players/${playerId}/missions`);
       const response = await api.get(`/players/${playerId}/missions`, {
         params: { account: ACCOUNT_ID }
       });
       
+      console.log(`✅ Mission progress response:`, response.data);
+      
       const progressMap: Record<string, { currentProgress: number; targetValue: number }> = {};
       
       if (Array.isArray(response.data?.missions?.started)) {
+        console.log(`📊 Processing ${response.data.missions.started.length} started missions`);
+        
         response.data.missions.started.forEach((mission: any) => {
           if (mission.id && mission.objectives?.events) {
             const events = mission.objectives.events;
@@ -696,10 +705,14 @@ export const gameLayerApi = {
             // but also store individual objective progress
             if (events.length > 0) {
               const firstEvent = events[0];
-              progressMap[mission.id] = {
+              const progress = {
                 currentProgress: firstEvent.currentCount || 0,
                 targetValue: firstEvent.count || 1
               };
+              
+              progressMap[mission.id] = progress;
+              
+              console.log(`📈 Mission ${mission.id}: ${progress.currentProgress}/${progress.targetValue}`);
               
               // If there are multiple events, also create entries for individual objectives
               if (events.length > 1) {
@@ -716,6 +729,7 @@ export const gameLayerApi = {
         });
       }
       
+      console.log(`🎯 Final progress map:`, progressMap);
       return progressMap;
     } catch (error) {
       console.error('Error fetching player mission progress:', error);

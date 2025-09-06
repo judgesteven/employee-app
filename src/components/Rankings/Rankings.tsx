@@ -270,28 +270,42 @@ export const Rankings: React.FC<RankingsProps> = () => {
   const [showAllEntries, setShowAllEntries] = useState(false);
   const [currentPlayer, setCurrentPlayer] = useState<{id: string, teamId?: string} | null>(null);
 
-  // Fetch individual leaderboard data
-  const fetchLeaderboardData = useCallback(async (leaderboardId: 'pvp' | 'tvt') => {
+  // Fetch all leaderboards data
+  const fetchAllLeaderboards = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
       
-      console.log(`🔄 Fetching fresh ${leaderboardId.toUpperCase()} data from GameLayer...`);
-      const response = await gameLayerApi.getLeaderboard(leaderboardId);
+      const leaderboards = await gameLayerApi.getLeaderboards();
+      console.log(`📊 ALL LEADERBOARDS: Received ${leaderboards.length} leaderboards`);
       
-      // Ensure we always have arrays
-      const data = Array.isArray(response) ? response : [];
+      // Find PvP and TvT leaderboards
+      const pvpLeaderboard = leaderboards.find(lb => lb.id === 'pvp');
+      const tvtLeaderboard = leaderboards.find(lb => lb.id === 'tvt');
       
-      if (leaderboardId === 'pvp') {
-        setPvpData(data);
+      // Set PvP data
+      if (pvpLeaderboard && pvpLeaderboard.entries) {
+        setPvpData(Array.isArray(pvpLeaderboard.entries) ? pvpLeaderboard.entries : []);
+        console.log(`📊 PVP: Loaded ${pvpLeaderboard.entries.length} entries`);
       } else {
-        setTvtData(data);
+        setPvpData([]);
+        console.log(`📊 PVP: No data found`);
       }
       
-      console.log(`✅ Updated ${leaderboardId.toUpperCase()} data: ${data.length} entries`);
+      // Set TvT data
+      if (tvtLeaderboard && tvtLeaderboard.entries) {
+        setTvtData(Array.isArray(tvtLeaderboard.entries) ? tvtLeaderboard.entries : []);
+        console.log(`📊 TVT: Loaded ${tvtLeaderboard.entries.length} entries`);
+      } else {
+        setTvtData([]);
+        console.log(`📊 TVT: No data found`);
+      }
+      
     } catch (err) {
-      console.error(`Error fetching ${leaderboardId} leaderboard:`, err);
-      setError(`Failed to load ${leaderboardId.toUpperCase()} leaderboard data`);
+      console.error(`Error fetching leaderboards:`, err);
+      setError(`Failed to load leaderboard data`);
+      setPvpData([]);
+      setTvtData([]);
     } finally {
       setLoading(false);
     }
@@ -314,17 +328,15 @@ export const Rankings: React.FC<RankingsProps> = () => {
     fetchCurrentPlayer();
   }, []);
 
-  // Initial load - fetch current tab data
+  // Initial load - fetch all leaderboards once
   useEffect(() => {
-    fetchLeaderboardData(activeTab);
-  }, [activeTab, fetchLeaderboardData]); // Depend on activeTab and the memoized function
+    fetchAllLeaderboards();
+  }, [fetchAllLeaderboards]);
 
-  // Handle tab change with fresh data fetch
+  // Handle tab change (no need to refetch, just switch view)
   const handleTabChange = (tab: 'pvp' | 'tvt') => {
     setActiveTab(tab);
     setShowAllEntries(false); // Reset to collapsed view when switching tabs
-    // Always fetch fresh data when switching tabs
-    fetchLeaderboardData(tab);
   };
 
   return (

@@ -440,7 +440,10 @@ export const Home: React.FC = () => {
 
         // Get player missions with progress data from single endpoint
         const playerMissionsResponse = await gameLayerApi.getPlayerMissionProgress();
+        console.log('🎯 Player mission progress data:', playerMissionsResponse);
+        
         const missions = await gameLayerApi.getMissions();
+        console.log('📋 Available missions:', missions.length);
         
         // Filter for Priority 1 missions, exclude Hidden category, and merge with progress
         const updatedMissions = missions
@@ -451,7 +454,16 @@ export const Home: React.FC = () => {
           )
           .map(mission => {
             const progress = playerMissionsResponse[mission.id];
-            return progress ? { ...mission, ...progress } : mission;
+            const mergedMission = progress ? { ...mission, ...progress } : mission;
+            
+            console.log(`🎯 Mission ${mission.id}:`, {
+              hasProgress: !!progress,
+              currentProgress: mergedMission.currentProgress,
+              targetValue: mergedMission.targetValue,
+              originalMission: mission.currentProgress
+            });
+            
+            return mergedMission;
           })
           .sort((a, b) => (a.priority || 999) - (b.priority || 999));
 
