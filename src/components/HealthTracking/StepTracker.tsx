@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { Play, Square, Activity, Plus, Minus } from 'lucide-react';
 import { theme } from '../../styles/theme';
 import { Button } from '../../styles/GlobalStyles';
-import { stepTrackingService } from '../../services/stepTrackingService';
+import { unifiedHealthService } from '../../services/unifiedHealthService';
 
 const TrackerContainer = styled.div`
   background: ${theme.colors.background};
@@ -27,6 +27,17 @@ const TrackerTitle = styled.h3`
   font-weight: ${theme.typography.fontWeight.semibold};
   color: ${theme.colors.text.primary};
   margin: 0;
+`;
+
+const StatusMessage = styled.div`
+  padding: ${theme.spacing.sm};
+  background: ${theme.colors.surface};
+  border: 1px solid ${theme.colors.border};
+  border-radius: ${theme.borderRadius.md};
+  font-size: ${theme.typography.fontSize.sm};
+  color: ${theme.colors.text.secondary};
+  text-align: center;
+  margin-bottom: ${theme.spacing.md};
 `;
 
 const ManualInputSection = styled.div`
@@ -108,66 +119,117 @@ interface StepTrackerProps {
 export const StepTracker: React.FC<StepTrackerProps> = ({ onStepTracked }) => {
   const [isTracking, setIsTracking] = useState(false);
   const [currentSteps, setCurrentSteps] = useState(0);
+  const [isAvailable, setIsAvailable] = useState(false);
+  const [permissionsGranted, setPermissionsGranted] = useState(false);
+  const [currentProvider, setCurrentProvider] = useState<string>('');
 
   useEffect(() => {
-    // Load initial state from service
-    const state = stepTrackingService.getState();
-    setIsTracking(state.isTracking);
-    setCurrentSteps(state.currentSteps);
+    // Load initial state from health service
+    const status = unifiedHealthService.getStatus();
+    setIsTracking(status.isTracking);
+    setCurrentSteps(status.stepsTracked);
+    setIsAvailable(status.isAvailable);
+    setPermissionsGranted(status.permissionsGranted);
+    setCurrentProvider(unifiedHealthService.getProviderDisplayName());
 
-    // Listen for step updates
-    const handleStepUpdate = (steps: number) => {
-      setCurrentSteps(steps);
-      onStepTracked?.(steps);
+    // Listen for step updates from health service
+    const handleStepUpdate = (event: CustomEvent) => {
+      const { stepCount } = event.detail;
+      setCurrentSteps(stepCount);
+      onStepTracked?.(stepCount);
     };
 
-    stepTrackingService.addListener(handleStepUpdate);
+    // Listen for provider changes
+    const handleProviderChange = () => {
+      const status = unifiedHealthService.getStatus();
+      setCurrentProvider(unifiedHealthService.getProviderDisplayName());
+      setIsAvailable(status.isAvailable);
+      setPermissionsGranted(status.permissionsGranted);
+    };
+
+    window.addEventListener('unifiedStepTracked', handleStepUpdate as EventListener);
+    window.addEventListener('healthProviderChanged', handleProviderChange as EventListener);
 
     return () => {
-      stepTrackingService.removeListener(handleStepUpdate);
+      window.removeEventListener('unifiedStepTracked', handleStepUpdate as EventListener);
+      window.removeEventListener('healthProviderChanged', handleProviderChange as EventListener);
     };
   }, [onStepTracked]);
 
-  const handleStartTracking = () => {
-    const success = stepTrackingService.startTracking();
-    if (success) {
-      setIsTracking(true);
+  const handleStartTracking = async () => {
+    try {
+      // Request permissions first if not granted
+      if (!permissionsGranted) {
+        const granted = await unifiedHealthService.requestPermissions();
+        if (!granted) {
+          console.error('Health permissions not granted');
+          return;
+        }
+        setPermissionsGranted(true);
+      }
+
+      // Start tracking
+      const success = await unifiedHealthService.startTracking();
+      if (success) {
+        setIsTracking(true);
+        console.log(`✅ Started ${currentProvider} step tracking`);
+      }
+    } catch (error) {
+      console.error('Error starting step tracking:', error);
     }
   };
 
-  const handleStopTracking = () => {
-    stepTrackingService.stopTracking();
-    setIsTracking(false);
+  const handleStopTracking = async () => {
+    try {
+      await unifiedHealthService.stopTracking();
+      setIsTracking(false);
+      console.log(`⏹️ Stopped ${currentProvider} step tracking`);
+    } catch (error) {
+      console.error('Error stopping step tracking:', error);
+    }
   };
 
   const handleAddSteps = () => {
-    stepTrackingService.addSteps(100);
+    // Keep manual adjustment as backup
+    const newSteps = currentSteps + 100;
+    setCurrentSteps(newSteps);
+    onStepTracked?.(newSteps);
   };
 
   const handleSubtractSteps = () => {
-    stepTrackingService.removeSteps(100);
+    // Keep manual adjustment as backup
+    const newSteps = Math.max(0, currentSteps - 100);
+    setCurrentSteps(newSteps);
+    onStepTracked?.(newSteps);
   };
 
   const handleStepsInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Keep manual input as backup
     const value = parseInt(e.target.value) || 0;
-    stepTrackingService.setSteps(value);
+    setCurrentSteps(value);
+    onStepTracked?.(value);
   };
 
-  const handleSyncToGameLayer = async () => {
-    const success = await stepTrackingService.syncToGameLayer();
-    if (success) {
-      console.log('✅ Steps synced to GameLayer successfully');
-    } else {
-      console.error('❌ Failed to sync steps to GameLayer');
-    }
-  };
 
   return (
     <TrackerContainer>
       <TrackerHeader>
         <Activity color={theme.colors.primary} size={24} />
-        <TrackerTitle>Manual Step Tracking</TrackerTitle>
+        <TrackerTitle>{currentProvider} Step Tracking</TrackerTitle>
       </TrackerHeader>
+
+      {/* Show availability status */}
+      {!isAvailable && (
+        <StatusMessage>
+          ⚠️ {currentProvider} is not available on this device
+        </StatusMessage>
+      )}
+
+      {isAvailable && !permissionsGranted && !isTracking && (
+        <StatusMessage>
+          🔒 {currentProvider} permissions required
+        </StatusMessage>
+      )}
 
       {/* Display current steps */}
       {currentSteps > 0 && (
@@ -177,7 +239,7 @@ export const StepTracker: React.FC<StepTrackerProps> = ({ onStepTracked }) => {
           transition={{ duration: 0.3 }}
         >
           <StepCount>{currentSteps.toLocaleString()}</StepCount>
-          <StepLabel>{isTracking ? 'steps being tracked' : 'total steps today'}</StepLabel>
+          <StepLabel>{isTracking ? `steps from ${currentProvider} (auto-syncs to GameLayer)` : 'total steps today'}</StepLabel>
         </StepCounter>
       )}
 
@@ -216,7 +278,7 @@ export const StepTracker: React.FC<StepTrackerProps> = ({ onStepTracked }) => {
               fullWidth
             >
               <Play size={16} />
-              Start 24/7 Tracking
+              {permissionsGranted ? `Start ${currentProvider} Tracking` : `Connect ${currentProvider}`}
             </Button>
           ) : (
             <Button
@@ -225,22 +287,10 @@ export const StepTracker: React.FC<StepTrackerProps> = ({ onStepTracked }) => {
               fullWidth
             >
               <Square size={16} />
-              Stop Tracking
+              Disable Tracking
             </Button>
           )}
         </SingleButtonRow>
-        
-        {currentSteps > 0 && (
-          <SingleButtonRow>
-            <Button
-              variant="ghost"
-              onClick={handleSyncToGameLayer}
-              fullWidth
-            >
-              🎯 Sync to GameLayer
-            </Button>
-          </SingleButtonRow>
-        )}
       </ControlsSection>
     </TrackerContainer>
   );

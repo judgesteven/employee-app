@@ -6,6 +6,8 @@ import { useNavigate } from 'react-router-dom';
 import { Container, Button } from '../styles/GlobalStyles';
 import { theme } from '../styles/theme';
 import { StepTracker } from '../components/HealthTracking/StepTracker';
+import { HealthProviderToggle } from '../components/HealthTracking/HealthProviderToggle';
+import { GoogleFitConnection } from '../components/HealthTracking/GoogleFitConnection';
 
 const SettingsContainer = styled(Container)`
   padding-top: ${theme.spacing.lg};
@@ -78,6 +80,18 @@ export const Settings: React.FC = () => {
           </BackButton>
           <Title>Settings</Title>
         </Header>
+
+        <Section>
+          <motion.div variants={itemVariants}>
+            <HealthProviderToggle />
+          </motion.div>
+        </Section>
+
+        <Section>
+          <motion.div variants={itemVariants}>
+            <GoogleFitConnection />
+          </motion.div>
+        </Section>
 
         <Section>
           <motion.div variants={itemVariants}>
