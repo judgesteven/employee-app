@@ -162,9 +162,10 @@ const StepCountLabel = styled.div`
 
 interface GoogleFitConnectionProps {
   onStatusChange?: (status: any) => void;
+  onStepTracked?: (stepCount: number) => void;
 }
 
-export const GoogleFitConnection: React.FC<GoogleFitConnectionProps> = ({ onStatusChange }) => {
+export const GoogleFitConnection: React.FC<GoogleFitConnectionProps> = ({ onStatusChange, onStepTracked }) => {
   const [status, setStatus] = useState({
     isInitialized: false,
     isAuthorized: false,
@@ -203,6 +204,7 @@ export const GoogleFitConnection: React.FC<GoogleFitConnectionProps> = ({ onStat
     // Listen for step tracking events
     const handleStepTracked = (event: CustomEvent) => {
       setCurrentStepCount(event.detail.stepCount);
+      onStepTracked?.(event.detail.stepCount);
     };
 
     window.addEventListener('googleFitStepTracked', handleStepTracked as EventListener);
@@ -214,7 +216,7 @@ export const GoogleFitConnection: React.FC<GoogleFitConnectionProps> = ({ onStat
       window.removeEventListener('googleFitStepTracked', handleStepTracked as EventListener);
       clearInterval(statusInterval);
     };
-  }, [updateStatus]);
+  }, [updateStatus, onStepTracked]);
 
 
   const handleConnect = async () => {

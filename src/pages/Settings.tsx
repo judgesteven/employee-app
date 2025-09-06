@@ -5,8 +5,6 @@ import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Button } from '../styles/GlobalStyles';
 import { theme } from '../styles/theme';
-import { StepTracker } from '../components/HealthTracking/StepTracker';
-import { HealthProviderToggle } from '../components/HealthTracking/HealthProviderToggle';
 import { GoogleFitConnection } from '../components/HealthTracking/GoogleFitConnection';
 
 const SettingsContainer = styled(Container)`
@@ -83,19 +81,7 @@ export const Settings: React.FC = () => {
 
         <Section>
           <motion.div variants={itemVariants}>
-            <HealthProviderToggle />
-          </motion.div>
-        </Section>
-
-        <Section>
-          <motion.div variants={itemVariants}>
-            <GoogleFitConnection />
-          </motion.div>
-        </Section>
-
-        <Section>
-          <motion.div variants={itemVariants}>
-            <StepTracker onStepTracked={(stepCount) => {
+            <GoogleFitConnection onStepTracked={(stepCount) => {
               console.log(`Settings: ${stepCount} steps tracked to GameLayer`);
             }} />
           </motion.div>
